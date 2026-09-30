@@ -1,0 +1,313 @@
+[
+  {
+    "title": "앱 흐름 (v6)",
+    "entries": [
+      {
+        "frame": "로그아웃 상태로 시작",
+        "nodes": "v6 2295:16882 · 2256:4478 …",
+        "description": "세션 로그아웃 → 시작 (전화번호 → 인증번호 → 이름 → 커플 연결 · 연결 완료 → 권한 → 홈 타임라인)",
+        "location": "/welcome?session=guest",
+        "presentation": "none"
+      },
+      {
+        "frame": "전체 흐름 데모",
+        "nodes": "v6-plan §5",
+        "description": "온보딩 → 홈 스크롤 → 사진 보기 · 스트립 · 좋아요 → 좋아요 · 삭제 보기 → 선택 3장 → 통화 · 볼륨 · 하이라이트 · 시트 → 카메라 → 카드 → 취침 · 취침모드 종료 → 종료 → 통화 기록 → 카메라 탭 · 전송 · 공유 사진 → 설정 → 로그아웃 (40단계 자동)",
+        "location": "/?demo=flow",
+        "presentation": "none"
+      },
+      {
+        "frame": "홈 타임라인 (회원)",
+        "nodes": "2256:8509",
+        "description": "앨범 타임라인 v6 — 날짜 섹션 · 선택 · plus 불러오기 · heart 좋아요 보기 · history 삭제 보기 · 칸 → 사진 보기 · 탭바 v6 + 통화 버튼",
+        "location": "/?session=member",
+        "presentation": "none"
+      },
+      {
+        "frame": "앨범 · 빈 상태 (온보딩)",
+        "nodes": "2295:10719",
+        "description": "빈 앨범 v6 — 아바타 쌍 · '아직 저장된 사진이 없어요!' · 사진 불러오기",
+        "location": "/?session=member&album=empty",
+        "presentation": "none"
+      },
+      {
+        "frame": "홈 (상대 미연결)",
+        "nodes": "2295:10719 · v6 F5",
+        "description": "빈 앨범 v6 — 나 원만 · '상대 연결하기' → /connect",
+        "location": "/?session=member&partner=none",
+        "presentation": "none"
+      },
+      {
+        "frame": "좋아요 보기",
+        "nodes": "2295:10137",
+        "description": "좋아요 사진만 · 모든 칸 하트 · 미니 탭바 · 선택 → heart = 좋아요 해제 · trash",
+        "location": "/?session=member&view=liked",
+        "presentation": "none"
+      },
+      {
+        "frame": "삭제 보기",
+        "nodes": "2295:11367",
+        "description": "지운 사진 (최근 삭제) · X + archive = 되살림 · 지운 사진이 없으면 히어로만",
+        "location": "/?session=member&view=deleted",
+        "presentation": "none"
+      },
+      {
+        "frame": "선택 모드",
+        "nodes": "2295:11028",
+        "description": "미니 탭바 · 카드 접힘 · 2×2 유지 · X + [share-2 · heart · trash]",
+        "location": "/?session=member&view=select",
+        "presentation": "none"
+      },
+      {
+        "frame": "카메라 탭",
+        "nodes": "2295:15973",
+        "description": "탭 1 — v6 뷰파인더 · 셔터 → 전송 검토 · 파트너 토스트 → 사진 보기 · 탭바 카메라 변형",
+        "location": "/capture?session=member",
+        "presentation": "none"
+      },
+      {
+        "frame": "전송 검토",
+        "nodes": "2295:16034",
+        "description": "촬영 사진 + dim · trash = 버림 · send = 오늘 섹션 맨 앞 + 썸네일 팝",
+        "location": "/capture?session=member&review=1",
+        "presentation": "none"
+      },
+      {
+        "frame": "설정 (회원)",
+        "nodes": "2295:16495 · v6 F15",
+        "description": "설정 v6 (light 목록) — 프로필 · 상대 · 알림 스위치 · 개발 › Lab · 흐름 데모 · 사진 시트 방식 · 연결 해제 · 로그아웃",
+        "location": "/settings?session=member",
+        "presentation": "none"
+      },
+      {
+        "frame": "인증번호 성공",
+        "nodes": "2256:6507",
+        "description": "코드 상자 성공 (초록 테두리 + 체크) — 자동 진행 없음",
+        "location": "/verify?session=guest&state=success",
+        "presentation": "none"
+      },
+      {
+        "frame": "연결 완료",
+        "nodes": "2256:8075",
+        "description": "아바타 쌍 · '성공적으로 …님과 연결됐어요!' — 자동 진행 없음",
+        "location": "/partner?session=onboarding&state=done",
+        "presentation": "none"
+      }
+    ]
+  },
+  {
+    "title": "통화 · 보기 (v6)",
+    "entries": [
+      {
+        "frame": "통화",
+        "nodes": "2295:15614",
+        "description": "통화 v6 — light 내비 (chevron-down · moon) · 발신자 · 통화 바 (볼륨 · 마이크 · 카메라 · 하이라이트 · 종료)",
+        "location": "/call",
+        "presentation": "modal"
+      },
+      {
+        "frame": "볼륨 슬라이더",
+        "nodes": "2295:15817",
+        "description": "슬라이더 고정 (자동 숨김 없음) · 볼륨 슬롯 선택",
+        "location": "/call?state=volume",
+        "presentation": "modal"
+      },
+      {
+        "frame": "하이라이트 토스트",
+        "nodes": "2295:15893",
+        "description": "하이라이트 토스트 고정 · rewind 슬롯 선택",
+        "location": "/call?state=highlight",
+        "presentation": "modal"
+      },
+      {
+        "frame": "취침 AOD",
+        "nodes": "2295:16742",
+        "description": "moon → AOD (사진 20 % + dim · 내비 · 바는 비킨다) · '취침모드 종료'",
+        "location": "/call?state=aod",
+        "presentation": "modal"
+      },
+      {
+        "frame": "촬영 카드 (세로)",
+        "nodes": "2295:15479",
+        "description": "통화 촬영 카드 3:4 — 아래 기준 770 · 닫기 (media-1x1 도 같은 카드)",
+        "location": "/call?state=media-16x9",
+        "presentation": "modal"
+      },
+      {
+        "frame": "촬영 카드 (가로)",
+        "nodes": "2295:15479 · F11",
+        "description": "가로 4:3 — 세로 카드와 같은 폭 · 높이 = 폭 × 3/4 (cameo)",
+        "location": "/call?state=media-4x3",
+        "presentation": "modal"
+      },
+      {
+        "frame": "통화 · 사진 시트 A (바로 공유)",
+        "nodes": "2295:14936 · E9 A",
+        "description": "통화 → camera 슬롯 → 사진 시트 v6 — 사진 탭 = 바로 공유 (카드)",
+        "location": "/call?sheet=instant",
+        "presentation": "modal"
+      },
+      {
+        "frame": "통화 · 사진 시트 B (여러 장 선택)",
+        "nodes": "2295:14936 · E9 B",
+        "description": "여러 장 선택 → '공유 N' → 카드",
+        "location": "/call?sheet=multi",
+        "presentation": "modal"
+      },
+      {
+        "frame": "카메라 (통화 모드)",
+        "nodes": "2295:15973 · F13",
+        "description": "사진 시트 실시간 칸 → 카메라 — 셔터 → 통화 카드 (검토 없음) · 다른 탭 비활성",
+        "location": "/camera",
+        "presentation": "modal"
+      },
+      {
+        "frame": "사진 보기",
+        "nodes": "2295:11837",
+        "description": "사진 보기 v6 — dim · 3:4 카드 · 스트립 · share-2 / heart / trash · 날짜 · 아래로 끌어 닫기",
+        "location": "/photo?section=sungsu&index=0",
+        "presentation": "modal"
+      },
+      {
+        "frame": "사진 보기 (파트너 사진)",
+        "nodes": "2295:11837 · F9",
+        "description": "/instant = v6 사진 보기 — 한 장 · [share-2 · heart] (인스턴트 보기 은퇴)",
+        "location": "/instant",
+        "presentation": "modal"
+      },
+      {
+        "frame": "통화 기록",
+        "nodes": "2295:11674",
+        "description": "통화 기록 v6 (light) — 현재 줄 색 스프링 · 인라인 사진 · 하이라이트 카드 · 플레이어 · X / phone-call / heart",
+        "location": "/transcript",
+        "presentation": "push"
+      }
+    ]
+  },
+  {
+    "title": "앨범",
+    "entries": [
+      {
+        "frame": "iPhone 16 - 6",
+        "nodes": "2028:435 (+2028:764)",
+        "description": "날짜별 타임라인 — 히어로 · 통화 카드 · 사진 그리드 · empty photo · 섹션 3",
+        "location": "/album",
+        "presentation": "push"
+      },
+      {
+        "frame": "iPhone 16 - 3",
+        "nodes": "2001:1126 (+2026:198)",
+        "description": "'강릉' 변형 단독 — 추천 타일 그리드 · 인용 카드 · 자기 글래스 탭바 (탭 안 16-3 = /albums/gangneung)",
+        "location": "/album-gangneung",
+        "presentation": "push"
+      }
+    ]
+  },
+  {
+    "title": "통화 기록 상세",
+    "entries": [
+      {
+        "frame": "iPhone 16 - 13",
+        "nodes": "2042:3219",
+        "description": "v3 다크(토큰 다크 모드) — 대화 라인 · 하이라이트 카드(카라오케) · 플레이어 pill (`?v=3`)",
+        "location": "/transcript?theme=dark&v=3",
+        "presentation": "push"
+      },
+      {
+        "frame": "iPhone 16 - 12",
+        "nodes": "2042:2933",
+        "description": "v3 사진 배경 — 블러 이미지 + 그라데이션 (`?v=3`)",
+        "location": "/transcript?theme=photo&v=3",
+        "presentation": "push"
+      }
+    ]
+  },
+  {
+    "title": "통화 v1 (모달)",
+    "entries": [
+      {
+        "frame": "iPhone 16 - 4",
+        "nodes": "2004:1796",
+        "description": "이전 변형 — 분리된 글래스 원 · 취침 모드 토스트 · 컨트롤 바 58",
+        "location": "/call-v1",
+        "presentation": "modal"
+      }
+    ]
+  },
+  {
+    "title": "카메라 v3 (모달)",
+    "entries": [
+      {
+        "frame": "iPhone 16 - 14",
+        "nodes": "2056:3280",
+        "description": "v3 카메라 촬영 — 3:4 뷰파인더 · 사진/동영상 세그먼트 · 셔터 · 닫기/전환 (v6 통화 모드 카메라는 /camera)",
+        "location": "/camera-v3",
+        "presentation": "modal"
+      }
+    ]
+  },
+  {
+    "title": "디자인 시스템 v6 (infra)",
+    "entries": [
+      {
+        "frame": "글래스 v6 · 앨범 히어로",
+        "nodes": "2256:8509",
+        "description": "측정 하네스 — 히어로 위 \"선택\" ScrimButton md · ScrimPill [plus · heart · history] (light 톤 Liquid Glass)",
+        "location": "/glass-v6?scene=album",
+        "presentation": "push"
+      },
+      {
+        "frame": "글래스 v6 · 밝은 캔버스",
+        "nodes": "2295:16495",
+        "description": "측정 하네스 — 캔버스 #e9e9ec 위 TabBarV6 풀 (설정 선택 · 톤 canvas)",
+        "location": "/glass-v6?scene=canvas",
+        "presentation": "push"
+      },
+      {
+        "frame": "글래스 v6 · 통화",
+        "nodes": "2295:15614",
+        "description": "측정 하네스 — 통화 사진 위 light 내비 2 · dark 통화 바",
+        "location": "/glass-v6?scene=call",
+        "presentation": "push"
+      },
+      {
+        "frame": "글래스 v6 · 카메라",
+        "nodes": "2295:15973",
+        "description": "측정 하네스 — dim 위 TabBarV6 카메라 변형 (썸네일 · dark pill · 전환)",
+        "location": "/glass-v6?scene=camera",
+        "presentation": "push"
+      },
+      {
+        "frame": "탭바 v6 모핑",
+        "nodes": "2256:8826 · 2295:11151 · 2295:15974",
+        "description": "풀 → 미니 → 풀 → 카메라 → 풀 (1.6 s 마다 — 글래스는 크기 · 이동만)",
+        "location": "/glass-v6?scene=tabbar&demo=1",
+        "presentation": "push"
+      }
+    ]
+  },
+  {
+    "title": "디자인 시스템",
+    "entries": [
+      {
+        "frame": "Foundation",
+        "nodes": "8:224",
+        "description": "토큰 프리뷰 — 타이포 · 아이콘 · 글래스 · 스프링",
+        "location": "/foundation",
+        "presentation": "push"
+      }
+    ]
+  },
+  {
+    "title": "참고",
+    "entries": [
+      {
+        "frame": "Frame 1000003650",
+        "nodes": "2042:3117",
+        "description": "화면 아님 — 앨범 샘플 사진 원본 (에셋만)",
+        "location": null,
+        "presentation": "none"
+      }
+    ]
+  }
+]

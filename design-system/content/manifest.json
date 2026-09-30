@@ -1,0 +1,1555 @@
+{
+  "$description": "Bundled content assets. Legacy mock slots contain neutral placeholders; welcome images are generated fictional couples.",
+  "$notes": [
+    "Personal photographs are not part of this repository. Original mock slot names and dimensions are retained to preserve stable layout and identifiers."
+  ],
+  "images": [
+    {
+      "file": "album-3-cover.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1024,
+        "height": 768,
+        "bytes": 9501,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-3-grid-r1c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 768,
+        "height": 1024,
+        "bytes": 9501,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-cover.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1179,
+        "height": 1572,
+        "bytes": 22152,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r1c1-hires.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1179,
+        "height": 1570,
+        "bytes": 22152,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r1c1.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 481,
+        "height": 640,
+        "bytes": 3945,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r1c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r1c3.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 481,
+        "height": 640,
+        "bytes": 3945,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r1c4.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 640,
+        "height": 481,
+        "bytes": 3945,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r1c5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r2c1.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r2c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 640,
+        "height": 480,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r2c3.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r2c4.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r2c5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 640,
+        "height": 480,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r3c1.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r3c2-hires.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1179,
+        "height": 1572,
+        "bytes": 22152,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r3c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r3c3.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r3c4.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r3c5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r4c1.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r4c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r4c3.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 215,
+        "height": 640,
+        "bytes": 1905,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r4c4.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 640,
+        "height": 480,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r4c5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 640,
+        "height": 480,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r5c1.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r5c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r5c3.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r5c4-hires.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1536,
+        "height": 2048,
+        "bytes": 37149,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r5c4.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r5c5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r6c1.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r6c2.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r6c3.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 480,
+        "height": 640,
+        "bytes": 3885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r6c4.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1179,
+        "height": 1572,
+        "bytes": 22152,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "album-sungsu-grid-r6c5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1179,
+        "height": 884,
+        "bytes": 12606,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "call-background.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1917,
+        "height": 2556,
+        "bytes": 57885,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "camera-placeholder.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 768,
+        "height": 1024,
+        "bytes": 9501,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "camera-viewfinder-v5.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1536,
+        "height": 2048,
+        "bytes": 37149,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "photo-sheet-live-camera.png",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "png",
+        "width": 770,
+        "height": 1369,
+        "bytes": 222,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "tabbar-avatar.png",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "png",
+        "width": 304,
+        "height": 302,
+        "bytes": 106,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "transcript-dark-background.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 786,
+        "height": 1704,
+        "bytes": 16100,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "transcript-inline-photo.jpg",
+      "source": {
+        "kind": "placeholder",
+        "description": "Neutral generated placeholder; contains no personal image data."
+      },
+      "process": {
+        "encode": "placeholder",
+        "reason": "Personal mock photographs were removed from published history."
+      },
+      "usedBy": [
+        {
+          "slot": "Legacy mock slot retained for stable layout and photo IDs."
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 1179,
+        "height": 780,
+        "bytes": 11163,
+        "metadata": "none"
+      }
+    },
+    {
+      "file": "welcome-couple-01-cafe.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-01-cafe.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 1 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 105089,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-02-coast.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-02-coast.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 2 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 84919,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-03-spring.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-03-spring.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 3 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 120919,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-04-kitchen.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-04-kitchen.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 4 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 108728,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-05-picnic.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-05-picnic.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 5 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 121217,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-06-rain.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-06-rain.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 6 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 112256,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-07-autumn.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-07-autumn.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 7 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 112405,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-08-snow.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-08-snow.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 8 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 124363,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-09-playful-portrait.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-09-playful-portrait.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 9 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 86417,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-10-train.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-10-train.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 10 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 90901,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-11-rooftop.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-11-rooftop.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 11 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 102549,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-12-bookstore.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-12-bookstore.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 12 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 96168,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-13-riverside.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-13-riverside.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 13 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 109377,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-14-flower-market.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-14-flower-market.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 14 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 131454,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-15-summer-beach.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-15-summer-beach.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 15 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 88350,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-16-hike.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-16-hike.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 16 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 105254,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-17-home-sofa.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-17-home-sofa.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 17 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 122440,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    },
+    {
+      "file": "welcome-couple-18-evening-date.jpg",
+      "source": {
+        "kind": "generated",
+        "path": "design-system/reference/generated/welcome-couples/welcome-couple-18-evening-date.png",
+        "format": "png",
+        "width": 1254,
+        "height": 1254,
+        "generator": "built-in image_gen",
+        "promptFile": "design-system/reference/generated/welcome-couples/generation.json"
+      },
+      "process": {
+        "toSrgb": true,
+        "resizeToWidth": 512,
+        "encode": "jpeg85",
+        "reason": "User-requested individual generated happy couple photo for the welcome tile loop. Keep the original in reference/generated; bundle a small sRGB JPEG for the drifting tiles."
+      },
+      "usedBy": [
+        {
+          "screen": "/welcome",
+          "slot": "Flutter v6 welcome photo 18 of 18; existing tile geometry and drift"
+        }
+      ],
+      "output": {
+        "format": "jpeg",
+        "width": 512,
+        "height": 512,
+        "bytes": 114227,
+        "metadata": "none (exiftool -all=; GPS verified absent)"
+      }
+    }
+  ]
+}

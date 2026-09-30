@@ -1,0 +1,16 @@
+{
+  "name": "cameo-workspace",
+  "private": true,
+  "description": "CAMEO Flutter frontend and design-system source tooling",
+  "type": "module",
+  "scripts": {
+    "tokens": "node design-system/scripts/build-tokens.mjs",
+    "icons": "node design-system/scripts/sync-icons.mjs",
+    "ds": "npm run icons && npm run tokens && npm run content",
+    "ds:check": "node design-system/scripts/build-tokens.mjs --check && node design-system/scripts/sync-icons.mjs --check && node design-system/scripts/build-content.mjs --check",
+    "content": "node design-system/scripts/build-content.mjs"
+  },
+  "devDependencies": {
+    "@tabler/icons": "3.48.0"
+  }
+}

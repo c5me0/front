@@ -1,0 +1,50 @@
+# macOS metadata on the exFAT workspace
+.DS_Store
+._*
+
+# Dependencies and build output (lockfiles stay tracked)
+node_modules/
+.dart_tool/
+.pub-cache/
+.pub/
+.expo/
+build/
+dist/
+coverage/
+Pods/
+.symlinks/
+__pycache__/
+*.pyc
+*.tsbuildinfo
+
+# Local design references, notes, and retired implementations
+/design-system/reference/
+/design-system/scripts/verify/text-width/
+/apps/rn/
+/docs/
+*.md
+*.mdx
+.claude/
+.codex/
+.agents/
+.local/
+.idea/
+.vscode/
+.flutter-sdk
+
+# Only source, required assets, tests, and build inputs are published.
+# Personal work records and generated previews stay local.
+
+# Local credentials and machine-specific settings
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.p8
+*.p12
+*.key
+*.jks
+*.keystore
+*.mobileprovision
+**/.claude/settings.local.json
