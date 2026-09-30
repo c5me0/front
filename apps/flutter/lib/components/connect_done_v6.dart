@@ -250,6 +250,7 @@ class ConnectDoneV6State extends State<ConnectDoneV6>
               AvatarV6(
                 size: avatar,
                 image: widget.partnerImage ?? labV6.connected.partnerPhoto,
+                name: widget.partnerName,
                 initialStyle: CameoTextStyles.headingLg,
               ),
             ),

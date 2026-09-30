@@ -14,6 +14,7 @@ import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/session.dart';
+import '../../api/api_error_text.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -31,6 +32,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focus = FocusNode(debugLabel: 'profile.name');
   Timer? _typing;
+  bool _saving = false;
+  String? _error;
   final List<VoidCallback> _unregisterFlow = [];
 
   bool get _valid => _controller.text.trim().isNotEmpty;
@@ -64,21 +67,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   bool _submit() {
-    if (!mounted || !_valid || !CameoNav.isTop(context)) return false;
-    SessionScope.read(context).setName(_controller.text.trim());
+    if (!mounted || !_valid || _saving || !CameoNav.isTop(context)) {
+      return false;
+    }
+    _save();
+    return true;
+  }
+
+  Future<void> _save() async {
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      await SessionScope.read(context).setName(_controller.text.trim());
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _error = apiErrorText(error);
+        });
+      }
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _saving = false);
     _focus.unfocus();
     CameoNav.openPartner(context).then((_) {
       if (mounted && CameoNav.isTop(context)) _focus.requestFocus();
     });
-    return true;
   }
 
   bool _submitFromDemo() => _submit();
 
-  void _back() {
+  Future<void> _back() async {
     if (!mounted || !CameoNav.isTop(context)) return;
     _focus.unfocus();
-    SessionScope.read(context).signOut();
+    try {
+      await SessionScope.read(context).signOutFromServer();
+    } catch (error) {
+      if (mounted) setState(() => _error = apiErrorText(error));
+    }
   }
 
   bool _typeDemo() {
@@ -116,12 +145,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return AuthScaffold(
       title: profile.title,
       subtitle: profile.subtitle,
+      subtitleWidget: _error == null
+          ? null
+          : Semantics(
+              liveRegion: true,
+              child: CameoText(
+                _error!,
+                style: CameoTextStyles.bodyMd,
+                color: c.systemRed,
+              ),
+            ),
       onBack: _back,
       footerRidesKeyboard: true,
       footer: SolidCta(
         key: ProfileScreen.ctaKey,
         label: profile.cta,
         enabled: _valid,
+        busy: _saving,
         onPress: _submit,
       ),
       child: TextFieldV6(

@@ -12,6 +12,8 @@ import '../../components/solid_cta.dart';
 import '../../content/app.g.dart';
 import '../../content/lab.g.dart';
 import '../../navigation/navigation.dart';
+import '../../api/api_error_text.dart';
+import '../../design_system/design_system.dart';
 import '../../state/session.dart';
 
 String appendDigit(String digits, String digit, [int? maxDigits]) =>
@@ -35,6 +37,7 @@ class PhoneScreen extends StatefulWidget {
 class _PhoneScreenState extends State<PhoneScreen> {
   String _digits = '';
   bool _sending = false;
+  String? _error;
 
   final KeypadController _keypad = KeypadController();
 
@@ -77,8 +80,21 @@ class _PhoneScreenState extends State<PhoneScreen> {
     _typing = null;
     final session = SessionScope.read(context);
     final phone = _digits;
-    setState(() => _sending = true);
-    await session.requestCode(phone);
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    try {
+      await session.requestCode(phone);
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _sending = false;
+          _error = apiErrorText(error);
+        });
+      }
+      return;
+    }
     if (!mounted) return;
     if (!CameoNav.isTop(context)) {
       setState(() => _sending = false);
@@ -129,6 +145,16 @@ class _PhoneScreenState extends State<PhoneScreen> {
     return AuthScaffold(
       title: c.title,
       subtitle: c.subtitle,
+      subtitleWidget: _error == null
+          ? null
+          : Semantics(
+              liveRegion: true,
+              child: CameoText(
+                _error!,
+                style: CameoTextStyles.bodyMd,
+                color: CameoTheme.colorsOf(context).systemRed,
+              ),
+            ),
       onBack: () => CameoNav.pop(context),
       footer: SolidCta(
         key: PhoneScreen.ctaKey,

@@ -13,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../content/app.g.dart';
 import '../design_system/design_system.dart';
+import '../api/cameo_api.dart';
+import '../api/api_models.dart';
 import 'account_history.dart';
 import 'album_store.dart';
 import 'payment_service.dart';
@@ -356,10 +358,12 @@ Session devSessionOf(DevSessionKind kind, {bool partnerNone = false}) {
 class SessionController extends ChangeNotifier {
   SessionController({
     Session? initial,
+    CameoApi? api,
     PaymentService paymentService = const DemoPaymentService(),
     Partner Function(String code)? partnerLookup,
     DateTime Function()? now,
   }) : _session = initial ?? Session.guest,
+       _api = api,
        _paymentService = paymentService,
        _partnerLookup = partnerLookup,
        _now = now ?? DateTime.now {
@@ -371,6 +375,20 @@ class SessionController extends ChangeNotifier {
   bool _disposed = false;
   bool _historyReadFailed = false;
   bool _flowDemoSession = false;
+  bool _demoOverride = false;
+  final CameoApi? _api;
+  ApiSignIn? _verifiedRemote;
+  String? _requestedPhone;
+  String? _pairingCode;
+  String? _partnerPhone;
+  String? backendError;
+  bool _updatingPreference = false;
+  bool get usesBackend => _api != null && !_demoOverride && !_flowDemoSession;
+  String get pairingCode => usesBackend ? (_pairingCode ?? '') : labPairingCode;
+  String get partnerPhone => _partnerPhone ?? '';
+  bool get updatingPreference => _updatingPreference;
+
+  static String get labPairingCode => appContent.partner.myCode;
   bool _transaction = false;
   int _archiveCounter = 0;
   final PaymentService _paymentService;
@@ -379,7 +397,10 @@ class SessionController extends ChangeNotifier {
   Map<String, AccountRecord> _accounts = {};
   AlbumStore? _album;
 
-  void bindAlbum(AlbumStore album) => _album = album;
+  void bindAlbum(AlbumStore album) {
+    _album = album;
+    if (usesBackend) album.reset(empty: true);
+  }
 
   AccountRecord? get _account =>
       _flowDemoSession ? null : _accounts[_session.phone];
@@ -410,6 +431,10 @@ class SessionController extends ChangeNotifier {
   Future<void> load({DevSessionKind? dev, bool partnerNone = false}) async {
     if (_loaded) {
       if (dev != null) applyDevSession(dev, partnerNone: partnerNone);
+      return;
+    }
+    if (_api != null && dev == null) {
+      await _loadBackend();
       return;
     }
     Session loaded = Session.guest;
@@ -460,15 +485,56 @@ class SessionController extends ChangeNotifier {
     }
   }
 
-  Future<void> requestCode(String phone) =>
-      Future<void>.delayed(CameoMotion.authMockSend);
+  Future<void> requestCode(String phone) async {
+    if (!usesBackend) {
+      await Future<void>.delayed(CameoMotion.authMockSend);
+      return;
+    }
+    await _api!.requestPhoneCode(phone);
+    _requestedPhone = phone;
+  }
 
-  Future<bool> verifyCode(String code) async {
+  Future<bool> verifyCode(String code, {String? phone}) async {
+    if (usesBackend) {
+      final target = phone ?? _requestedPhone;
+      if (target == null) throw const ApiException('invalid_request');
+      final generation = _generation;
+      try {
+        final verified = await _api!.verifyPhone(target, code);
+        if (_disposed || generation != _generation) {
+          throw const ApiException('request_cancelled');
+        }
+        await _api.acceptCredential(verified.credential);
+        if (_disposed || generation != _generation) {
+          throw const ApiException('request_cancelled');
+        }
+        _verifiedRemote = verified;
+        return true;
+      } on ApiException catch (error) {
+        if (error.code == 'auth:invalid_code') return false;
+        rethrow;
+      }
+    }
     await Future<void>.delayed(CameoMotion.authMockVerify);
     return code == appContent.verify.mockCode;
   }
 
   void completeVerification(String phone, {bool forceOnboarding = false}) {
+    if (usesBackend && !forceOnboarding) {
+      final verified = _verifiedRemote;
+      if (verified == null || verified.user.phone != koreanPhoneToE164(phone)) {
+        return;
+      }
+      _verifiedRemote = null;
+      _generation++;
+      _applyRemoteUser(
+        verified.user,
+        status: verified.user.displayName?.isNotEmpty == true
+            ? SessionStatus.member
+            : SessionStatus.onboarding,
+      );
+      return;
+    }
     _generation++;
     _flowDemoSession = forceOnboarding;
     final account = forceOnboarding ? null : _accounts[phone];
@@ -491,10 +557,39 @@ class SessionController extends ChangeNotifier {
     );
   }
 
-  void setName(String name) => _set(_session.copyWith(name: name.trim()));
+  Future<void> setName(String name) async {
+    if (!usesBackend) {
+      _set(_session.copyWith(name: name.trim()));
+      return;
+    }
+    final generation = _generation;
+    final user = await _backendCall(_api!.updateMe(displayName: name));
+    if (_disposed || generation != _generation) {
+      throw const ApiException('request_cancelled');
+    }
+    _applyRemoteUser(user);
+  }
 
   Future<Partner> connectPartner(String code) async {
     final generation = _generation;
+    if (usesBackend) {
+      final couple = await _backendCall(_api!.connect(code));
+      if (_disposed || generation != _generation) {
+        throw const ApiException('request_cancelled');
+      }
+      final partner = _remotePartner(couple.partner);
+      _partnerPhone = couple.partner.phone;
+      _set(_session.copyWith(partner: partner, partnerSkipped: false));
+      // The server rotates both invitation codes after pairing.
+      try {
+        final user = await _api.me();
+        if (!_disposed && generation == _generation) _applyRemoteUser(user);
+      } on ApiException catch (error) {
+        _recordBackendError(error);
+        if (error.status == 401) rethrow;
+      }
+      return partner;
+    }
     await Future<void>.delayed(CameoMotion.authMockConnect);
     final partner = _partnerLookup?.call(code) ?? Partner.mock();
     if (generation == _generation) {
@@ -522,8 +617,29 @@ class SessionController extends ChangeNotifier {
   void completeOnboarding() =>
       _set(_session.copyWith(status: SessionStatus.member));
 
-  void setPref(SessionPref key, bool value) =>
+  Future<void> setPref(SessionPref key, bool value) async {
+    if (!usesBackend) {
       _set(_session.copyWith(prefs: _session.prefs.copyWith(key, value)));
+      return;
+    }
+    if (_updatingPreference) return;
+    _updatingPreference = true;
+    backendError = null;
+    final generation = _generation;
+    notifyListeners();
+    try {
+      final user = await _api!.updateMe(
+        callAlert: key == SessionPref.callAlerts ? value : null,
+        highlightAlert: key == SessionPref.highlightAlerts ? value : null,
+      );
+      if (!_disposed && generation == _generation) _applyRemoteUser(user);
+    } on ApiException catch (error) {
+      if (!_disposed && generation == _generation) _recordBackendError(error);
+    } finally {
+      _updatingPreference = false;
+      if (!_disposed) notifyListeners();
+    }
+  }
 
   void setPhotoSheetVariant(PhotoSheetVariant variant) => _set(
     _session.copyWith(prefs: _session.prefs.withPhotoSheetVariant(variant)),
@@ -538,6 +654,20 @@ class SessionController extends ChangeNotifier {
   }
 
   void signOut() {
+    if (usesBackend) {
+      _generation++;
+      _verifiedRemote = null;
+      unawaited(
+        _api!.forgetCredential().catchError((_) {
+          if (!_disposed) {
+            backendError = 'storage_unavailable';
+            notifyListeners();
+          }
+        }),
+      );
+      _set(Session.guest);
+      return;
+    }
     _rememberAccount(_session);
     _generation++;
     _set(Session.guest);
@@ -559,7 +689,8 @@ class SessionController extends ChangeNotifier {
     if (phone == null ||
         session.status != SessionStatus.member ||
         _historyReadFailed ||
-        _flowDemoSession) {
+        _flowDemoSession ||
+        usesBackend) {
       return;
     }
     final old = _accounts[phone] ?? AccountRecord(profile: session.toJson());
@@ -617,6 +748,7 @@ class SessionController extends ChangeNotifier {
     final partner = _session.partner;
     final album = _album;
     if (_transaction ||
+        usesBackend ||
         _flowDemoSession ||
         _historyReadFailed ||
         phone == null ||
@@ -662,6 +794,7 @@ class SessionController extends ChangeNotifier {
     final phone = _session.phone;
     final archive = archiveId == null ? null : recoveryById(archiveId);
     if (_transaction ||
+        usesBackend ||
         _flowDemoSession ||
         _historyReadFailed ||
         phone == null ||
@@ -736,6 +869,7 @@ class SessionController extends ChangeNotifier {
   void applyDevSession(DevSessionKind kind, {bool partnerNone = false}) {
     _generation++;
     _flowDemoSession = false;
+    _demoOverride = true;
     _set(devSessionOf(kind, partnerNone: partnerNone), force: true);
   }
 
@@ -749,6 +883,7 @@ class SessionController extends ChangeNotifier {
   }
 
   void _persist(Session value) {
+    if (usesBackend) return;
     final raw = jsonEncode(value.toJson());
     final history = _historyReadFailed || _flowDemoSession
         ? null
@@ -771,7 +906,94 @@ class SessionController extends ChangeNotifier {
     _disposed = true;
     _generation++;
     _album = null;
+    _api?.close();
     super.dispose();
+  }
+
+  Partner _remotePartner(ApiPartner partner) => Partner(
+    id: partner.id,
+    name: partner.displayName ?? appContent.v6.backend.partnerName,
+    avatar: '',
+  );
+
+  void _applyRemoteUser(ApiUser user, {SessionStatus? status}) {
+    _pairingCode = user.pairingCode;
+    _set(
+      _session.copyWith(
+        status: status ?? _session.status,
+        phone: localPhoneDisplay(user.phone),
+        name: user.displayName,
+        partner: user.partner == null ? null : _remotePartner(user.partner!),
+        prefs: SessionPrefs(
+          callAlerts: user.callAlert,
+          highlightAlerts: user.highlightAlert,
+          photoSheetVariant: _session.prefs.photoSheetVariant,
+        ),
+      ),
+      force: true,
+    );
+  }
+
+  void _recordBackendError(ApiException error) {
+    if (_disposed) return;
+    backendError = error.code;
+    if (error.status == 401) {
+      _generation++;
+      _verifiedRemote = null;
+      _set(Session.guest);
+    } else {
+      notifyListeners();
+    }
+  }
+
+  Future<T> _backendCall<T>(Future<T> operation) async {
+    final generation = _generation;
+    try {
+      return await operation;
+    } on ApiException catch (error) {
+      if (!_disposed && generation == _generation) _recordBackendError(error);
+      rethrow;
+    }
+  }
+
+  Future<void> _loadBackend() async {
+    final generation = _generation;
+    try {
+      await _api!.loadCredential();
+      if (_api.hasCredential) {
+        final user = await _api.me();
+        if (!_disposed && generation == _generation) {
+          _applyRemoteUser(
+            user,
+            status: user.displayName?.isNotEmpty == true
+                ? SessionStatus.member
+                : SessionStatus.onboarding,
+          );
+        }
+      }
+    } on ApiException catch (error) {
+      if (!_disposed && generation == _generation) _recordBackendError(error);
+    } catch (_) {
+      backendError = 'storage_unavailable';
+    } finally {
+      if (!_disposed) {
+        _loaded = true;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> signOutFromServer() async {
+    if (!usesBackend) {
+      signOut();
+      return;
+    }
+    final generation = _generation;
+    await _api!.signOut();
+    if (_disposed || generation != _generation) return;
+    _generation++;
+    _verifiedRemote = null;
+    _set(Session.guest);
   }
 }
 

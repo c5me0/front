@@ -96,7 +96,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final c = CameoTheme.colorsOf(context);
     final session = SessionScope.of(context);
     final active = !_recovery && session.monthlyActive;
-    final unavailable = _recovery && _archive == null && !_success;
+    final unavailable =
+        session.usesBackend || (_recovery && _archive == null && !_success);
     final completed = _success || active;
     final partner = _archive?.partnerName ?? '';
     final title = _recovery ? copy.recoveryTitle : copy.title;
@@ -169,7 +170,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         color: c.foregroundNeutralBase,
                       ),
                       CameoText(
-                        copy.unavailableBody,
+                        session.usesBackend
+                            ? appContent.v6.backend.billingUnavailable
+                            : copy.unavailableBody,
                         style: CameoTextStyles.bodyLg,
                         color: c.foregroundNeutralMuted,
                       ),

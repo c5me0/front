@@ -36,7 +36,7 @@ class AvatarV6 extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
     final image = this.image;
-    final Widget body = image != null
+    final Widget body = image != null && image.isNotEmpty
         ? Image.asset(
             image,
             key: imageKey,

@@ -59,7 +59,8 @@ class _BreakupScreenState extends State<BreakupScreen> {
       return;
     }
     final partner = _partner;
-    if (!_acknowledged || partner == null) return;
+    final backend = SessionScope.read(context).usesBackend;
+    if (!_acknowledged || partner == null || backend) return;
     setState(() {
       _busy = true;
       _failed = false;
@@ -90,6 +91,7 @@ class _BreakupScreenState extends State<BreakupScreen> {
     final copy = appContent.v6.breakup;
     final step = copy.steps[_step];
     final partner = _partner;
+    final backend = SessionScope.of(context).usesBackend;
     final amount = formatUsd(appContent.v6.billing.recoveryPriceCents);
     String text(String value) =>
         fillTemplate(value, {'partner': partner?.name ?? '', 'amount': amount});
@@ -131,7 +133,11 @@ class _BreakupScreenState extends State<BreakupScreen> {
                   ? SolidButtonVariant.system
                   : SolidButtonVariant.defaultVariant,
               stretch: true,
-              disabled: _busy || partner == null || (_last && !_acknowledged),
+              disabled:
+                  backend ||
+                  _busy ||
+                  partner == null ||
+                  (_last && !_acknowledged),
               onPress: _next,
             ),
             SolidButton(
@@ -168,7 +174,9 @@ class _BreakupScreenState extends State<BreakupScreen> {
                 ),
               ),
               CameoText(
-                text(step.body),
+                backend
+                    ? appContent.v6.backend.breakupUnavailable
+                    : text(step.body),
                 style: CameoTextStyles.bodyLg,
                 color: c.foregroundNeutralMuted,
               ),

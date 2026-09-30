@@ -18,6 +18,7 @@ import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/session.dart';
+import '../../api/api_error_text.dart';
 
 enum PartnerMode { onboarding, settings }
 
@@ -113,13 +114,13 @@ class _PartnerScreenState extends State<PartnerScreen> {
         CameoNav.pop(context);
       }
       return;
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _phase = _Phase.idle;
         _code = '';
       });
-      _toast.show(appContent.v6.billing.unavailableBody, CameoIconName.x);
+      _toast.show(apiErrorText(error), CameoIconName.x);
       return;
     }
     if (!mounted) return;
@@ -155,7 +156,9 @@ class _PartnerScreenState extends State<PartnerScreen> {
 
   void _copy() {
     HapticFeedback.mediumImpact();
-    Clipboard.setData(ClipboardData(text: labV6.partner.myCode));
+    Clipboard.setData(
+      ClipboardData(text: SessionScope.read(context).pairingCode),
+    );
     _toast.show(appContent.v6.partner.copied, CameoIconName.check);
   }
 
@@ -209,7 +212,7 @@ class _PartnerScreenState extends State<PartnerScreen> {
       ),
       accessory: MyCodeCard(
         key: PartnerScreen.myCodeKey,
-        code: content.myCode,
+        code: SessionScope.read(context).pairingCode,
         onCopy: _copy,
       ),
       overlays: [
@@ -232,7 +235,9 @@ class _PartnerScreenState extends State<PartnerScreen> {
                   visible: _phase == _Phase.done,
                   myName: session.name ?? appContent.demo.name,
                   partnerName: partner.name,
-                  partnerImage: labV6.connected.partnerPhoto,
+                  partnerImage: SessionScope.read(context).usesBackend
+                      ? ''
+                      : labV6.connected.partnerPhoto,
                   onDone: _preset ? null : _onDone,
                 ),
         ),

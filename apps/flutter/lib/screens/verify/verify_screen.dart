@@ -16,6 +16,7 @@ import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/session.dart';
+import '../../api/api_error_text.dart';
 
 enum _Phase { idle, autofilling, verifying, success, error }
 
@@ -55,6 +56,8 @@ class _VerifyScreenState extends State<VerifyScreen> {
   bool _bannerVisible = false;
 
   bool _errorVisible = false;
+  String? _serverError;
+  bool _resending = false;
 
   int _remaining = appContent.verify.timerSeconds;
 
@@ -93,6 +96,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
   }
 
   void _scheduleBanner() {
+    if (SessionScope.read(context).usesBackend) return;
     _bannerTimer?.cancel();
     _bannerTimer = Timer(CameoMotion.smsBannerDelay, () {
       if (mounted) setState(() => _bannerVisible = true);
@@ -154,7 +158,14 @@ class _VerifyScreenState extends State<VerifyScreen> {
     if (_phase == _Phase.verifying || _phase == _Phase.success) return;
     final session = SessionScope.read(context);
     setState(() => _phase = _Phase.verifying);
-    final ok = await session.verifyCode(code);
+    bool ok;
+    try {
+      ok = await session.verifyCode(code, phone: widget.phone);
+      _serverError = null;
+    } catch (error) {
+      ok = false;
+      _serverError = apiErrorText(error);
+    }
     if (!mounted) return;
     if (ok) {
       _countdown?.cancel();
@@ -186,8 +197,24 @@ class _VerifyScreenState extends State<VerifyScreen> {
     });
   }
 
-  void _resend() {
-    if (_phase != _Phase.idle) return;
+  Future<void> _resend() async {
+    if (_phase != _Phase.idle || _resending) return;
+    _resending = true;
+    try {
+      final session = SessionScope.read(context);
+      if (session.usesBackend) await session.requestCode(widget.phone);
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _serverError = apiErrorText(error);
+          _errorVisible = true;
+        });
+      }
+      return;
+    } finally {
+      _resending = false;
+    }
+    if (!mounted) return;
     setState(() {
       _bannerVisible = false;
       _errorVisible = false;
@@ -230,7 +257,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
               visible: _errorVisible,
               live: true,
               child: CameoText(
-                appContent.v6.verify.error,
+                _serverError ?? appContent.v6.verify.error,
                 key: VerifyScreen.errorKey,
                 style: CameoTextStyles.bodyMd,
                 color: c.systemRed,

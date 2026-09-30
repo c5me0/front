@@ -10,6 +10,9 @@ import 'state/album_store.dart';
 import 'state/device_services.dart';
 import 'state/permissions.dart';
 import 'state/session.dart';
+import 'api/api_config.dart';
+import 'api/cameo_api.dart';
+import 'api/credential_store.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +49,19 @@ class CameoApp extends StatefulWidget {
 
 class _CameoAppState extends State<CameoApp> {
   late final CameoLaunch _launch = CameoLaunch.parse(widget.initialRoute);
-  late final SessionController _session = widget.session ?? SessionController();
+  late final SessionController _session = widget.session ?? _createSession();
+
+  SessionController _createSession() {
+    final config = ApiConfig.fromEnvironment();
+    return SessionController(
+      api: config == null
+          ? null
+          : CameoApi(
+              config: config,
+              credentials: SecureCredentialStore(config.baseUri),
+            ),
+    );
+  }
 
   late final AlbumStore _album = widget.album ?? AlbumStore();
   late final DeviceServices _services =

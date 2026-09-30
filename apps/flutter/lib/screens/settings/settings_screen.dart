@@ -16,6 +16,7 @@ import '../../navigation/navigation.dart';
 import '../../state/notification_prefs.dart';
 import '../../state/session.dart';
 import 'settings_model.dart';
+import '../../api/api_error_text.dart';
 
 final GlassBackdropTone _backdrop = GlassBackdropTone.fromToken(
   CameoEffects.liquidGlassBackdropSettingsV6,
@@ -60,6 +61,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final List<VoidCallback> _unregisterFlow = [];
 
   bool _sheetOpen = false;
+  bool _loggingOut = false;
+  String? _serverError;
 
   bool _sheetShown = false;
 
@@ -120,11 +123,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  void _confirm() {
-    if (!mounted || !_sheetOpen) return;
+  Future<void> _confirm() async {
+    if (!mounted || !_sheetOpen || _loggingOut) return;
     final session = SessionScope.read(context);
-    _closeSheet();
-    session.signOut();
+    _loggingOut = true;
+    try {
+      await session.signOutFromServer();
+      if (mounted) _closeSheet();
+    } catch (error) {
+      if (mounted) {
+        _closeSheet();
+        setState(() => _serverError = apiErrorText(error));
+      }
+    } finally {
+      _loggingOut = false;
+    }
   }
 
   void _onSheetShown() {
@@ -169,7 +182,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             key: SettingsScreen.partnerCardKey,
             kind: SettingsPersonKind.partner,
             name: settingsName(partner.name, content.partner.name),
-            phone: content.partner.phone,
+            phone: controller.usesBackend
+                ? controller.partnerPhone
+                : content.partner.phone,
             status: content.partner.status,
           )
         : SettingsRowV6(
@@ -230,6 +245,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: CameoLayout.settingsV6ContentGap,
                 children: [
+                  if (_serverError != null || controller.backendError != null)
+                    Semantics(
+                      liveRegion: true,
+                      child: CameoText(
+                        _serverError ??
+                            apiErrorCodeText(controller.backendError!),
+                        style: CameoTextStyles.bodyMd,
+                        color: c.systemRed,
+                      ),
+                    ),
                   KeyedSubtree(
                     key: SettingsScreen.profileKey,
                     child: SettingsCard(

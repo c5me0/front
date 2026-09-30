@@ -29,7 +29,8 @@ class AppContent {
 }
 
 class AppContentV6 {
-  const AppContentV6({required this.billing, required this.breakup, required this.welcome, required this.partner, required this.verify, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.viewer, required this.review, required this.emptyAlbum});
+  const AppContentV6({required this.backend, required this.billing, required this.breakup, required this.welcome, required this.partner, required this.verify, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.viewer, required this.review, required this.emptyAlbum});
+  final AppContentV6Backend backend;
   final AppContentV6Billing billing;
   final AppContentV6Breakup breakup;
   final AppContentV6Welcome welcome;
@@ -213,6 +214,23 @@ class AppContentV6Billing {
   final String unavailableBody;
   final String photoCount;
   final String callCount;
+}
+
+class AppContentV6Backend {
+  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum});
+  final String partnerName;
+  final String networkError;
+  final String rateLimit;
+  final String expired;
+  final String codeNotFound;
+  final String selfCode;
+  final String alreadyConnected;
+  final String partnerUnavailable;
+  final String invalidRequest;
+  final String genericError;
+  final String billingUnavailable;
+  final String breakupUnavailable;
+  final String emptyAlbum;
 }
 
 class AppContentDevLabels {
@@ -676,6 +694,21 @@ const AppContent appContent = AppContent(
     albumEmpty: '앨범 · 빈 상태 (온보딩)',
   ),
   v6: AppContentV6(
+    backend: AppContentV6Backend(
+      partnerName: '상대',
+      networkError: '서버에 연결하지 못했어요. 연결 상태를 확인하고 다시 시도해 주세요.',
+      rateLimit: '요청이 많아요. 잠시 후 다시 시도해 주세요.',
+      expired: '로그인이 만료됐어요. 다시 로그인해 주세요.',
+      codeNotFound: '상대 코드를 찾지 못했어요. 코드를 다시 확인해 주세요.',
+      selfCode: '내 코드는 입력할 수 없어요.',
+      alreadyConnected: '이미 연결된 상대가 있어요.',
+      partnerUnavailable: '상대가 이미 다른 계정과 연결되어 있어요.',
+      invalidRequest: '입력한 내용을 다시 확인해 주세요.',
+      genericError: '요청을 처리하지 못했어요. 다시 시도해 주세요.',
+      billingUnavailable: '서버 결제와 기록 복구 기능은 준비 중이에요.',
+      breakupUnavailable: '기록 복구 기능이 연결되면 헤어지기를 이용할 수 있어요.',
+      emptyAlbum: '연결된 계정의 앨범을 준비하고 있어요.',
+    ),
     billing: AppContentV6Billing(
       section: '멤버십',
       settingsLabel: '요금제 및 결제',
