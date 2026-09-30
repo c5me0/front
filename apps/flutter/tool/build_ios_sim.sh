@@ -5,7 +5,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 find . -name '._*' -not -path './.git/*' -delete 2>/dev/null || true
 mode="--debug"
-[ "${1:-}" = "--release" ] && mode="--release"
+if [ "${1:-}" = "--release" ]; then
+  mode="--release"
+  shift
+fi
 
 shim_dir="$(mktemp -d)"
 trap 'rm -rf "$shim_dir"' EXIT
@@ -22,4 +25,4 @@ EOF
   export PATH="$shim_dir:$PATH"
 fi
 
-./tool/flutter.sh build ios --simulator "$mode"
+./tool/flutter.sh build ios --simulator "$mode" "$@"
