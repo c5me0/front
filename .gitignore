@@ -23,6 +23,7 @@ __pycache__/
 /apps/rn/
 /docs/
 *.md
+!/README.md
 *.mdx
 .claude/
 .codex/
