@@ -6,24 +6,18 @@ import '../../api/api_error_text.dart';
 import '../../components/account_flow_scaffold.dart';
 import '../../components/confirm_sheet.dart';
 import '../../components/settings_v6.dart';
+import '../../components/storage_usage.dart';
 import '../../components/solid_button.dart';
 import '../../content/app.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/cameo_nav.dart';
 import '../../state/revenuecat_billing.dart';
 import '../../state/session.dart';
-import '../../state/app_language.dart';
-import '../settings/language_screen.dart';
 
 class RevenueCatPaymentScreen extends StatefulWidget {
-  const RevenueCatPaymentScreen({
-    super.key,
-    this.archiveId,
-    this.requiredAccess = false,
-  });
+  const RevenueCatPaymentScreen({super.key, this.archiveId});
   // Live recovery routes carry the current server couple ID.
   final String? archiveId;
-  final bool requiredAccess;
   @override
   State<RevenueCatPaymentScreen> createState() =>
       _RevenueCatPaymentScreenState();
@@ -32,26 +26,8 @@ class RevenueCatPaymentScreen extends StatefulWidget {
 class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
   bool _confirm = false, _recovered = false;
   String? _notice;
-  bool _leaving = false;
-
-  Future<void> _back() async {
-    if (_leaving || BillingScope.of(context).purchasing) return;
-    if (!widget.requiredAccess) {
-      CameoNav.pop(context);
-      return;
-    }
-    setState(() => _leaving = true);
-    try {
-      await SessionScope.read(context).signOutFromServer();
-    } catch (error) {
-      if (mounted) {
-        setState(
-          () => _notice = apiErrorText(error, copy: AppContent.of(context)),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _leaving = false);
-    }
+  void _back() {
+    if (!BillingScope.of(context).purchasing) CameoNav.pop(context);
   }
 
   @override
@@ -119,7 +95,7 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
         matchingCouple &&
         (_recovered || couple?.restoredAt != null);
     final hasRecords = recovery && matchingCouple && couple?.canRestore == true;
-    final recovering = recovery && billing.active;
+    final recovering = recovery;
     final useCredit = recovering && session.restoreCredits > 0;
     final product = recovering
         ? billing.recoveryProduct
@@ -130,7 +106,6 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
     final canPurchase =
         billing.ready &&
         !billing.busy &&
-        !_leaving &&
         billing.serverReady &&
         (recovery ? hasRecords : !billing.active) &&
         (recovering
@@ -165,35 +140,14 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
             'amount': amount,
           });
     return PopScope(
-      canPop: !widget.requiredAccess && !billing.purchasing && !_leaving,
+      canPop: !billing.purchasing,
       child: Stack(
         fit: StackFit.expand,
         children: [
           AccountFlowScaffold(
             title: recovery ? copy.recoveryTitle : copy.title,
             onBack: _back,
-            backLabel: widget.requiredAccess
-                ? AppContent.of(context).v6.settings.logout
-                : null,
-            backIcon: widget.requiredAccess
-                ? CameoIconName.logout
-                : CameoIconName.chevronLeft,
-            busy: billing.purchasing || _leaving,
-            trailing: widget.requiredAccess
-                ? SolidButton(
-                    key: const ValueKey('billing.language'),
-                    size: SolidButtonSize.md,
-                    variant: SolidButtonVariant.gray,
-                    label:
-                        AppLanguageScope.maybeOf(context)?.language.label ??
-                        AppLanguage.korean.label,
-                    disabled: billing.purchasing || _leaving,
-                    onPress: () => CameoNav.pushPage(
-                      context,
-                      (_) => const LanguageScreen(),
-                    ),
-                  )
-                : null,
+            busy: billing.purchasing,
             footer: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -235,7 +189,7 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                     size: SolidButtonSize.md,
                     variant: SolidButtonVariant.gray,
                     label: messages.restorePurchases,
-                    disabled: !billing.ready || billing.busy || _leaving,
+                    disabled: !billing.ready || billing.busy,
                     onPress: () async {
                       setState(() => _notice = null);
                       await billing.restore();
@@ -248,7 +202,7 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                     size: SolidButtonSize.md,
                     variant: SolidButtonVariant.gray,
                     label: messages.retry,
-                    disabled: billing.busy || _leaving,
+                    disabled: billing.busy,
                     onPress: billing.refresh,
                   ),
               ],
@@ -293,12 +247,10 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                                 'partner': partner,
                               })
                             : copy.unavailableBody)
-                      : session.premium?.source == 'partner'
+                      : session.storage?.source == 'partner'
                       ? messages.partnerPremium
                       : billing.active
                       ? copy.activeBody
-                      : widget.requiredAccess && session.session.partner == null
-                      ? copy.paywallSubtitle
                       : copy.subtitle,
                   style: CameoTextStyles.bodyLg,
                   color: c.foregroundNeutralMuted,
@@ -312,10 +264,23 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                     color: c.foregroundNeutralBase,
                   ),
                   CameoText(
-                    billing.active
-                        ? messages.recoveryNote
-                        : messages.premiumRequired,
+                    messages.recoveryNote,
                     style: CameoTextStyles.bodyMd,
+                    color: c.foregroundNeutralMuted,
+                  ),
+                ],
+                if (!recovery) ...[
+                  SettingsCard(
+                    children: [StorageUsage(storage: session.storage)],
+                  ),
+                  CameoText(
+                    AppContent.of(context).v6.storage.freeDetail,
+                    style: CameoTextStyles.bodyMd,
+                    color: c.foregroundNeutralMuted,
+                  ),
+                  CameoText(
+                    AppContent.of(context).v6.storage.keepAccess,
+                    style: CameoTextStyles.bodySm,
                     color: c.foregroundNeutralMuted,
                   ),
                 ],
@@ -342,6 +307,14 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                       style: CameoTextStyles.bodyMd,
                       color: c.systemRed,
                     ),
+                  ),
+                if (recovery &&
+                    billing.error == 'storage:quota_exceeded' &&
+                    session.shouldOfferStorageUpgrade)
+                  SolidButton(
+                    stretch: true,
+                    label: AppContent.of(context).v6.storage.upgrade,
+                    onPress: () => CameoNav.openPayment(context),
                   ),
                 if (pending)
                   CameoText(

@@ -14,7 +14,7 @@ enum AppLanguage {
 }
 
 class AppLanguageController extends ChangeNotifier {
-  AppLanguageController({AppLanguage language = AppLanguage.korean})
+  AppLanguageController({AppLanguage language = AppLanguage.english})
     : _language = language;
 
   static const preferenceKey = 'cameo.language';
@@ -22,18 +22,14 @@ class AppLanguageController extends ChangeNotifier {
   AppLanguage _language;
   AppLanguage get language => _language;
 
-  static Future<AppLanguageController> load({Locale? deviceLocale}) async {
-    final fallback =
-        deviceLocale ?? WidgetsBinding.instance.platformDispatcher.locale;
+  static Future<AppLanguageController> load() async {
     String? stored;
     try {
       stored = (await SharedPreferences.getInstance()).getString(preferenceKey);
     } catch (_) {
       // A failed preference read must not block login or an incoming call.
     }
-    return AppLanguageController(
-      language: AppLanguage.fromCode(stored ?? fallback.languageCode),
-    );
+    return AppLanguageController(language: AppLanguage.fromCode(stored));
   }
 
   Future<void> select(AppLanguage language) async {

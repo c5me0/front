@@ -2,6 +2,7 @@
 // the result through the shared album store.
 
 import 'package:flutter/widgets.dart';
+import '../api/cameo_api.dart';
 
 import 'album_store.dart';
 import 'photo_picker_service.dart';
@@ -17,6 +18,11 @@ Future<List<AlbumPhoto>> importPhotos(
   try {
     final photos = await picker.pickPhotos();
     return await album.savePhotos(photos);
+  } catch (problem) {
+    album.remote.reportUploadError(
+      problem is ApiException ? problem : const ApiException('upload_failed'),
+    );
+    return const [];
   } finally {
     _busy = false;
   }

@@ -493,22 +493,36 @@ List<String> demoSelectionIds(List<AlbumPhoto> photos, AlbumMode mode, int n) {
   return (normal: 1 + (epsilon - 1) * a, select: epsilon + (1 - epsilon) * b);
 }
 
-Rect viewerCardRectV6(double width) {
-  final w = width - 2 * CameoLayout.viewerV6CardInset;
+Rect viewerCardRectV6(
+  double width, {
+  double height = CameoLayout.screenV6Height,
+  double aspectRatio = CameoLayout.viewerV6CardAspectRatio,
+}) {
+  final ratio = aspectRatio > 0 && aspectRatio.isFinite ? aspectRatio : 3 / 4;
+  const top = CameoLayout.screenV6StatusBarHeight;
+  final available = math.max(
+    1.0,
+    height - top - CameoLayout.viewerV6BottomHeight,
+  );
+  final maxWidth = width - 2 * CameoLayout.viewerV6CardInset;
+  final cardHeight = math.min(maxWidth / ratio, available);
+  final cardWidth = math.min(maxWidth, cardHeight * ratio);
+  final aboveStrip = available - CameoLayout.silicaViewerStripHeight;
   return Rect.fromLTWH(
-    CameoLayout.viewerV6CardInset,
-    CameoLayout.viewerV6PhotoRowTop + CameoLayout.viewerV6CardInset,
-    w,
-    w / CameoLayout.viewerV6CardAspectRatio,
+    (width - cardWidth) / 2,
+    top + (cardHeight <= aboveStrip ? (aboveStrip - cardHeight) / 2 : 0),
+    cardWidth,
+    cardHeight,
   );
 }
 
-double viewerStripTop(double width) {
-  final card = viewerCardRectV6(width);
-  return card.bottom +
-      CameoLayout.viewerV6CardInset +
-      CameoLayout.viewerV6StripPaddingY;
-}
+double viewerStripTop(
+  double width, {
+  double height = CameoLayout.screenV6Height,
+}) =>
+    height -
+    CameoLayout.viewerV6BottomHeight -
+    CameoLayout.silicaViewerStripHeight;
 
 double viewerDatePillTop(double height) =>
     height -
@@ -522,7 +536,7 @@ double viewerDatePillTop(double height) =>
 ) => (
   top: CameoLayout.topNavV6Top + CameoLayout.topNavV6ButtonSize,
   date: CameoLayout.viewerV6BottomHeight,
-  strip: height - viewerStripTop(width),
+  strip: height - viewerStripTop(width, height: height),
 );
 
 double viewerPageStep(double width) => width;

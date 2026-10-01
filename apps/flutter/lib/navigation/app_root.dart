@@ -92,9 +92,7 @@ class CameoAppRootState extends State<CameoAppRoot>
     _requiredLocation = requiredLiveLocation(widget.session);
     final accessChanged =
         previousRequired != _requiredLocation &&
-        (previousRequired == CameoRoutes.paywall ||
-            _requiredLocation == CameoRoutes.paywall ||
-            previousRequired == CameoRoutes.profile);
+        previousRequired == CameoRoutes.profile;
     if (!accessChanged &&
         status == _status &&
         !(status == SessionStatus.member &&

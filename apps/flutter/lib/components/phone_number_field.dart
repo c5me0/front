@@ -47,9 +47,14 @@ class PhoneNumberField extends StatefulWidget {
     this.placeholder,
     this.prefix,
     this.accessibilityLabel,
+    this.formattedValue,
+    this.onSelectCountry,
+    this.countryLabel,
   });
 
   final String value;
+  final String? formattedValue, countryLabel;
+  final VoidCallback? onSelectCountry;
 
   final bool focused;
 
@@ -72,7 +77,7 @@ class PhoneNumberField extends StatefulWidget {
 class _PhoneNumberFieldState extends State<PhoneNumberField> {
   final List<_Glyph> _glyphs = [];
   int _nextId = 0;
-  late String _formatted = formatPhone(widget.value);
+  late String _formatted = widget.formattedValue ?? formatPhone(widget.value);
 
   @override
   void initState() {
@@ -85,7 +90,7 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
   @override
   void didUpdateWidget(PhoneNumberField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final next = formatPhone(widget.value);
+    final next = widget.formattedValue ?? formatPhone(widget.value);
     if (next == _formatted) return;
     var prefix = 0;
     while (prefix < next.length &&
@@ -142,17 +147,39 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
           widget.accessibilityLabel ??
           AppContent.of(context).v6.accessibility.phone,
       value: '$prefix ${empty ? placeholder : _formatted}',
-      excludeSemantics: true,
+      excludeSemantics: widget.onSelectCountry == null,
       child: TextFieldV6(
         variant: TextFieldV6Variant.phone,
         focused: widget.focused,
         children: [
-          CameoText(
-            prefix,
-            key: PhoneNumberField.prefixKey,
-            style: CameoTextStyles.bodyLg,
-            color: c.foregroundNeutralBase,
-            maxLines: 1,
+          Semantics(
+            button: widget.onSelectCountry != null,
+            label: widget.countryLabel,
+            child: GestureDetector(
+              key: const ValueKey('phone.country'),
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.onSelectCountry,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CameoText(
+                    prefix,
+                    key: PhoneNumberField.prefixKey,
+                    style: CameoTextStyles.bodyLg,
+                    color: c.foregroundNeutralBase,
+                    maxLines: 1,
+                  ),
+                  if (widget.onSelectCountry != null) ...[
+                    const SizedBox(width: CameoSpace.s4),
+                    CameoIcon(
+                      CameoIconName.chevronDown,
+                      size: CameoIconTokens.sizeXs,
+                      color: c.foregroundNeutralMuted,
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
           TextFieldV6Slot(
             child: ClipRect(
@@ -171,10 +198,9 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
                   SizedBox(
                     key: const ValueKey('phoneNumberField.numberBox'),
                     height: CameoLayout.textFieldV6PhoneHeight,
-                    child: OverflowBox(
+                    child: FittedBox(
                       alignment: Alignment.centerLeft,
-                      minWidth: 0,
-                      maxWidth: double.infinity,
+                      fit: BoxFit.scaleDown,
                       child: number,
                     ),
                   ),

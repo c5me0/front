@@ -1,4 +1,4 @@
-// Onboarding profile-name entry. Live sessions advance through the paid access gate;
+// Onboarding profile-name entry. Live sessions advance to partner setup;
 // cancelling the authentication flow signs out.
 
 import 'dart:async';

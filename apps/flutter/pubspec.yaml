@@ -57,6 +57,10 @@ dependencies:
   just_audio: 0.10.6
   purchases_flutter: ^10.13.2
   url_launcher: ^6.3.2
+  phone_numbers_parser: ^9.0.27
+  country_picker: ^2.0.28
+  video_player: ^2.10.1
+  video_thumbnail: ^0.5.6
 
 dev_dependencies:
   flutter_test:

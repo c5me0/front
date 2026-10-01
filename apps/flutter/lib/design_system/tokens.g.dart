@@ -1286,10 +1286,10 @@ abstract final class CameoTextStyles {
     fontFamily: CameoFontFamily.defaultFamily,
     fontFamilyFallback: CameoFontFamily.fallbackText,
     fontWeight: CameoFontWeight.regular,
-    fontVariations: [FontVariation('wght', 400.0), FontVariation('opsz', 10.0)],
-    fontSize: 10.0,
-    height: 1.4,
-    letterSpacing: -0.2,
+    fontVariations: [FontVariation('wght', 400.0), FontVariation('opsz', 12.0)],
+    fontSize: 12.0,
+    height: 1.166667,
+    letterSpacing: -0.24,
     leadingDistribution: TextLeadingDistribution.even,
   );
   static const TextStyle wordmark = TextStyle(
@@ -1355,7 +1355,7 @@ abstract final class CameoTextStyles {
     'avatarInitialSm': avatarInitialSm,
   };
 
-  static final Map<double, double> systemTracking = Map.unmodifiable(<double, double>{10.0: 0.117188, 12.0: 0.0, 14.0: -0.150391, 16.0: -0.3125, 18.0: -0.439453, 20.0: -0.449219, 24.0: 0.070313, 50.0: 0.341797, 64.0: 0.21875, 11.52: 0.0324});
+  static final Map<double, double> systemTracking = Map.unmodifiable(<double, double>{12.0: 0.0, 14.0: -0.150391, 16.0: -0.3125, 18.0: -0.439453, 20.0: -0.449219, 24.0: 0.070313, 50.0: 0.341797, 64.0: 0.21875, 11.52: 0.0324});
 }
 
 abstract final class CameoIconTokens {
@@ -2165,6 +2165,13 @@ abstract final class CameoLayout {
   static const double scrimButtonV6SmHeight = 38.0;
   static const double scrimButtonV6SmPadding = 10.0;
   static const double scrimButtonV6SmIconSize = 18.0;
+  static const double scrimButtonV6XlHeight = 56.0;
+  static const double scrimButtonV6XlPadding = 15.0;
+  static const double scrimButtonV6XlIconSize = 26.0;
+  static const double scrimButtonV6NavHeight = 52.0;
+  static const double scrimButtonV6NavPadding = 13.0;
+  static const double scrimButtonV6NavIconSize = 26.0;
+  static const double scrimButtonV6NavLabelPaddingX = 6.0;
   static const double scrimPillV6Height = 46.0;
   static const double scrimPillV6Padding = 4.0;
   static const double scrimPillV6Gap = 12.0;
@@ -2298,27 +2305,27 @@ abstract final class CameoLayout {
   static const double settingsV6SwitchInset = 2.0;
   static const double settingsV6SwitchRadius = 100.0;
   static const double settingsV6BottomInset = 102.0;
-  static const double tabBarV6FullContainerHeight = 102.0;
-  static const double tabBarV6FullRowHeight = 68.0;
-  static const double tabBarV6FullRowPaddingTop = 12.0;
+  static const double tabBarV6FullContainerHeight = 90.0;
+  static const double tabBarV6FullRowHeight = 56.0;
+  static const double tabBarV6FullRowPaddingTop = 0.0;
   static const double tabBarV6FullPaddingX = 16.0;
-  static const double tabBarV6FullGap = 8.0;
-  static const double tabBarV6FullPillWidth = 308.0;
+  static const double tabBarV6FullGap = 12.0;
+  static const double tabBarV6FullPillWidth = 302.0;
   static const double tabBarV6FullPillHeight = 56.0;
-  static const double tabBarV6FullPillPadding = 4.0;
+  static const double tabBarV6FullPillPadding = 5.0;
   static const double tabBarV6FullPillRadius = 32.0;
   static const double tabBarV6FullPillBorderWidth = 1.0;
-  static const double tabBarV6FullItemWidth = 100.0;
-  static const double tabBarV6FullItemHeight = 48.0;
-  static const double tabBarV6FullItemPadding = 6.0;
+  static const double tabBarV6FullItemWidth = 97.333333;
+  static const double tabBarV6FullItemHeight = 46.0;
+  static const double tabBarV6FullItemPadding = 5.0;
   static const double tabBarV6FullItemRadius = 26.0;
   static const double tabBarV6FullIconSize = 22.0;
   static const double tabBarV6FullLabelLineHeight = 14.0;
-  static const double tabBarV6FullCallButtonSize = 54.0;
-  static const double tabBarV6FullCallButtonLeft = 332.0;
-  static const double tabBarV6MiniContainerHeight = 90.0;
-  static const double tabBarV6MiniRowHeight = 56.0;
-  static const double tabBarV6MiniRowPaddingTop = 12.0;
+  static const double tabBarV6FullCallButtonSize = 56.0;
+  static const double tabBarV6FullCallButtonLeft = 330.0;
+  static const double tabBarV6MiniContainerHeight = 78.0;
+  static const double tabBarV6MiniRowHeight = 44.0;
+  static const double tabBarV6MiniRowPaddingTop = 0.0;
   static const double tabBarV6MiniPillWidth = 190.0;
   static const double tabBarV6MiniPillHeight = 44.0;
   static const double tabBarV6MiniPillPadding = 4.0;
@@ -2329,13 +2336,13 @@ abstract final class CameoLayout {
   static const double tabBarV6MiniItemPadding = 6.0;
   static const double tabBarV6MiniItemRadius = 26.0;
   static const double tabBarV6MiniIconSize = 22.0;
-  static const double tabBarV6CameraGap = 8.0;
-  static const double tabBarV6CameraThumbnailSize = 54.0;
-  static const double tabBarV6CameraThumbnailRadius = 16.0;
+  static const double tabBarV6CameraGap = 12.0;
+  static const double tabBarV6CameraThumbnailSize = 56.0;
+  static const double tabBarV6CameraThumbnailRadius = 999.0;
   static const double tabBarV6CameraThumbnailBorderWidth = 1.5;
-  static const double tabBarV6CameraFlipSize = 54.0;
-  static const double tabBarV6CameraPillWidth = 246.0;
-  static const double tabBarV6CameraItemWidth = 79.333333;
+  static const double tabBarV6CameraFlipSize = 56.0;
+  static const double tabBarV6CameraPillWidth = 234.0;
+  static const double tabBarV6CameraItemWidth = 74.666667;
   static const double albumNavV6HeaderHeight = 118.0;
   static const double albumNavV6RowPaddingX = 16.0;
   static const double albumNavV6RowPaddingBottom = 10.0;
@@ -2407,15 +2414,15 @@ abstract final class CameoLayout {
   static const double viewerV6CardInset = 4.0;
   static const double viewerV6PhotoRowTop = 118.0;
   static const double viewerV6StripPaddingY = 12.0;
-  static const double viewerV6StripCellSize = 58.0;
+  static const double viewerV6StripCellSize = 48.0;
   static const double viewerV6StripGap = 4.0;
   static const double viewerV6StripRowRadius = 8.0;
-  static const double viewerV6StripHeight = 126.666667;
-  static const double viewerV6BottomHeight = 96.0;
+  static const double viewerV6StripHeight = 72.0;
+  static const double viewerV6BottomHeight = 90.0;
   static const double viewerV6BottomRowPaddingX = 16.0;
   static const double viewerV6BottomRowPaddingY = 12.0;
-  static const double viewerV6DatePillHeight = 38.0;
-  static const double viewerV6DatePillPadding = 10.0;
+  static const double viewerV6DatePillHeight = 44.0;
+  static const double viewerV6DatePillPadding = 12.0;
   static const double viewerV6DatePillWidth = 118.0;
   static const double viewerV6DatePillTop = 790.0;
   static const double viewerV6PageStep = 402.0;
@@ -2522,10 +2529,10 @@ abstract final class CameoLayout {
   static const double toastV6ElevatedBorderWidth = 1.5;
   static const double toastV6ElevatedIconSize = 18.0;
   static const double toastV6ElevatedTextPaddingX = 4.0;
-  static const double toastV6CameraContainerTop = 66.0;
+  static const double toastV6CameraContainerTop = 62.0;
   static const double toastV6CameraPaddingTop = 24.0;
   static const double toastV6CameraPaddingBottom = 12.0;
-  static const double toastV6CameraPillTop = 90.0;
+  static const double toastV6CameraPillTop = 86.0;
   static const double shotV6Width = 88.0;
   static const double shotV6Height = 124.0;
   static const double shotV6PaddingX = 6.0;
@@ -2536,6 +2543,7 @@ abstract final class CameoLayout {
   static const double shotV6RingRadius = 41.0;
   static const double shotV6RingStrokeWidth = 6.0;
   static const double shotV6RingSampleSweepDeg = 252.0;
+  static const double shotV6RecordingSize = 120.0;
   static const double photoSheetV6Top = 197.0;
   static const double photoSheetV6Bottom = 770.0;
   static const double photoSheetV6MarginX = 8.0;
@@ -2579,27 +2587,63 @@ abstract final class CameoLayout {
   static const double aodV6ButtonTop = 774.0;
   static const double aodV6ButtonIconSize = 22.0;
   static const double cameraV6ViewfinderLeft = 4.0;
-  static const double cameraV6ViewfinderTop = 66.0;
+  static const double cameraV6ViewfinderTop = 62.0;
   static const double cameraV6ViewfinderWidth = 394.0;
   static const double cameraV6ViewfinderHeight = 700.444444;
   static const double cameraV6ViewfinderRadius = 26.0;
   static const double cameraV6ViewfinderAspectRatio = 0.5625;
   static const double cameraV6ViewfinderContainerPadding = 4.0;
   static const double cameraV6ShotCenterX = 201.0;
-  static const double cameraV6ShotCenterY = 704.0;
-  static const double cameraV6ShotBottomOffset = 62.444444;
-  static const double cameraV6ShotTop = 642.0;
-  static const double cameraV6ShotHeight = 124.0;
-  static const double cameraV6BottomNavHeight = 102.0;
+  static const double cameraV6ShotCenterY = 684.0;
+  static const double cameraV6ShotBottomOffset = 78.444444;
+  static const double cameraV6ShotTop = 624.0;
+  static const double cameraV6ShotHeight = 120.0;
+  static const double cameraV6BottomNavHeight = 90.0;
   static const double reviewV6ActionsTop = 784.0;
   static const double reviewV6ActionsHeight = 56.0;
   static const double reviewV6ActionsPaddingX = 16.0;
-  static const double reviewV6ActionsPaddingBottom = 10.0;
-  static const double reviewV6ActionsButtonSize = 46.0;
-  static const double reviewV6SendSize = 46.0;
-  static const double reviewV6SendPadding = 4.0;
-  static const double reviewV6SendInnerPadding = 8.0;
-  static const double reviewV6SendIconSize = 22.0;
+  static const double reviewV6ActionsPaddingBottom = 0.0;
+  static const double reviewV6ActionsButtonSize = 56.0;
+  static const double reviewV6SendSize = 56.0;
+  static const double reviewV6SendPadding = 1.0;
+  static const double reviewV6SendInnerPadding = 14.0;
+  static const double reviewV6SendIconSize = 26.0;
+  static const double silicaActionPillHeight = 56.0;
+  static const double silicaActionPillPadding = 5.0;
+  static const double silicaActionPillGap = 8.0;
+  static const double silicaActionPillItemSize = 46.0;
+  static const double silicaActionPillIconSize = 26.0;
+  static const double silicaRecordingSideSize = 44.0;
+  static const double silicaRecordingSideInset = 24.0;
+  static const double silicaViewerStripHeight = 72.0;
+  static const double silicaViewerDateInset = 24.0;
+  static const double silicaTranscriptHeaderHeight = 188.0;
+  static const double silicaTranscriptHandleAreaHeight = 22.0;
+  static const double silicaTranscriptHandleWidth = 56.0;
+  static const double silicaTranscriptHandleHeight = 6.0;
+  static const double silicaTranscriptLinePaddingX = 18.0;
+  static const double silicaTranscriptLinePaddingY = 12.0;
+  static const double silicaTranscriptContextHeight = 54.0;
+  static const double silicaTranscriptFooterHeight = 200.0;
+  static const double silicaTranscriptScrubFooterHeight = 208.0;
+  static const double silicaTranscriptCollapsedFooterHeight = 110.0;
+  static const double silicaTranscriptFadeHeight = 36.0;
+  static const double silicaTranscriptTrackHeight = 8.0;
+  static const double silicaTranscriptScrubTrackHeight = 16.0;
+  static const double silicaTranscriptSliderPaddingX = 24.0;
+  static const double silicaTranscriptSliderPaddingY = 12.0;
+  static const double silicaTranscriptTimeGap = 12.0;
+  static const double silicaTranscriptPillHeight = 40.0;
+  static const double silicaAvatarSize = 22.0;
+  static const double silicaAvatarRadius = 8.0;
+  static const double silicaCaptionSmallHeight = 40.0;
+  static const double silicaCaptionLargeHeight = 44.0;
+  static const double silicaCaptionTextPaddingX = 16.0;
+  static const double silicaNavigationPillHeight = 52.0;
+  static const double silicaNavigationPillPadding = 5.0;
+  static const double silicaNavigationPillGap = 8.0;
+  static const double silicaNavigationPillItemSize = 42.0;
+  static const double silicaNavigationPillIconSize = 26.0;
 }
 
 abstract final class CameoSprings {

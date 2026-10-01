@@ -198,7 +198,10 @@ abstract final class CameoNav {
     if (session?.usesBackend == true && session!.session.partner == null) {
       return openConnect(context);
     }
-    if (session?.premiumRequired == true) return openPayment(context);
+    if (session?.storage?.isFull == true &&
+        session!.shouldOfferStorageUpgrade) {
+      return openPayment(context);
+    }
     return _root(context).pushNamed<void>(CameoRoutes.call(sheet: sheet));
   }
 

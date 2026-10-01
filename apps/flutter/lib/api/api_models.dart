@@ -28,8 +28,8 @@ class ApiUser {
     required this.highlightAlert,
     this.displayName,
     this.partner,
-    this.premium,
     this.restoreCredits = 0,
+    this.storage,
   });
   final String id;
   final String phone;
@@ -38,8 +38,8 @@ class ApiUser {
   final bool callAlert;
   final bool highlightAlert;
   final ApiPartner? partner;
-  final ApiPremium? premium;
   final int restoreCredits;
+  final ApiStorage? storage;
   factory ApiUser.fromJson(JsonObject json) => ApiUser(
     id: json['id'] as String,
     phone: json['phone'] as String,
@@ -50,11 +50,62 @@ class ApiUser {
     partner: json['partner'] == null
         ? null
         : ApiPartner.fromJson(jsonObject(json['partner'])),
-    premium: json['premium'] == null
-        ? null
-        : ApiPremium.fromJson(jsonObject(json['premium'])),
     restoreCredits: json['restore_credits'] as int? ?? 0,
+    storage: json['storage'] == null
+        ? null
+        : ApiStorage.fromJson(jsonObject(json['storage'])),
   );
+}
+
+/// Server-owned shared usage, including photo thumbnails and call recordings.
+class ApiStorage {
+  const ApiStorage({
+    required this.usedBytes,
+    required this.quotaBytes,
+    this.tier,
+    this.source = 'none',
+    this.until,
+  });
+
+  static const freeBytes = 1000000000;
+  static const proBytes = 50000000000;
+  final int usedBytes;
+  final int? quotaBytes;
+  final String? tier;
+  final String source;
+  final DateTime? until;
+  bool paidAt(DateTime now) =>
+      tier != null && source != 'none' && until?.isAfter(now) == true;
+  bool get isPro => paidAt(DateTime.now());
+  int? get remainingBytes => quotaBytes == null
+      ? null
+      : (quotaBytes! - usedBytes).clamp(0, quotaBytes!);
+  bool get isFull => remainingBytes == 0;
+  double get progress =>
+      quotaBytes == null ? 0 : (usedBytes / quotaBytes!).clamp(0, 1);
+  bool fits(int bytes) =>
+      bytes >= 0 && (remainingBytes == null || bytes <= remainingBytes!);
+
+  factory ApiStorage.fromJson(JsonObject json) {
+    final used = json['used_bytes'] as int;
+    final limit = json['quota_bytes'] as int?;
+    final source = json['source'] as String;
+    if (!json.containsKey('quota_bytes') ||
+        used < 0 ||
+        (limit != null && limit <= 0) ||
+        !{'none', 'self', 'partner'}.contains(source)) {
+      throw const FormatException('Invalid storage quota');
+    }
+    return ApiStorage(
+      usedBytes: used,
+      quotaBytes: limit,
+      tier: json['tier'] as String?,
+      source: source,
+      until: json['until'] == null
+          ? null
+          : DateTime.parse(json['until'] as String),
+    );
+  }
 }
 
 class ApiCouple {
@@ -82,28 +133,6 @@ class ApiCouple {
         ? null
         : DateTime.parse(json['restored_at'] as String),
   );
-}
-
-class ApiPremium {
-  const ApiPremium({required this.active, required this.source, this.until});
-  final bool active;
-  final String source;
-  final DateTime? until;
-  bool get paid => active && source != 'none';
-  bool paidAt(DateTime now) => paid && (until == null || until!.isAfter(now));
-  factory ApiPremium.fromJson(JsonObject json) {
-    final source = json['source'] as String;
-    if (!{'self', 'partner', 'none'}.contains(source)) {
-      throw const FormatException('Invalid premium source');
-    }
-    return ApiPremium(
-      active: json['active'] as bool,
-      source: source,
-      until: json['until'] == null
-          ? null
-          : DateTime.parse(json['until'] as String),
-    );
-  }
 }
 
 class ApiRestorable {
@@ -144,12 +173,10 @@ class ApiSignIn {
   );
 }
 
-String koreanPhoneToE164(String phone) {
+String phoneToE164(String phone) {
   final digits = phone.replaceAll(RegExp(r'[\s()-]'), '');
   if (RegExp(r'^\+[1-9]\d{7,14}$').hasMatch(digits)) return digits;
-  if (RegExp(r'^01\d{9}$').hasMatch(digits)) return '+82${digits.substring(1)}';
-  throw const FormatException('Invalid phone number');
+  throw const FormatException(
+    'A phone number with country calling code is required',
+  );
 }
-
-String localPhoneDisplay(String phone) =>
-    phone.startsWith('+82') ? '0${phone.substring(3)}' : phone;

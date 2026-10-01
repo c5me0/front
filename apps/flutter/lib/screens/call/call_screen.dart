@@ -313,7 +313,7 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
       _showCard([
         CapturedCardItem(
           key: photo.id,
-          image: NetworkImage(photo.url),
+          image: NetworkImage(photo.isVideo ? photo.thumbnailUrl : photo.url),
           width: (photo.width ?? 1).toDouble(),
           height: (photo.height ?? 1).toDouble(),
         ),

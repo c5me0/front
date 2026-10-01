@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'captured_photo.dart';
 import 'device_services.dart';
+import 'video_media.dart';
 
 abstract class PhotoPickerService {
   Future<List<CapturedPhoto>> pickPhotos({int? limit});
@@ -33,14 +34,24 @@ class SystemPhotoPickerService implements PhotoPickerService {
     try {
       final List<XFile> files;
       if (limit == 1) {
-        final one = await _picker.pickImage(source: ImageSource.gallery);
+        final one = await _picker.pickMedia();
         files = one == null ? const [] : [one];
       } else {
-        files = await _picker.pickMultiImage(
+        files = await _picker.pickMultipleMedia(
           limit: limit != null && limit >= 2 ? limit : null,
         );
       }
-      return [for (final file in files) await photoOfFile(file.path)];
+      return [
+        for (final file in files)
+          if (file.mimeType?.startsWith('video/') == true ||
+              RegExp(
+                r'\.(mp4|mov|m4v)$',
+                caseSensitive: false,
+              ).hasMatch(file.path))
+            await videoOfFile(file.path)
+          else
+            await photoOfFile(file.path),
+      ];
     } on PlatformException catch (e) {
       debugPrint('[cameo] photo picker failed: ${e.code} ${e.message}');
       return const [];

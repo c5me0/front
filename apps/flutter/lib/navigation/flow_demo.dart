@@ -370,8 +370,15 @@ const List<FlowDemoStep> flowDemoTimeline = [
   (
     afterMs: 1500,
     action: FlowDemoAction.reviewSend,
-    to: FlowDemoScreen.capture,
+    to: FlowDemoScreen.photo,
     settle: true,
+    pending: false,
+  ),
+  (
+    afterMs: 1600,
+    action: FlowDemoAction.back,
+    to: FlowDemoScreen.capture,
+    settle: false,
     pending: false,
   ),
   (

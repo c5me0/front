@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:country_picker/country_picker.dart' show CountryLocalizations;
 import 'content/lab.g.dart';
 import 'state/app_language.dart';
 
@@ -125,7 +126,7 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
     _calls.configure(
       _session.backend,
       _session.userId,
-      _session.premiumRequired ? null : _session.session.partner?.id,
+      _session.session.partner?.id,
       _album.remote,
     );
     unawaited(_billing.identify());
@@ -150,7 +151,7 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
       case 'answer':
         if (id == null) return;
         await _session.refreshBackend();
-        if (!mounted || _session.userId == null || _session.premiumRequired) {
+        if (!mounted || _session.userId == null) {
           await _systemCalls.reportEnded(id);
           return;
         }
@@ -233,6 +234,7 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
         supportedLocales: AppLanguageController.supportedLocales,
         localizationsDelegates: const [
           AppContent.delegate,
+          CountryLocalizations.delegate,
           LabV6.delegate,
           LabSamples.delegate,
           GlobalWidgetsLocalizations.delegate,

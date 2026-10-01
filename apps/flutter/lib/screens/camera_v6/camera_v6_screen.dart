@@ -11,6 +11,7 @@ import '../../components/review_overlay.dart';
 import '../../components/shot.dart';
 import '../../components/toast.dart';
 import '../../components/toast_v6.dart';
+import '../../components/media_details.dart';
 import '../../components/v6_layout.dart';
 import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
@@ -18,8 +19,10 @@ import '../../navigation/navigation.dart';
 import '../../state/album_store.dart';
 import '../../state/captured_photo.dart';
 import '../../api/api_error_text.dart';
+import '../../api/cameo_api.dart';
 import '../../content/app.g.dart';
 import '../../state/session.dart';
+import '../../state/share_service.dart';
 import '../instant_viewer/instant_subject.dart';
 
 enum CameraV6Mode { tab, call }
@@ -39,15 +42,16 @@ _Thumb _partnerThumb(int seq) => (
 );
 
 _Thumb _captureThumb(AlbumPhoto photo) {
-  final video = photo.capture?.isVideo ?? false;
+  final video = photo.isVideo;
   return (
     key: photo.id,
-    image: photo.provider,
+    image: photo.thumbnailProvider,
     video: video,
     subject: InstantSubject(
       image: photo.provider,
       share: photo.image,
       albumPhotoId: photo.id,
+      aspectRatio: photo.aspectRatio,
       video: video,
     ),
   );
@@ -93,6 +97,8 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   CameraFacing _facing = CameraFacing.back;
   int _shotKey = 0;
   bool _busy = false;
+  bool _recording = false;
+  Future<bool>? _recordStart;
   bool _uploading = false;
   bool _closed = false;
 
@@ -108,6 +114,8 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   bool _shutterSettle = false;
   bool _sendSettle = false;
   bool _deepLinkShown = false;
+  bool _reviewLiked = false;
+  String? _reviewError;
 
   bool _entered = false;
   bool _focused = true;
@@ -162,9 +170,10 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final album = context.dependOnInheritedWidgetOfExactType<AlbumScope>()?.notifier;
 
     if (_thumb == null) {
-      final latest = AlbumScope.maybeRead(context)?.latestCapture;
+      final latest = album?.latestCapture;
       _thumb = latest != null
           ? _captureThumb(latest)
           : SessionScope.read(context).usesBackend
@@ -252,14 +261,20 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
     return box.localToGlobal(Offset.zero) & box.size;
   }
 
-  bool _openViewer(InstantSubject subject, {required bool fromThumbnail}) {
-    if (!_isTop() || _reviewing) return false;
+  bool _openViewer(
+    InstantSubject subject, {
+    required bool fromThumbnail,
+    Rect? rect,
+  }) {
+    if (!_isTop() || _reviewing || _busy) return false;
     setInstantSubject(subject);
     _toast.hide();
     CameoNav.openInstant(
       context,
-      rect: fromThumbnail ? _rectOf(_thumbAnchor) : null,
-      sourceRadius: CameoLayout.tabBarV6CameraThumbnailRadius,
+      rect: rect ?? (fromThumbnail ? _rectOf(_thumbAnchor) : null),
+      sourceRadius: rect != null
+          ? CameoLayout.cameraV6ViewfinderRadius
+          : CameoLayout.tabBarV6CameraThumbnailRadius,
     );
     return true;
   }
@@ -278,6 +293,8 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
     if (reviewTransition(_stage, ReviewEvent.capture) == null) return;
     _reviewSeq++;
     setState(() {
+      _reviewLiked = false;
+      _reviewError = null;
       _review = (
         photo: photo,
         key: '${photo.uri}#$_reviewSeq',
@@ -304,16 +321,25 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
       return false;
     }
     final album = AlbumScope.maybeRead(context);
+    if (album?.usesBackend == true &&
+        SessionScope.read(context).session.partner == null) {
+      setState(() => _reviewError = 'couple:not_connected');
+      return false;
+    }
     if (album?.usesBackend == true) {
-      _uploading = true;
+      setState(() {
+        _uploading = true;
+        _reviewError = null;
+      });
       _toast.show(
         AppContent.of(context).v6.backend.uploading,
         CameoIconName.arrowUp,
       );
       album!.savePhotos([review.photo]).then((photos) {
         if (!mounted || _review?.key != review.key) return;
-        _uploading = false;
+        setState(() => _uploading = false);
         if (photos.isEmpty) {
+          setState(() => _reviewError = album.remote.error ?? 'upload_failed');
           _toast.show(
             apiErrorCodeText(
               album.remote.error ?? 'upload_failed',
@@ -324,13 +350,16 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
           return;
         }
         _toast.hide();
+        if (_reviewLiked) album.toggleLike(photos.first.id);
         _pendingThumb = _captureThumb(photos.first);
         _setPhase(ReviewPhase.send);
       });
       return true;
     }
     if (album != null) {
-      _pendingThumb = _captureThumb(album.addCapture(review.photo));
+      final added = album.addCapture(review.photo);
+      if (_reviewLiked) album.toggleLike(added.id);
+      _pendingThumb = _captureThumb(added);
     }
     _setPhase(ReviewPhase.send);
     return true;
@@ -358,9 +387,21 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   void _onReviewExited(String key) {
     if (!mounted || _review?.key != key) return;
     if (reviewTransition(_stage, ReviewEvent.exited) == null) return;
+    final sent = _review?.phase == ReviewPhase.send;
     setState(() => _review = null);
     _portal.hide();
     _armPartnerTimer();
+    if (sent && _thumb != null) {
+      _openViewer(
+        _thumb!.subject,
+        fromThumbnail: false,
+        rect: cameraViewfinderRect(
+          MediaQuery.sizeOf(context).width,
+          height: MediaQuery.sizeOf(context).height,
+        ),
+      );
+      _onThumbPopSettled();
+    }
   }
 
   void _onThumbPopSettled() {
@@ -382,22 +423,82 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
 
   Future<void> _takePhoto() async {
     if (_busy || _closed || _reviewing) return;
-    _busy = true;
-    setState(() => _shotKey++);
-    final results = await Future.wait<Object?>([
-      _viewfinder.capture(),
-      _viewfinder.flash(),
-    ]);
-    _busy = false;
-    if (mounted) _deliver(results.first! as CapturedPhoto);
+    setState(() {
+      _busy = true;
+      _shotKey++;
+    });
+    final live = SessionScope.read(context).usesBackend;
+    try {
+      final photo = await _viewfinder.capture();
+      if (live && photo.source == CapturedPhotoSource.placeholder) {
+        throw const ApiException('camera_unavailable');
+      }
+      await _viewfinder.flash();
+      if (mounted && _focused) _deliver(photo);
+    } catch (problem) {
+      if (mounted) {
+        _toast.show(
+          apiErrorText(problem, copy: AppContent.of(context)),
+          CameoIconName.x,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
-  void _onRecordStart() => _busy = true;
+  void _onRecordStart() {
+    if (_busy || _reviewing) return;
+    setState(() {
+      _busy = true;
+      _recording = true;
+    });
+    _recordStart = _startRecording();
+  }
+
+  Future<bool> _startRecording() async {
+    if (!SessionScope.read(context).usesBackend &&
+        _viewfinder.source == CameraViewfinderSource.placeholder) {
+      return true;
+    }
+    try {
+      await _viewfinder.startRecording(audio: _tab);
+      return true;
+    } catch (problem) {
+      if (mounted) {
+        _toast.show(
+          apiErrorText(problem, copy: AppContent.of(context)),
+          CameoIconName.x,
+        );
+      }
+      return false;
+    }
+  }
 
   Future<void> _onRecordEnd(Duration elapsed) async {
-    final poster = await _viewfinder.capture();
-    _busy = false;
-    if (mounted) _deliver(poster.asVideo(elapsed));
+    final start = _recordStart;
+    if (start == null) return;
+    _recordStart = null;
+    final demo =
+        !SessionScope.read(context).usesBackend &&
+        _viewfinder.source == CameraViewfinderSource.placeholder;
+    setState(() => _recording = false);
+    try {
+      if (!await start) return;
+      final photo = demo
+          ? (await _viewfinder.capture()).asVideo(elapsed)
+          : await _viewfinder.stopRecording();
+      if (mounted && _focused) _deliver(photo);
+    } catch (problem) {
+      if (mounted) {
+        _toast.show(
+          apiErrorText(problem, copy: AppContent.of(context)),
+          CameoIconName.x,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   void _onFlip() => setState(() => _facing = _facing.opposite);
@@ -412,7 +513,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
         popKey: thumb?.key,
         anchor: _thumbAnchor,
         onPopSettled: _onThumbPopSettled,
-        onPress: thumb == null ? null : _openThumbnail,
+        onPress: thumb == null || _busy ? null : _openThumbnail,
         semanticLabel: thumb == null
             ? AppContent.of(context).v6.backend.cameraEmptyThumbnail
             : thumb.video
@@ -423,7 +524,8 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
       flipLabel: _facing == CameraFacing.back
           ? AppContent.of(context).v6.accessibility.frontCamera
           : AppContent.of(context).v6.accessibility.backCamera,
-      flipDisabled: _reviewing,
+      flipDisabled: _reviewing || _busy,
+      recording: _recording,
     );
   }
 
@@ -448,41 +550,42 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   Widget _body(BuildContext context, TabBarCameraSlots slots) {
     final c = CameoTheme.colorsOf(context);
     final l = V6Layout.of(context);
-    final vf = cameraViewfinderRect(l.width);
-    final shot = cameraShotCenter(l.width);
+    final vf = cameraViewfinderRect(l.width, height: l.height);
+    final shot = cameraShotCenter(l.width, height: l.height);
     final box = shotRingBox();
+    final active =
+        _entered &&
+        _focused &&
+        !_reviewing &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
     final stack = Stack(
       key: CameraV6Screen.rootKey,
       fit: StackFit.expand,
       children: [
         IgnorePointer(
           key: const ValueKey('cameraV6.layer.background'),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(
-                LabV6.of(context).camera.viewfinder,
-                fit: BoxFit.cover,
-                excludeFromSemantics: true,
-                gaplessPlayback: true,
-              ),
-              ColoredBox(color: c.dimScrim),
-            ],
-          ),
+          child: ColoredBox(color: c.staticBlackBase),
         ),
         Positioned.fromRect(
           key: CameraV6Screen.viewfinderKey,
           rect: vf,
           child: CameraViewfinder(
-            key: ValueKey(_entered && _focused),
+            key: ValueKey(active),
             facing: _facing,
-            active: _entered && _focused,
+            active: active,
             controller: _viewfinder,
             placeholder: LabV6.of(context).camera.viewfinder,
             radius: CameoLayout.cameraV6ViewfinderRadius,
             flashColor: c.staticWhiteBase,
             shadeColor: c.staticBlackBase,
-            cameraListLoader: widget.cameraListLoader,
+            cameraListLoader:
+                widget.cameraListLoader ??
+                (SessionScope.read(context).usesBackend
+                    ? null
+                    : () async => []),
+            onSourceChange: (_) {
+              if (mounted) setState(() {});
+            },
           ),
         ),
         Positioned(
@@ -497,23 +600,26 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
             onRecordStart: _onRecordStart,
             onRecordEnd: _onRecordEnd,
             feedbackKey: _shotKey,
-            disabled: _reviewing,
+            disabled:
+                !active ||
+                _viewfinder.source == CameraViewfinderSource.probing ||
+                _reviewing ||
+                (_busy && !_recording),
           ),
         ),
-        if (_tab)
-          Positioned(
-            key: CameraV6Screen.toastKey,
-            left: 0,
-            right: 0,
-            top: l.toastV6CameraTop,
-            child: ToastV6Host(
-              controller: _toast,
-              variant: ToastV6Variant.elevated,
-              placement: ToastV6Placement.camera,
-              onPress: _openShared,
-            ),
-          )
-        else
+        Positioned(
+          key: CameraV6Screen.toastKey,
+          left: 0,
+          right: 0,
+          top: l.toastV6CameraTop,
+          child: ToastV6Host(
+            controller: _toast,
+            variant: ToastV6Variant.elevated,
+            placement: ToastV6Placement.camera,
+            onPress: _toastShown && !SessionScope.read(context).usesBackend ? _openShared : null,
+          ),
+        ),
+        if (!_tab)
           Positioned(
             key: CameraV6Screen.barKey,
             left: 0,
@@ -546,7 +652,38 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
       mode: CameoColorMode.dark,
       child: ReviewOverlay(
         key: ValueKey('cameraV6.review.${review.key}'),
-        photo: ReviewPhoto(key: review.key, image: review.photo.image),
+        photo: ReviewPhoto(
+          key: review.key,
+          image: review.photo.image,
+          videoUri:
+              review.photo.isVideo &&
+                  review.photo.source != CapturedPhotoSource.placeholder
+              ? review.photo.uri
+              : null,
+        ),
+        busy: _uploading,
+        liked: _reviewLiked,
+        onLike: () => setState(() => _reviewLiked = !_reviewLiked),
+        onShare: () =>
+            unawaited(ShareService.of(context).shareImages([review.photo.uri])),
+        onMore: () => unawaited(
+          showMediaDetails(
+            context,
+            video: review.photo.isVideo,
+            width: review.photo.width,
+            height: review.photo.height,
+            duration: review.photo.videoDuration,
+          ),
+        ),
+        error: _reviewError == null
+            ? null
+            : apiErrorCodeText(_reviewError!, copy: AppContent.of(context)),
+        onErrorAction: _reviewError == 'couple:not_connected'
+            ? () => unawaited(CameoNav.openConnect(context))
+            : _reviewError == 'storage:quota_exceeded' &&
+                  SessionScope.read(context).shouldOfferStorageUpgrade
+            ? () => unawaited(CameoNav.openPayment(context))
+            : null,
         phase: review.phase,
         onSend: _onSend,
         onDiscard: _onDiscard,

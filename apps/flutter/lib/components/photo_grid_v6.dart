@@ -26,6 +26,7 @@ class PhotoGridV6Item {
     required this.image,
     required this.tile,
     required this.label,
+    this.video = false,
   });
 
   final String id;
@@ -34,6 +35,7 @@ class PhotoGridV6Item {
   final bool tile;
 
   final String label;
+  final bool video;
 
   @override
   bool operator ==(Object other) =>
@@ -41,10 +43,11 @@ class PhotoGridV6Item {
       other.id == id &&
       other.image == image &&
       other.tile == tile &&
-      other.label == label;
+      other.label == label &&
+      other.video == video;
 
   @override
-  int get hashCode => Object.hash(id, image, tile, label);
+  int get hashCode => Object.hash(id, image, tile, label, video);
 }
 
 const GridV5Metrics photoGridV6Metrics = GridV5Metrics(
@@ -587,6 +590,27 @@ class _PhotoCellV6State extends State<_PhotoCellV6>
               child: child,
             ),
           ),
+          if (w.item.video)
+            Positioned(
+              left: CameoSpace.s6,
+              bottom: CameoSpace.s6,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: CameoTheme.colorsOf(context).dimScrim,
+                    borderRadius: BorderRadius.circular(CameoRadius.full),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(CameoSpace.s4),
+                    child: CameoIcon(
+                      CameoIconName.playerPlayFilled,
+                      size: CameoIconTokens.sizeXs,
+                      color: CameoTheme.colorsOf(context).staticWhiteBase,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if (_heartMounted)
             Positioned(
               key: const ValueKey('photoGridV6.heartSlot'),

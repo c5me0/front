@@ -39,6 +39,13 @@ class AlbumPhoto {
   final CapturedPhoto? capture;
   final ApiPhoto? remote;
 
+  bool get isVideo => remote?.isVideo ?? capture?.isVideo ?? false;
+  double get aspectRatio {
+    final width = remote?.width?.toDouble() ?? capture?.width ?? 0;
+    final height = remote?.height?.toDouble() ?? capture?.height ?? 0;
+    return width > 0 && height > 0 ? width / height : 3 / 4;
+  }
+
   Map<String, Object?> toJson() => {
     'id': id,
     'image': image,
@@ -60,7 +67,7 @@ class AlbumPhoto {
   );
 
   ImageProvider get provider => remote != null
-      ? NetworkImage(remote!.url)
+      ? NetworkImage(remote!.isVideo ? remote!.thumbnailUrl : remote!.url)
       : capture?.image ?? AssetImage(image);
   ImageProvider get thumbnailProvider =>
       remote != null ? NetworkImage(remote!.thumbnailUrl) : provider;
@@ -100,6 +107,7 @@ class AlbumSection {
     required this.photos,
     this.includeCalls = true,
     ImageProvider? hero,
+    this.date,
   }) : _hero = hero;
 
   final AlbumV5SectionContent content;
@@ -109,6 +117,7 @@ class AlbumSection {
   final bool includeCalls;
 
   final ImageProvider? _hero;
+  final DateTime? date;
 
   String get id => content.id;
 
@@ -144,6 +153,7 @@ class AlbumSection {
     photos: List.unmodifiable(next),
     includeCalls: false,
     hero: _hero,
+    date: date,
   );
 
   @override
@@ -169,6 +179,20 @@ List<AlbumPhoto> coveredContentPhotos(AlbumV5SectionContent content) {
         if (!visible.contains(image))
           AlbumPhoto(id: '${content.id}/${_fileOf(image)}', image: image),
   ];
+}
+
+DateTime? _storedDate(String? value) {
+  if (value == null) return null;
+  final iso = DateTime.tryParse(value);
+  if (iso != null) return iso;
+  final legacy = RegExp(r'^(\d{4})년 (\d{1,2})월 (\d{1,2})일$').firstMatch(value);
+  return legacy == null
+      ? null
+      : DateTime(
+          int.parse(legacy[1]!),
+          int.parse(legacy[2]!),
+          int.parse(legacy[3]!),
+        );
 }
 
 class AlbumSnapshot {
@@ -296,16 +320,20 @@ class AlbumStore extends ChangeNotifier {
       for (final call in calls)
         CallCardV5Content(
           nodeId: call.id,
-          variant: call.summary == null ? 'base' : 'summary',
-          direction: call.status == 'missed'
-              ? CallDirection.missed
-              : call.callerId == remote.ownerId
+          variant: call.status == 'missed'
+              ? 'failed'
+              : photos.isEmpty
+              ? 'default'
+              : 'list',
+          direction: call.callerId == remote.ownerId
               ? CallDirection.outgoing
               : CallDirection.incoming,
           icon: call.callerId == remote.ownerId
               ? 'arrow-up-right'
               : 'arrow-down-left',
-          title: call.title ?? copy.callRecord,
+          title: call.status == 'missed'
+              ? copy.callMissed
+              : call.title ?? copy.callRecord,
           subtitle: [
             LabTextSpan(
               '${_callLabel(call.status)} · ${_duration(call.duration)}',
@@ -315,6 +343,7 @@ class AlbumStore extends ChangeNotifier {
         ),
     ];
     return AlbumSection(
+      date: date,
       content: AlbumV5SectionContent(
         id: key,
         figmaName: '',
@@ -340,7 +369,13 @@ class AlbumStore extends ChangeNotifier {
         featured: const [],
       ),
       photos: photos.map(_remotePhoto).toList(),
-      hero: photos.isEmpty ? null : NetworkImage(photos.first.url),
+      hero: photos.isEmpty
+          ? null
+          : NetworkImage(
+              photos.first.isVideo
+                  ? photos.first.thumbnailUrl
+                  : photos.first.url,
+            ),
     );
   }
 
@@ -455,7 +490,9 @@ class AlbumStore extends ChangeNotifier {
       tint: template.tint,
       heroGradient: template.heroGradient,
       cover: null,
-      title: title,
+      title: _storedDate(title) == null
+          ? title
+          : formatAlbumDate(_storedDate(title)!, languageCode: _languageCode),
       subtitle: template.subtitle,
       stats: AlbumStatsContent(
         photos: '$photoCount',
@@ -493,6 +530,7 @@ class AlbumStore extends ChangeNotifier {
     photos: List.unmodifiable(photos),
     includeCalls: includeCalls,
     hero: content.id == todaySectionId ? _todayHero?.provider : null,
+    date: content.id == todaySectionId ? _storedDate(_todayTitle) : null,
   );
 
   List<AlbumSection> get sections => usesBackend
@@ -680,7 +718,7 @@ class AlbumStore extends ChangeNotifier {
       image: capture.uri,
       capture: capture,
     );
-    _todayTitle ??= formatAlbumDate(now);
+    _todayTitle ??= now.toIso8601String();
     (_photos[todaySectionId] ??= []).insert(0, photo);
     _todayHero = photo;
     _latestCapture = photo;

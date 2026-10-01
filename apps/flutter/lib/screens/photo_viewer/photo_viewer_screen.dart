@@ -12,13 +12,17 @@ import '../../components/confirm_sheet.dart';
 import '../../components/scrim_button.dart';
 import '../../components/scrim_pill.dart';
 import '../../components/thumb_strip.dart';
-import '../../components/toast.dart' show toastIconOf;
-import '../../components/v6_layout.dart';
+import '../../components/media_player.dart';
+import '../../components/media_details.dart';
+import '../../components/glass_caption.dart';
+import '../../components/call_camera_geometry.dart' show reviewActions;
 import '../../content/app.g.dart';
 import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/album_store.dart';
+import '../../state/session.dart';
+import '../../components/backend_notice.dart';
 import '../../state/device_services.dart';
 import '../home_timeline/album_timeline_model.dart';
 import '../home_timeline/cell_locator.dart';
@@ -135,7 +139,12 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
 
   double get _width => MediaQuery.sizeOf(context).width;
   double get _height => MediaQuery.sizeOf(context).height;
-  double get _cardH => viewerCardRectV6(_width).height;
+  double get _cardH => viewerCardRectV6(
+    _width,
+    height: _height,
+    aspectRatio:
+        _knownPhoto?.aspectRatio ?? widget.subject?.aspectRatio ?? 3 / 4,
+  ).height;
   double get _step => viewerPageStep(_width);
 
   @override
@@ -501,11 +510,9 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
     final album = _maybeWatchAlbum(context);
     final width = _width;
     final height = _height;
-    final layout = V6Layout.of(context);
-    final cardRect = viewerCardRectV6(width);
     final step = viewerPageStep(width);
     final travel = viewerChromeTravel(width, height);
-    final stripTop = viewerStripTop(width);
+    final stripTop = viewerStripTop(width, height: height);
 
     final List<_ViewerPage> pages;
     final int index;
@@ -514,9 +521,14 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
     if (_sectionId != null) {
       final photos =
           album?.sectionOf(_sectionId!)?.photos ?? const <AlbumPhoto>[];
-      final id = _photoId;
+      final id =
+          _photoId ??
+          (widget.index >= 0 && widget.index < photos.length
+              ? photos[widget.index].id
+              : null);
       final liveIndex = id == null ? -1 : photos.indexWhere((p) => p.id == id);
       if (liveIndex >= 0) {
+        _photoId = id;
         _knownPhoto = photos[liveIndex];
         _knownIndex = liveIndex;
       }
@@ -546,28 +558,91 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
         ),
       ];
     }
+    if (photo == null &&
+        subject == null &&
+        SessionScope.maybeRead(context)?.usesBackend == true) {
+      return CameoTheme(
+        mode: CameoColorMode.dark,
+        child: Builder(
+          builder: (context) => ColoredBox(
+            color: CameoTheme.colorsOf(context).staticBlackBase,
+            child: Stack(
+              children: [
+                Center(
+                  child: BackendNotice(
+                    message: album?.remote.loading == true
+                        ? AppContent.of(context).v6.backend.loading
+                        : AppContent.of(context).v6.viewer.unavailable,
+                    onRetry: () => album?.remote.refresh(renewUrls: true),
+                  ),
+                ),
+                Positioned(
+                  right: CameoSpace.s16,
+                  bottom: CameoLayout.screenV6HomeIndicatorHeight,
+                  child: ScrimButton(
+                    key: PhotoViewerScreen.closeKey,
+                    size: ScrimButtonSize.xl,
+                    tone: ScrimButtonTone.dark,
+                    neutral: true,
+                    icon: CameoIconName.x,
+                    semanticLabel: AppContent.of(context).v6.album.closeLabel,
+                    onPress: _close,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     _index = index;
     final single = pages.length == 1;
     final liked = _sectionId != null ? (photo?.liked ?? false) : _localLiked;
     final canAct = _sectionId != null ? photo != null : subject != null;
 
+    final cardRect = viewerCardRectV6(
+      width,
+      height: height,
+      aspectRatio: photo?.aspectRatio ?? subject?.aspectRatio ?? 3 / 4,
+    );
     Widget card(int k, ImageProvider image) {
-      final img = Image(
-        image: image,
-        fit: BoxFit.cover,
-        gaplessPlayback: true,
-        excludeFromSemantics: true,
+      final data = single ? photo : _photos[k];
+      final rect = viewerCardRectV6(
+        width,
+        height: height,
+        aspectRatio: data?.aspectRatio ?? subject?.aspectRatio ?? 3 / 4,
       );
+      final uri = data?.image ?? subject?.share;
+      final video =
+          (data?.isVideo ?? subject?.video ?? false) &&
+          uri != null &&
+          !uri.startsWith('assets/');
+      final img = video
+          ? MediaPlayer(
+              key: ValueKey(uri),
+              uri: uri,
+              poster: image,
+              active:
+                  k == (single ? 0 : index) &&
+                  !_sheetOpen &&
+                  (ModalRoute.of(context)?.isCurrent ?? true),
+            )
+          : Image(
+              image: image,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+              excludeFromSemantics: true,
+            );
       if (k == (single ? 0 : index)) {
         return ViewerZoomCard(
           key: PhotoViewerScreen.cardKey,
-          card: cardRect,
+          card: rect,
           radius: CameoLayout.viewerV6CardRadius,
           child: img,
         );
       }
       return Positioned.fromRect(
-        rect: cardRect,
+        rect: rect,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(CameoLayout.viewerV6CardRadius),
           child: img,
@@ -587,173 +662,199 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
           ).format(capturedAt.toLocal());
     final copy = AppContent.of(context).v6.album;
     final pillItems = <ScrimPillItem>[
-      for (final key in LabV6.of(context).viewer.actions)
-        if (key == 'share-2')
-          ScrimPillItem(
-            icon: toastIconOf(key),
-            semanticLabel: copy.shareLabel,
-            onPress: canAct ? () => unawaited(_share()) : null,
-          )
-        else if (key == 'heart')
-          ScrimPillItem(
-            icon: toastIconOf(key),
-            active: liked,
-            semanticLabel: liked ? copy.unlikeLabel : copy.likeLabel,
-            onPress: canAct ? () => _like() : null,
-          )
-        else if (_sectionId != null)
-          ScrimPillItem(
-            icon: toastIconOf(key),
-            semanticLabel: copy.deleteLabel,
-            onPress: canAct ? _requestDelete : null,
-          ),
+      ScrimPillItem(
+        icon: CameoIconName.share2,
+        semanticLabel: copy.shareLabel,
+        onPress: canAct ? () => unawaited(_share()) : null,
+      ),
+      ScrimPillItem(
+        icon: CameoIconName.heart,
+        active: liked,
+        semanticLabel: liked ? copy.unlikeLabel : copy.likeLabel,
+        onPress: canAct ? () => _like() : null,
+      ),
+      ScrimPillItem(
+        icon: CameoIconName.dots,
+        semanticLabel: AppContent.of(context).v6.mediaDetails.more,
+        onPress: canAct
+            ? () => unawaited(
+                showMediaDetails(
+                  context,
+                  video: photo?.isVideo ?? subject?.video ?? false,
+                  width:
+                      photo?.remote?.width?.toDouble() ??
+                      photo?.capture?.width ??
+                      0,
+                  height:
+                      photo?.remote?.height?.toDouble() ??
+                      photo?.capture?.height ??
+                      0,
+                  duration:
+                      photo?.capture?.videoDuration ??
+                      (photo?.remote?.durationSeconds == null
+                          ? null
+                          : Duration(
+                              milliseconds:
+                                  (photo!.remote!.durationSeconds! * 1000)
+                                      .round(),
+                            )),
+                ),
+              )
+            : null,
+      ),
     ];
 
-    return GlassBackdrop(
-      tone: GlassBackdropTone.fromToken(
-        CameoEffects.liquidGlassBackdropViewerV6,
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          GestureDetector(
-            key: PhotoViewerScreen.gestureKey,
-            behavior: HitTestBehavior.opaque,
-            dragStartBehavior: DragStartBehavior.down,
-            onHorizontalDragStart: single ? null : _hStart,
-            onHorizontalDragUpdate: single ? null : _hUpdate,
-            onHorizontalDragEnd: single ? null : _hEnd,
-            onHorizontalDragCancel: single ? null : _hCancel,
-            onVerticalDragStart: _vStart,
-            onVerticalDragUpdate: _vUpdate,
-            onVerticalDragEnd: _vEnd,
-            onVerticalDragCancel: _vCancel,
-            child: AnimatedBuilder(
-              animation: Listenable.merge([_tx, _ty, _scale, _pos]),
-              builder: (context, _) => Transform(
-                key: PhotoViewerScreen.dragKey,
-                origin: cardRect.center,
-                transform: Matrix4.translationValues(_tx.value, _ty.value, 0)
-                  ..scaleByDouble(_scale.value, _scale.value, 1, 1),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    for (final k in window)
-                      Positioned.fill(
-                        key: PhotoViewerScreen.pageKey(pages[k].key),
-                        child: Transform.translate(
-                          offset: Offset(
-                            single ? 0 : (k - _pos.value) * step,
-                            0,
-                          ),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [card(k, pages[k].image)],
+    return CameoTheme(
+      mode: CameoColorMode.dark,
+      child: GlassBackdrop(
+        tone: GlassBackdropTone.fromToken(
+          CameoEffects.liquidGlassBackdropViewerV6,
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            GestureDetector(
+              key: PhotoViewerScreen.gestureKey,
+              behavior: HitTestBehavior.opaque,
+              dragStartBehavior: DragStartBehavior.down,
+              onHorizontalDragStart: single ? null : _hStart,
+              onHorizontalDragUpdate: single ? null : _hUpdate,
+              onHorizontalDragEnd: single ? null : _hEnd,
+              onHorizontalDragCancel: single ? null : _hCancel,
+              onVerticalDragStart: _vStart,
+              onVerticalDragUpdate: _vUpdate,
+              onVerticalDragEnd: _vEnd,
+              onVerticalDragCancel: _vCancel,
+              child: AnimatedBuilder(
+                animation: Listenable.merge([_tx, _ty, _scale, _pos]),
+                builder: (context, _) => Transform(
+                  key: PhotoViewerScreen.dragKey,
+                  origin: cardRect.center,
+                  transform: Matrix4.translationValues(_tx.value, _ty.value, 0)
+                    ..scaleByDouble(_scale.value, _scale.value, 1, 1),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      for (final k in window)
+                        Positioned.fill(
+                          key: PhotoViewerScreen.pageKey(pages[k].key),
+                          child: Transform.translate(
+                            offset: Offset(
+                              single ? 0 : (k - _pos.value) * step,
+                              0,
+                            ),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [card(k, pages[k].image)],
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Positioned(
-            key: PhotoViewerScreen.topRowKey,
-            left: 0,
-            right: 0,
-            top: CameoLayout.topNavV6Top,
-            height: CameoLayout.topNavV6ButtonSize,
-            child: ViewerChromeSlide(
-              edge: ViewerChromeEdge.top,
-              distance: -travel.top,
-              child: _ChromePush(
-                push: _chromeK,
-                distance: -travel.top,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Positioned(
-                      key: const ValueKey('photoViewer.slot.close'),
-                      left: CameoLayout.topNavV6PaddingX,
-                      top: 0,
-                      child: ScrimButton(
+            Positioned(
+              key: PhotoViewerScreen.topRowKey,
+              left: CameoLayout.reviewV6ActionsPaddingX,
+              right: CameoLayout.reviewV6ActionsPaddingX,
+              top: reviewActions(width, height).top,
+              height: CameoLayout.reviewV6ActionsButtonSize,
+              child: ViewerChromeSlide(
+                edge: ViewerChromeEdge.bottom,
+                distance: travel.date,
+                child: _ChromePush(
+                  push: _chromeK,
+                  distance: travel.date,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ScrimButton(
+                        size: ScrimButtonSize.xl,
+                        tone: ScrimButtonTone.dark,
+                        neutral: true,
+                        icon: CameoIconName.trash,
+                        semanticLabel: copy.deleteLabel,
+                        disabled: !_isAlbum,
+                        onPress: _isAlbum ? _requestDelete : null,
+                      ),
+                      ScrimPill(
+                        key: PhotoViewerScreen.pillKey,
+                        size: ScrimPillSize.large,
+                        tone: ScrimPillTone.dark,
+                        items: pillItems,
+                      ),
+                      ScrimButton(
                         key: PhotoViewerScreen.closeKey,
-                        size: ScrimButtonSize.md,
-                        icon: toastIconOf(LabV6.of(context).viewer.closeIcon),
+                        size: ScrimButtonSize.xl,
+                        tone: ScrimButtonTone.dark,
+                        neutral: true,
+                        icon: CameoIconName.x,
                         semanticLabel: copy.closeLabel,
                         onPress: _close,
                       ),
-                    ),
-                    Positioned(
-                      key: const ValueKey('photoViewer.slot.pill'),
-                      left: layout.topNavPillLeft(pillItems.length),
-                      top: 0,
-                      child: ScrimPill(
-                        key: PhotoViewerScreen.pillKey,
-                        items: pillItems,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Positioned(
-            key: PhotoViewerScreen.stripKey,
-            left: 0,
-            right: 0,
-            top: stripTop,
-            height: CameoLayout.viewerV6StripCellSize,
-            child: ViewerChromeSlide(
-              edge: ViewerChromeEdge.bottom,
-              distance: travel.strip,
-              child: _ChromePush(
-                push: _chromeK,
+            Positioned(
+              key: PhotoViewerScreen.stripKey,
+              left: 0,
+              right: 0,
+              top: stripTop,
+              height: CameoLayout.viewerV6StripCellSize,
+              child: ViewerChromeSlide(
+                edge: ViewerChromeEdge.bottom,
                 distance: travel.strip,
-                child: ThumbStrip(
-                  images: [for (final p in pages) p.image],
-                  position: single ? kAlwaysDismissedAnimation : _strip,
-                  onTap: single ? null : _jumpTo,
+                child: _ChromePush(
+                  push: _chromeK,
+                  distance: travel.strip,
+                  child: ThumbStrip(
+                    images: [for (final p in pages) p.image],
+                    position: single ? kAlwaysDismissedAnimation : _strip,
+                    onTap: single ? null : _jumpTo,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Positioned(
-            key: PhotoViewerScreen.datePillKey,
-            left: 0,
-            right: 0,
-            top: viewerDatePillTop(height),
-            height: CameoLayout.viewerV6DatePillHeight,
-            child: ViewerChromeSlide(
-              edge: ViewerChromeEdge.bottom,
-              distance: travel.date,
-              child: _ChromePush(
-                push: _chromeK,
+            Positioned(
+              key: PhotoViewerScreen.datePillKey,
+              left: 0,
+              right: 0,
+              top: cardRect.top + CameoLayout.silicaViewerDateInset,
+              height: CameoLayout.viewerV6DatePillHeight,
+              child: ViewerChromeSlide(
+                edge: ViewerChromeEdge.bottom,
                 distance: travel.date,
-                child: Center(child: _DatePill(label: dateLabel)),
+                child: _ChromePush(
+                  push: _chromeK,
+                  distance: travel.date,
+                  child: Center(child: _DatePill(label: dateLabel)),
+                ),
               ),
             ),
-          ),
-          if (_sheetMounted)
-            Positioned.fill(
-              key: PhotoViewerScreen.deleteSheetKey,
-              child: ConfirmSheet(
-                visible: _sheetOpen,
-                title: fillTemplate(copy.deleteSheet.title, {'count': 1}),
-                body: AlbumScope.read(context).usesBackend
-                    ? AppContent.of(context).v6.backend.permanentDelete
-                    : copy.deleteSheet.body,
-                confirmLabel: copy.deleteSheet.confirm,
-                cancelLabel: copy.deleteSheet.cancel,
-                destructive: true,
-                onConfirm: _confirmDelete,
-                onCancel: () => setState(() => _sheetOpen = false),
+            if (_sheetMounted)
+              Positioned.fill(
+                key: PhotoViewerScreen.deleteSheetKey,
+                child: ConfirmSheet(
+                  visible: _sheetOpen,
+                  title: fillTemplate(copy.deleteSheet.title, {'count': 1}),
+                  body: AlbumScope.read(context).usesBackend
+                      ? AppContent.of(context).v6.backend.permanentDelete
+                      : copy.deleteSheet.body,
+                  confirmLabel: copy.deleteSheet.confirm,
+                  cancelLabel: copy.deleteSheet.cancel,
+                  destructive: true,
+                  onConfirm: _confirmDelete,
+                  onCancel: () => setState(() => _sheetOpen = false),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -766,49 +867,10 @@ class _DatePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = CameoTheme.colorsOf(context);
-    final radius = BorderRadius.circular(
-      CameoLayout.viewerV6DatePillHeight / 2,
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.staticWhiteBase,
-        borderRadius: radius,
-        boxShadow: const [CameoShadows.scrim],
-      ),
-
-      position: DecorationPosition.background,
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          border: Border.all(
-            color: c.borderScrim,
-            width: CameoLayout.scrimButtonV6BorderWidth,
-          ),
-        ),
-        child: SizedBox(
-          height: CameoLayout.viewerV6DatePillHeight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal:
-                  CameoLayout.viewerV6DatePillPadding +
-                  CameoLayout.scrimButtonV6LabelPaddingX,
-            ),
-            child: Center(
-              widthFactor: 1,
-              child: CameoText(
-                label,
-                key: PhotoViewerScreen.dateKey,
-                style: CameoTextStyles.bodyMd,
-                color: c.staticBlackBase,
-                maxLines: 1,
-              ),
-            ),
-          ),
-        ),
-      ),
+    return GlassCaption(
+      key: PhotoViewerScreen.dateKey,
+      label: label,
+      small: false,
     );
   }
 }

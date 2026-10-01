@@ -237,7 +237,7 @@ class AlbumNavV6State extends State<AlbumNavV6> {
             left: CameoLayout.albumNavV6RowPaddingX,
             child: ScrimButton(
               key: AlbumNavV6.selectKey,
-              size: ScrimButtonSize.md,
+              size: ScrimButtonSize.nav,
               label: lab.selectLabel,
               disabled: w.selectDisabled,
               semanticLabel: copy.selectLabel,
@@ -247,8 +247,15 @@ class AlbumNavV6State extends State<AlbumNavV6> {
           swap(
             key: const ValueKey('albumNavV6.slot.mainPill'),
             normalSide: true,
-            left: layout.topNavPillLeft(mainItems.length),
-            child: ScrimPill(key: AlbumNavV6.mainPillKey, items: mainItems),
+            left:
+                layout.width -
+                CameoLayout.albumNavV6RowPaddingX -
+                scrimPillWidth(mainItems.length, ScrimPillSize.navigation),
+            child: ScrimPill(
+              key: AlbumNavV6.mainPillKey,
+              size: ScrimPillSize.navigation,
+              items: mainItems,
+            ),
           ),
 
           swap(
@@ -257,7 +264,7 @@ class AlbumNavV6State extends State<AlbumNavV6> {
             left: CameoLayout.albumNavV6RowPaddingX,
             child: ScrimButton(
               key: AlbumNavV6.closeKey,
-              size: ScrimButtonSize.md,
+              size: ScrimButtonSize.nav,
               icon: toastIconOf(lab.closeIcon),
               semanticLabel: copy.closeLabel,
               onPress: a.onClose,
@@ -266,11 +273,15 @@ class AlbumNavV6State extends State<AlbumNavV6> {
           swap(
             key: const ValueKey('albumNavV6.slot.otherPill'),
             normalSide: false,
-            left: layout.topNavPillLeft(otherCount),
+            left:
+                layout.width -
+                CameoLayout.albumNavV6RowPaddingX -
+                scrimPillWidth(otherCount, ScrimPillSize.navigation),
             child: ScrimPill(
               key: otherChrome.right == AlbumNavRight.restore
                   ? AlbumNavV6.restorePillKey
                   : AlbumNavV6.selectionPillKey,
+              size: ScrimPillSize.navigation,
               items: otherItems,
             ),
           ),

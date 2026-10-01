@@ -120,14 +120,14 @@
   "v6.settings.flowDemo": "Play flow demo",
   "v6.settings.disconnect.label": "Disconnect",
   "v6.album.selectLabel": "Select",
-  "v6.emptyAlbum.title": "No photos saved yet!",
-  "v6.emptyAlbum.cta": "Import photos",
+  "v6.emptyAlbum.title": "No photos or videos yet!",
+  "v6.emptyAlbum.cta": "Import media",
   "v6.emptyAlbum.meInitialSample": "J",
   "v6.viewer.date": "Today, 12:00 PM",
   "v6.call.highlightToast.text": "Saved a highlight with 15 seconds before and after!",
   "v6.call.sleepEnd.label": "End sleep mode",
   "v6.camera.partnerToast.text": "Yurim shared a photo!",
-  "v6.tabBar.tabs.0.label": "Album",
-  "v6.tabBar.tabs.1.label": "Camera",
-  "v6.tabBar.tabs.2.label": "Settings"
+  "v6.tabBar.tabs.0.label": "Memories",
+  "v6.tabBar.tabs.1.label": "Now",
+  "v6.tabBar.tabs.2.label": "Us"
 }

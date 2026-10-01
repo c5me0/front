@@ -3,7 +3,7 @@
 
 //
 
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/widgets.dart';
 
@@ -152,7 +152,7 @@ class CameoViewerRoute<T> extends PageRoute<T> with CameoSpringRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final dim = CameoTheme.colorsOf(context).dimScrim;
+    final dim = CameoTheme.colorsOf(context).staticBlackBase;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     return Stack(
       fit: StackFit.expand,
@@ -170,15 +170,7 @@ class CameoViewerRoute<T> extends PageRoute<T> with CameoSpringRoute<T> {
                 color: dim.withValues(alpha: dim.a * k),
               );
 
-              final sigma = CameoBlur.blur.sigma * k;
-              if (sigma <= 0.01) return fill;
-              return ClipRect(
-                child: BackdropFilter(
-                  key: const ValueKey('viewerRoute.blur'),
-                  filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-                  child: fill,
-                ),
-              );
+              return fill;
             },
           ),
         ),

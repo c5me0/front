@@ -56,3 +56,6 @@ __pycache__/
 *.keystore
 *.mobileprovision
 **/.claude/settings.local.json
+
+# Local browser verification output
+.playwright-mcp/

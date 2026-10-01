@@ -178,7 +178,12 @@ class ShotState extends State<Shot> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _ringWidth,
+    builder: (context, _) => _body(context),
+  );
+
+  Widget _body(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
     final box = shotRingBox();
 
@@ -192,7 +197,10 @@ class ShotState extends State<Shot> with TickerProviderStateMixin {
         tint: light.backgroundFillScrimBase,
         radius: CameoRadius.full,
         child: SizedBox.square(
-          dimension: CameoLayout.shotV6BaseSize,
+          dimension:
+              CameoLayout.shotV6BaseSize +
+              (CameoLayout.shotV6RecordingSize - CameoLayout.shotV6BaseSize) *
+                  (_ringWidth.value / CameoLayout.shotV6RingStrokeWidth),
           child: Center(
             child: AnimatedBuilder(
               animation: Listenable.merge([_press, _disc]),
@@ -288,6 +296,9 @@ class ShotState extends State<Shot> with TickerProviderStateMixin {
                   color: c.systemRed,
                   width: math.max(0, _ringWidth.value),
                   progress: _ringProgress.value,
+                  radius:
+                      CameoLayout.shotV6RecordingSize / 2 +
+                      CameoLayout.shotV6RingStrokeWidth / 2,
                 ),
               ),
             ),
@@ -307,11 +318,13 @@ class _RingPainter extends CustomPainter {
     required this.color,
     required this.width,
     required this.progress,
+    required this.radius,
   });
 
   final Color color;
   final double width;
   final double progress;
+  final double radius;
 
   double get sweepDeg => progress.clamp(0.0, 1.0) * 360;
 
@@ -320,10 +333,7 @@ class _RingPainter extends CustomPainter {
     final sweep = progress.clamp(0.0, 1.0) * 2 * math.pi;
     if (width <= 0 || sweep <= 0) return;
     final center = size.center(Offset.zero);
-    final rect = Rect.fromCircle(
-      center: center,
-      radius: CameoLayout.shotV6RingRadius,
-    );
+    final rect = Rect.fromCircle(center: center, radius: radius);
     canvas.drawArc(
       rect,
       -math.pi / 2,
@@ -339,7 +349,10 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.color != color || old.width != width || old.progress != progress;
+      old.color != color ||
+      old.width != width ||
+      old.progress != progress ||
+      old.radius != radius;
 }
 
 double shotRingPainterSweepDeg(CustomPaint paint) =>

@@ -7,6 +7,7 @@
 //    (photo → default · canvas → light · camera → dark).
 
 import 'dart:ui' show ImageFilter;
+import 'dart:math' as math;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/widgets.dart';
 import '../content/app.g.dart';
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
+import '../state/session.dart';
 import 'outside_shadow.dart';
 import 'v6_layout.dart';
 
@@ -63,6 +65,7 @@ class TabBarCameraSlots {
     this.onFlip,
     required this.flipLabel,
     this.flipDisabled = false,
+    this.recording = false,
   });
 
   final Widget? thumbnail;
@@ -72,6 +75,7 @@ class TabBarCameraSlots {
   final String flipLabel;
 
   final bool flipDisabled;
+  final bool recording;
 
   @override
   bool operator ==(Object other) =>
@@ -79,10 +83,12 @@ class TabBarCameraSlots {
       other.thumbnail == thumbnail &&
       other.onFlip == onFlip &&
       other.flipLabel == flipLabel &&
-      other.flipDisabled == flipDisabled;
+      other.flipDisabled == flipDisabled &&
+      other.recording == recording;
 
   @override
-  int get hashCode => Object.hash(thumbnail, onFlip, flipLabel, flipDisabled);
+  int get hashCode =>
+      Object.hash(thumbnail, onFlip, flipLabel, flipDisabled, recording);
 }
 
 const double _gone = 0.001;
@@ -101,6 +107,8 @@ typedef TabBarV6Frame = ({
   double buttonLeft,
   double buttonTop,
   double buttonScale,
+  double buttonSize,
+  double thumbnailLeft,
 
   double thumbnail,
 });
@@ -109,6 +117,7 @@ TabBarV6Frame tabBarV6Frame(
   double width, {
   double mini = 0,
   double camera = 0,
+  double recording = 0,
 }) {
   final l = V6Layout(width);
   double lerp(double a, double b, double t) => a + (b - a) * t;
@@ -154,12 +163,26 @@ TabBarV6Frame tabBarV6Frame(
     inset: inset,
     itemWidth: (pillWidth - 2 * inset) / 3,
     itemHeight: pillHeight - 2 * inset,
-    buttonLeft:
-        l.tabBarCallButtonLeft +
-        mini * CameoMotion.tabBarV6CallButtonExitOffsetX,
-    buttonTop: containerHeight - buttonBottom - button,
-    buttonScale: lerp(1, CameoMotion.tabBarV6CallButtonExitScale, mini),
-    thumbnail: camera * (1 - mini),
+    buttonLeft: lerp(
+      l.tabBarCallButtonLeft + mini * CameoMotion.tabBarV6CallButtonExitOffsetX,
+      width -
+          CameoLayout.silicaRecordingSideInset -
+          CameoLayout.silicaRecordingSideSize,
+      recording,
+    ),
+    buttonTop: lerp(containerHeight - buttonBottom - button, 0, recording),
+    buttonSize: lerp(button, CameoLayout.silicaRecordingSideSize, recording),
+    buttonScale: lerp(
+      lerp(1, CameoMotion.tabBarV6CallButtonExitScale, mini),
+      1,
+      recording,
+    ),
+    thumbnailLeft: lerp(
+      CameoLayout.tabBarV6FullPaddingX,
+      CameoLayout.silicaRecordingSideInset,
+      recording,
+    ),
+    thumbnail: lerp(camera * (1 - mini), camera, recording),
   );
 }
 
@@ -216,6 +239,7 @@ class TabBarV6 extends StatefulWidget {
 
 class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
   late final AnimationController _mini;
+  late final AnimationController _record;
 
   late final AnimationController _label;
 
@@ -233,8 +257,16 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    final mini = widget.mode == TabBarV6Mode.mini;
-    _mini = AnimationController.unbounded(vsync: this, value: mini ? 1 : 0);
+    final recording = widget.camera?.recording ?? false;
+    final mini = widget.mode == TabBarV6Mode.mini || recording;
+    _mini = AnimationController.unbounded(
+      vsync: this,
+      value: widget.mode == TabBarV6Mode.mini ? 1 : 0,
+    );
+    _record = AnimationController.unbounded(
+      vsync: this,
+      value: recording ? 1 : 0,
+    );
     _label = AnimationController(vsync: this, value: mini ? 0 : 1);
     _camera = AnimationController.unbounded(
       vsync: this,
@@ -249,7 +281,15 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
       value: widget.hidden ? 1 : 0,
     );
     _tone = AnimationController.unbounded(vsync: this, value: 1);
-    _all = Listenable.merge([_mini, _label, _camera, _position, _hide, _tone]);
+    _all = Listenable.merge([
+      _mini,
+      _record,
+      _label,
+      _camera,
+      _position,
+      _hide,
+      _tone,
+    ]);
   }
 
   double get miniProgress => _mini.value;
@@ -286,11 +326,19 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(TabBarV6 oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.mode != widget.mode) {
-      final mini = widget.mode == TabBarV6Mode.mini;
+    if (oldWidget.mode != widget.mode ||
+        oldWidget.camera?.recording != widget.camera?.recording) {
+      final recording = widget.camera?.recording ?? false;
+      final mini = widget.mode == TabBarV6Mode.mini || recording;
+      _spring(
+        _record,
+        recording ? 1 : 0,
+        CameoMotion.tabBarV6MorphSpring,
+        preserveVelocity: true,
+      );
       _spring(
         _mini,
-        mini ? 1 : 0,
+        widget.mode == TabBarV6Mode.mini ? 1 : 0,
         CameoMotion.tabBarV6MorphSpring,
         preserveVelocity: true,
       );
@@ -330,7 +378,15 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    for (final c in [_mini, _label, _camera, _position, _hide, _tone]) {
+    for (final c in [
+      _mini,
+      _record,
+      _label,
+      _camera,
+      _position,
+      _hide,
+      _tone,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -357,7 +413,12 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
   Widget _bar(BuildContext context, double width) {
     final c = CameoTheme.colorsOf(context);
     final cam = _camera.value.clamp(0.0, 1.0);
-    final f = tabBarV6Frame(width, mini: _mini.value, camera: cam);
+    final f = tabBarV6Frame(
+      width,
+      mini: math.max(_mini.value, _record.value),
+      camera: cam,
+      recording: _record.value.clamp(0.0, 1.0),
+    );
     final backdropVisibility =
         1 +
         (CameoMotion.tabBarV6MiniBackdropVisibility - 1) *
@@ -371,7 +432,7 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
       cam,
     )!;
     final hidden = widget.hidden;
-    const button = CameoLayout.tabBarV6FullCallButtonSize;
+    final button = f.buttonSize;
     final bar = SizedBox(
       key: TabBarV6.containerKey,
       width: width,
@@ -404,10 +465,10 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
 
           Positioned(
             key: const ValueKey('tabBarV6.layer.thumbnail'),
-            left: CameoLayout.tabBarV6FullPaddingX,
+            left: f.thumbnailLeft,
             top: f.buttonTop,
-            width: CameoLayout.tabBarV6CameraThumbnailSize,
-            height: CameoLayout.tabBarV6CameraThumbnailSize,
+            width: button,
+            height: button,
             child: f.thumbnail <= _gone
                 ? const SizedBox.shrink()
                 : IgnorePointer(
@@ -435,7 +496,11 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
               child: GlassSurface(
                 key: TabBarV6.pillKey,
                 blur: CameoBlur.scrim,
-                tint: mix((p) => p.backgroundFillScrimBase),
+                tint: Color.lerp(
+                  CameoPalette.light.backgroundFillScrimBase,
+                  CameoPalette.dark.backgroundFillNeutralBase,
+                  cam,
+                )!,
                 border: mix((p) => p.borderScrim),
                 borderWidth: CameoLayout.tabBarV6FullPillBorderWidth,
                 radius: CameoLayout.tabBarV6FullPillRadius,
@@ -494,14 +559,22 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
         cam,
       )!,
     );
-    const icon = CameoLayout.scrimButtonV6LgIconSize;
+    final icon =
+        CameoLayout.silicaActionPillIconSize -
+        CameoSpace.s4 * _record.value.clamp(0.0, 1.0);
     final surface = OutsideShadow(
       shadow: shadow.copyWith(color: faded(shadow.color)),
       radius: CameoLayout.scrimButtonV6Radius,
       child: GlassSurface(
         key: TabBarV6.buttonKey,
         blur: CameoBlur.scrim,
-        tint: faded(mix((p) => p.backgroundFillScrimBase)),
+        tint: faded(
+          Color.lerp(
+            CameoPalette.light.backgroundFillScrimBase,
+            CameoPalette.dark.backgroundFillNeutralBase,
+            cam,
+          )!,
+        ),
         border: faded(mix((p) => p.borderScrim)),
         borderWidth: CameoLayout.scrimButtonV6BorderWidth,
         radius: CameoLayout.scrimButtonV6Radius,
@@ -549,6 +622,33 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
       pressedColor: mix((p) => p.backgroundFillScrimInteraction),
       pressedRadius: CameoLayout.scrimButtonV6Radius,
       child: surface,
+    );
+  }
+
+  Widget _avatar(Color color, double size) {
+    final name = SessionScope.maybeOf(context)?.session.name;
+    final initial = name == null || name.trim().isEmpty
+        ? 'C'
+        : name.trim().characters.first.toUpperCase();
+    final palette = CameoTheme.colorsOf(context);
+    return SizedBox.square(
+      dimension: size,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(CameoLayout.silicaAvatarRadius),
+        ),
+        child: Center(
+          child: CameoText(
+            initial,
+            style: CameoTextStyles.bodyMd,
+            color: _camera.value > 0.5
+                ? palette.staticBlackBase
+                : palette.staticWhiteBase,
+            maxLines: 1,
+          ),
+        ),
+      ),
     );
   }
 
@@ -634,7 +734,11 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
         alpha: color.a * CameoLayout.scrimButtonV6DisabledOpacity,
       );
     }
-    const pad = CameoLayout.tabBarV6FullItemPadding;
+    final pad =
+        CameoLayout.tabBarV6FullItemPadding +
+        (CameoLayout.tabBarV6MiniItemPadding -
+                CameoLayout.tabBarV6FullItemPadding) *
+            math.max(_mini.value, _record.value).clamp(0.0, 1.0);
     const icon = CameoLayout.tabBarV6FullIconSize;
     final body = ClipRect(
       key: TabBarV6.tabKey(i),
@@ -647,12 +751,14 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
             right: 0,
             height: icon,
             child: Center(
-              child: CameoIcon(
-                _iconOf(tab.icon),
-                key: TabBarV6.iconKey(i),
-                size: icon,
-                color: color,
-              ),
+              child: i == 2
+                  ? _avatar(color, icon)
+                  : CameoIcon(
+                      _iconOf(tab.icon),
+                      key: TabBarV6.iconKey(i),
+                      size: icon,
+                      color: color,
+                    ),
             ),
           ),
 

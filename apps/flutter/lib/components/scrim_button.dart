@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import '../design_system/design_system.dart';
 import 'outside_shadow.dart';
 
-enum ScrimButtonSize { lg, md, sm }
+enum ScrimButtonSize { xl, nav, lg, md, sm }
 
 enum ScrimButtonTone {
   light,
@@ -27,6 +27,18 @@ typedef V5ButtonMetrics = ({
 });
 
 V5ButtonMetrics scrimButtonMetrics(ScrimButtonSize size) => switch (size) {
+  ScrimButtonSize.nav => (
+    height: CameoLayout.scrimButtonV6NavHeight,
+    padding: CameoLayout.scrimButtonV6NavPadding,
+    iconSize: CameoLayout.scrimButtonV6NavIconSize,
+    label: CameoTextStyles.bodyLg,
+  ),
+  ScrimButtonSize.xl => (
+    height: CameoLayout.scrimButtonV6XlHeight,
+    padding: CameoLayout.scrimButtonV6XlPadding,
+    iconSize: CameoLayout.scrimButtonV6XlIconSize,
+    label: CameoTextStyles.bodyLg,
+  ),
   ScrimButtonSize.lg => (
     height: CameoLayout.scrimButtonV6LgHeight,
     padding: CameoLayout.scrimButtonV6LgPadding,
@@ -125,6 +137,7 @@ class ScrimButton extends StatelessWidget {
     this.disabled = false,
     this.onPress,
     this.semanticLabel,
+    this.neutral = false,
   }) : assert(icon != null || label != null, '아이콘이나 라벨 중 하나는 있어야 한다');
 
   final ScrimButtonSize size;
@@ -136,6 +149,7 @@ class ScrimButton extends StatelessWidget {
   final VoidCallback? onPress;
 
   final String? semanticLabel;
+  final bool neutral;
 
   static const Key surfaceKey = ValueKey('scrimButton.surface');
   static const Key shadowKey = ValueKey('scrimButton.shadow');
@@ -156,7 +170,12 @@ class ScrimButton extends StatelessWidget {
         child: GlassSurface(
           key: surfaceKey,
           blur: CameoBlur.scrim,
-          tint: _faded(colors.tint, k),
+          tint: _faded(
+            neutral
+                ? CameoPalette.of(tone.mode).backgroundFillNeutralBase
+                : colors.tint,
+            k,
+          ),
           border: _faded(colors.border, k),
           borderWidth: bw,
           radius: CameoLayout.scrimButtonV6Radius,
@@ -165,7 +184,9 @@ class ScrimButton extends StatelessWidget {
           child: V5ButtonContent(
             metrics: m,
             gap: CameoLayout.scrimButtonV6Gap,
-            labelPaddingX: CameoLayout.scrimButtonV6LabelPaddingX,
+            labelPaddingX: size == ScrimButtonSize.nav
+                ? CameoLayout.scrimButtonV6NavLabelPaddingX
+                : CameoLayout.scrimButtonV6LabelPaddingX,
             color: _faded(colors.content, k),
             icon: icon,
             label: label,

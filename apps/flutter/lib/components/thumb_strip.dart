@@ -62,6 +62,7 @@ class ThumbStrip extends StatelessWidget {
                         height: cell,
                         child: Semantics(
                           button: onTap != null,
+                          selected: k == position.value.round(),
                           label: fillTemplate(
                             AppContent.of(context).v6.viewer.thumbnailLabel,
                             {'index': k + 1},
@@ -70,11 +71,27 @@ class ThumbStrip extends StatelessWidget {
                           child: PressScale(
                             key: cellKey(k),
                             onPress: onTap == null ? null : () => onTap!(k),
-                            child: Image(
-                              image: images[k],
-                              fit: BoxFit.cover,
-                              gaplessPlayback: true,
-                              excludeFromSemantics: true,
+                            child: DecoratedBox(
+                              position: DecorationPosition.foreground,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  CameoRadius.sm,
+                                ),
+                                border: k == position.value.round()
+                                    ? Border.all(
+                                        color: CameoTheme.colorsOf(
+                                          context,
+                                        ).staticWhiteBase,
+                                        width: CameoBorderWidth.thick,
+                                      )
+                                    : null,
+                              ),
+                              child: Image(
+                                image: images[k],
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                                excludeFromSemantics: true,
+                              ),
                             ),
                           ),
                         ),

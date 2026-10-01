@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show SocketException, WebSocket;
+import 'dart:io' show File, FileSystemException, SocketException, WebSocket;
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
@@ -67,6 +67,7 @@ class CameoApi {
 
   Future<void> forgetCredential() {
     _generation++;
+    _abortUploads();
     _credential = null;
     _credentialWrites = _credentialWrites
         .catchError((_) {})
@@ -155,7 +156,7 @@ class CameoApi {
       'POST',
       '/v1/auth/phone/start',
       authenticated: false,
-      body: {'phone': koreanPhoneToE164(phone)},
+      body: {'phone': phoneToE164(phone)},
     );
   }
 
@@ -177,7 +178,7 @@ class CameoApi {
       'POST',
       '/v1/auth/phone/verify',
       authenticated: false,
-      body: {'phone': koreanPhoneToE164(phone), 'code': code},
+      body: {'phone': phoneToE164(phone), 'code': code},
     ),
     ApiSignIn.fromJson,
   );
@@ -259,21 +260,33 @@ class CameoApi {
     required int width,
     required int height,
     DateTime? takenAt,
-  }) => _decode(
-    request(
-      'POST',
-      '/v1/photos/upload-url',
-      body: {
-        'content_type': contentType,
-        'size_bytes': sizeBytes,
-        'thumbnail_size_bytes': thumbnailSizeBytes,
-        'width': width,
-        'height': height,
-        if (takenAt != null) 'taken_at': takenAt.toUtc().toIso8601String(),
-      },
-    ),
-    ApiUpload.fromJson,
-  );
+    double? durationSeconds,
+  }) async {
+    try {
+      return await _decode(
+        request(
+          'POST',
+          '/v1/photos/upload-url',
+          body: {
+            'content_type': contentType,
+            'size_bytes': sizeBytes,
+            'thumbnail_size_bytes': thumbnailSizeBytes,
+            'width': width,
+            'height': height,
+            if (durationSeconds != null) 'duration_seconds': durationSeconds,
+            if (takenAt != null) 'taken_at': takenAt.toUtc().toIso8601String(),
+          },
+        ),
+        ApiUpload.fromJson,
+      );
+    } on ApiException catch (error) {
+      if (contentType.startsWith('video/') && error.code == 'invalid_request') {
+        throw const ApiException('video_unavailable');
+      }
+      rethrow;
+    }
+  }
+
   Future<ApiPhoto> completePhoto(String id) => _decode(
     request('POST', '/v1/photos/${Uri.encodeComponent(id)}/complete'),
     ApiPhoto.fromJson,
@@ -336,37 +349,72 @@ class CameoApi {
   Future<void> unregisterDevice(String token) async =>
       request('DELETE', '/v1/devices/${Uri.encodeComponent(token)}');
 
-  /// Object storage receives the presigned URL only, never the API bearer token.
-  Future<void> uploadObject(
+  /// Presigned uploads contain no API credentials. Video bodies stream from disk.
+  Future<void> uploadObject(String url, Uint8List bytes, String contentType) =>
+      _sendUpload(
+        (abort) =>
+            http.AbortableRequest('PUT', mediaUri(url), abortTrigger: abort)
+              ..followRedirects = false
+              ..headers['Content-Type'] = contentType
+              ..bodyBytes = bytes,
+      );
+
+  Future<void> uploadFileObject(
     String url,
-    Uint8List bytes,
+    String path,
+    int size,
     String contentType,
   ) async {
-    final generation = _generation;
-    final uri = mediaUri(url);
-    try {
-      final upload = http.Request('PUT', uri)
+    final file = File(path);
+    if (await file.length() != size) throw const ApiException('upload_failed');
+    await _sendUpload(
+      (abort) => _FileUploadRequest(mediaUri(url), file, size, abort)
         ..followRedirects = false
-        ..headers['Content-Type'] = contentType
-        ..bodyBytes = bytes;
-      final response = await _client
-          .send(upload)
-          .timeout(const Duration(minutes: 2));
-      await response.stream.drain<void>().timeout(timeout);
+        ..headers['Content-Type'] = contentType,
+    );
+  }
+
+  final Set<Completer<void>> _uploads = {};
+
+  void _abortUploads() {
+    for (final abort in _uploads.toList()) {
+      if (!abort.isCompleted) abort.complete();
+    }
+  }
+
+  Future<void> _sendUpload(
+    http.BaseRequest Function(Future<void>) create,
+  ) async {
+    final generation = _generation;
+    final abort = Completer<void>();
+    _uploads.add(abort);
+    final timer = Timer(const Duration(minutes: 5), () {
+      if (!abort.isCompleted) abort.complete();
+    });
+    try {
+      final response = await _client.send(create(abort.future));
+      await response.stream.drain<void>();
       if (generation != _generation) {
         throw const ApiException('request_cancelled');
       }
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException('upload_failed', status: response.statusCode);
       }
-    } on TimeoutException {
-      throw const ApiException('network_timeout');
+    } on http.RequestAbortedException {
+      throw ApiException(
+        generation == _generation ? 'network_timeout' : 'request_cancelled',
+      );
     } on http.ClientException {
       throw const ApiException('network_unavailable');
     } on SocketException {
       throw ApiException(
         generation == _generation ? 'network_unavailable' : 'request_cancelled',
       );
+    } on FileSystemException {
+      throw const ApiException('upload_failed');
+    } finally {
+      timer.cancel();
+      _uploads.remove(abort);
     }
   }
 
@@ -390,6 +438,7 @@ class CameoApi {
 
   void close() {
     _generation++;
+    _abortUploads();
     _client.close();
   }
 }
@@ -404,4 +453,19 @@ Uri mediaUri(String value) {
     throw const ApiException('invalid_response');
   }
   return uri;
+}
+
+class _FileUploadRequest extends http.BaseRequest with http.Abortable {
+  _FileUploadRequest(Uri uri, this.file, int length, this.abortTrigger)
+    : super('PUT', uri) {
+    contentLength = length;
+  }
+  final File file;
+  @override
+  final Future<void> abortTrigger;
+  @override
+  http.ByteStream finalize() {
+    super.finalize();
+    return http.ByteStream(file.openRead(0, contentLength));
+  }
 }

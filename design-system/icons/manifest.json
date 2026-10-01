@@ -54,6 +54,13 @@
       "file": "svg/outline/border-none.svg"
     },
     {
+      "key": "calendar-week",
+      "slug": "calendar-week",
+      "variant": "outline",
+      "provenance": "figma",
+      "file": "svg/outline/calendar-week.svg"
+    },
+    {
       "key": "camera",
       "slug": "camera",
       "variant": "outline",
@@ -164,6 +171,13 @@
       "variant": "outline",
       "provenance": "figma",
       "file": "svg/outline/link-off.svg"
+    },
+    {
+      "key": "live-photo",
+      "slug": "live-photo",
+      "variant": "outline",
+      "provenance": "figma",
+      "file": "svg/outline/live-photo.svg"
     },
     {
       "key": "logout",

@@ -3,8 +3,6 @@
 
 //    onEntered.
 
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/widgets.dart';
 
 import '../content/app.g.dart';
@@ -12,15 +10,19 @@ import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
 import 'call_camera_geometry.dart';
 import 'scrim_button.dart';
+import 'scrim_pill.dart';
+import 'media_player.dart';
+import 'backend_notice.dart';
 
 enum ReviewPhase { review, send, discard }
 
 @immutable
 class ReviewPhoto {
-  const ReviewPhoto({required this.key, required this.image});
+  const ReviewPhoto({required this.key, required this.image, this.videoUri});
 
   final String key;
   final ImageProvider image;
+  final String? videoUri;
 }
 
 CameoIconName _iconOf(String name) => CameoIconName.values.firstWhere(
@@ -39,6 +41,13 @@ class ReviewOverlay extends StatefulWidget {
     this.onEntered,
     this.onLanded,
     this.onExited,
+    this.liked = false,
+    this.busy = false,
+    this.onLike,
+    this.onShare,
+    this.onMore,
+    this.error,
+    this.onErrorAction,
   });
 
   final ReviewPhoto photo;
@@ -51,6 +60,9 @@ class ReviewOverlay extends StatefulWidget {
   final VoidCallback? onLanded;
 
   final VoidCallback? onExited;
+  final bool liked, busy;
+  final VoidCallback? onLike, onShare, onMore, onErrorAction;
+  final String? error;
 
   static const Key rootKey = ValueKey('reviewV6');
   static const Key dimKey = ValueKey('reviewV6.dim');
@@ -74,16 +86,6 @@ class ReviewOverlayState extends State<ReviewOverlay>
     vsync: this,
   );
 
-  late final AnimationController _fly = AnimationController.unbounded(
-    vsync: this,
-  );
-
-  late final AnimationController _photoAlpha = AnimationController(
-    vsync: this,
-    value: 1,
-    animationBehavior: AnimationBehavior.preserve,
-  );
-
   late final AnimationController _drop = AnimationController.unbounded(
     vsync: this,
   );
@@ -95,14 +97,8 @@ class ReviewOverlayState extends State<ReviewOverlay>
 
   double get dim => _dim.value;
   double get actions => _actions.value;
-  double get fly => _fly.value;
+  double get fly => _landed ? 1 : 0;
   bool get landed => _landed;
-
-  @override
-  void initState() {
-    super.initState();
-    _fly.addListener(_onFly);
-  }
 
   @override
   void didChangeDependencies() {
@@ -149,20 +145,23 @@ class ReviewOverlayState extends State<ReviewOverlay>
   }
 
   void _leave(ReviewPhase phase) {
+    if (phase == ReviewPhase.send) {
+      // Keep the media in place; the viewer route owns the shared-image transition.
+      _landed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.onLanded?.call();
+        widget.onExited?.call();
+      });
+      return;
+    }
     if (_reduceMotion) {
       for (final c in [_dim, _actions]) {
         c
           ..stop()
           ..value = 0;
       }
-      if (phase == ReviewPhase.send) {
-        _landed = true;
-        _fly.value = 1;
-        _photoAlpha.value = 0;
-        widget.onLanded?.call();
-      } else {
-        _drop.value = 1;
-      }
+      _drop.value = 1;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) widget.onExited?.call();
       });
@@ -187,35 +186,13 @@ class ReviewOverlayState extends State<ReviewOverlay>
       0,
     );
     settle(_actions, _actions.springTo(0, CameoMotion.reviewV6ExitSpring), 0);
-    if (phase == ReviewPhase.send) {
-      _fly.springTo(1, CameoMotion.reviewV6SendSpring);
-    } else {
-      settle(_drop, _drop.springTo(1, CameoMotion.reviewV6ExitSpring), 1);
-    }
-  }
-
-  void _onFly() {
-    if (_landed || _fly.value < 1) return;
-    _landed = true;
-    widget.onLanded?.call();
-    _photoAlpha
-        .animateTo(
-          0,
-          duration: CameoMotion.durationFast,
-          curve: CameoMotion.easingStandard,
-        )
-        .then((_) {
-          if (mounted) _leftOne();
-        });
+    settle(_drop, _drop.springTo(1, CameoMotion.reviewV6ExitSpring), 1);
   }
 
   @override
   void dispose() {
-    _fly.removeListener(_onFly);
     _dim.dispose();
     _actions.dispose();
-    _fly.dispose();
-    _photoAlpha.dispose();
     _drop.dispose();
     super.dispose();
   }
@@ -224,10 +201,9 @@ class ReviewOverlayState extends State<ReviewOverlay>
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
     final size = MediaQuery.sizeOf(context);
-    final vf = cameraViewfinderRect(size.width);
+    final vf = cameraViewfinderRect(size.width, height: size.height);
     final row = reviewActions(size.width, size.height);
-    final delta = reviewSendDelta(size.width, size.height);
-    final interactive = widget.phase == ReviewPhase.review;
+    final interactive = widget.phase == ReviewPhase.review && !widget.busy;
     final discard = widget.phase == ReviewPhase.discard;
     return IgnorePointer(
       key: ReviewOverlay.rootKey,
@@ -250,16 +226,10 @@ class ReviewOverlayState extends State<ReviewOverlay>
                   builder: (context, _) {
                     final d = _dim.value.clamp(0.0, 1.0);
                     if (d <= 0) return const SizedBox.expand();
-                    final sigma = CameoBlur.blur.sigma * d;
-                    return ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-                        child: Opacity(
-                          key: ReviewOverlay.dimKey,
-                          opacity: d,
-                          child: ColoredBox(color: c.dimScrim),
-                        ),
-                      ),
+                    return Opacity(
+                      key: ReviewOverlay.dimKey,
+                      opacity: d,
+                      child: ColoredBox(color: c.staticBlackBase),
                     );
                   },
                 ),
@@ -269,8 +239,9 @@ class ReviewOverlayState extends State<ReviewOverlay>
               key: const ValueKey('reviewV6.layer.photo'),
               rect: vf,
               child: IgnorePointer(
+                ignoring: !interactive,
                 child: AnimatedBuilder(
-                  animation: Listenable.merge([_fly, _photoAlpha, _drop]),
+                  animation: _drop,
                   builder: (context, child) {
                     if (discard) {
                       final t = reviewDiscardTransform(_drop.value);
@@ -279,14 +250,7 @@ class ReviewOverlayState extends State<ReviewOverlay>
                         child: Transform.scale(scale: t.scale, child: child),
                       );
                     }
-                    final t = reviewSendTransform(_fly.value, delta);
-                    return Opacity(
-                      opacity: _photoAlpha.value.clamp(0.0, 1.0),
-                      child: Transform.translate(
-                        offset: Offset(t.translateX, t.translateY),
-                        child: Transform.scale(scale: t.scale, child: child),
-                      ),
-                    );
+                    return child!;
                   },
                   child: Semantics(
                     image: true,
@@ -298,12 +262,18 @@ class ReviewOverlayState extends State<ReviewOverlay>
                       borderRadius: BorderRadius.circular(
                         CameoLayout.cameraV6ViewfinderRadius,
                       ),
-                      child: Image(
-                        image: widget.photo.image,
-                        fit: BoxFit.cover,
-                        excludeFromSemantics: true,
-                        gaplessPlayback: true,
-                      ),
+                      child: widget.photo.videoUri != null
+                          ? MediaPlayer(
+                              uri: widget.photo.videoUri!,
+                              poster: widget.photo.image,
+                              active: interactive,
+                            )
+                          : Image(
+                              image: widget.photo.image,
+                              fit: BoxFit.cover,
+                              excludeFromSemantics: true,
+                              gaplessPlayback: true,
+                            ),
                     ),
                   ),
                 ),
@@ -335,14 +305,43 @@ class ReviewOverlayState extends State<ReviewOverlay>
                       _pop(
                         ScrimButton(
                           key: ReviewOverlay.discardKey,
-                          size: ScrimButtonSize.md,
-                          tone: ScrimButtonTone.light,
+                          size: ScrimButtonSize.xl,
+                          tone: ScrimButtonTone.dark,
+                          neutral: true,
                           icon: _iconOf(LabV6.of(context).review.discardIcon),
                           semanticLabel: AppContent.of(
                             context,
                           ).v6.review.discardLabel,
                           onPress: interactive ? widget.onDiscard : null,
                         ),
+                      ),
+                      ScrimPill(
+                        size: ScrimPillSize.large,
+                        tone: ScrimPillTone.dark,
+                        items: [
+                          ScrimPillItem(
+                            icon: CameoIconName.share2,
+                            semanticLabel: AppContent.of(
+                              context,
+                            ).v6.album.shareLabel,
+                            onPress: interactive ? widget.onShare : null,
+                          ),
+                          ScrimPillItem(
+                            icon: CameoIconName.heart,
+                            active: widget.liked,
+                            semanticLabel: widget.liked
+                                ? AppContent.of(context).v6.album.unlikeLabel
+                                : AppContent.of(context).v6.album.likeLabel,
+                            onPress: interactive ? widget.onLike : null,
+                          ),
+                          ScrimPillItem(
+                            icon: CameoIconName.dots,
+                            semanticLabel: AppContent.of(
+                              context,
+                            ).v6.mediaDetails.more,
+                            onPress: interactive ? widget.onMore : null,
+                          ),
+                        ],
                       ),
                       _pop(
                         _SendButton(
@@ -355,6 +354,18 @@ class ReviewOverlayState extends State<ReviewOverlay>
                 ),
               ),
             ),
+            if (widget.error != null || widget.busy)
+              Positioned(
+                left: CameoSpace.s16,
+                right: CameoSpace.s16,
+                top: vf.top + CameoSpace.s24,
+                child: BackendNotice(
+                  message:
+                      widget.error ??
+                      AppContent.of(context).v6.backend.uploading,
+                  onRetry: widget.onErrorAction,
+                ),
+              ),
           ],
         ),
       ),

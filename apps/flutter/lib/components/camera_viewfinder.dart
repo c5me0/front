@@ -7,11 +7,14 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
+import 'package:permission_handler/permission_handler.dart' as permissions;
+import '../api/cameo_api.dart';
 import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
 import '../state/captured_photo.dart';
+import '../state/video_media.dart';
 
 enum CameraFacing {
   back,
@@ -46,6 +49,14 @@ class CameraViewfinderController {
       _state?._capture() ?? Future.value(CapturedPhoto.placeholder());
 
   Future<void> flash() => _state?._runFlash() ?? Future<void>.value();
+
+  Future<void> startRecording({bool audio = true}) =>
+      _state?._startRecording(audio: audio) ??
+      Future.error(const ApiException('camera_unavailable'));
+
+  Future<CapturedPhoto> stopRecording() =>
+      _state?._stopRecording() ??
+      Future.error(const ApiException('camera_unavailable'));
 }
 
 ///
@@ -97,6 +108,8 @@ class _CameraViewfinderState extends State<CameraViewfinder>
   CameraViewfinderSource _source = CameraViewfinderSource.probing;
   List<CameraDescription> _cameras = const [];
   CameraController? _camera;
+  bool _askingMicrophone = false;
+  bool _audioEnabled = false;
 
   late final AnimationController _turns = AnimationController.unbounded(
     vsync: this,
@@ -171,14 +184,27 @@ class _CameraViewfinderState extends State<CameraViewfinder>
   Future<void> _probe() async {
     if (_probed) return;
     _probed = true;
+    var expired = false;
+    late final Timer timeout;
+    timeout = Timer(const Duration(seconds: 10), () {
+      _timers.remove(timeout);
+      expired = true;
+      _settle(CameraViewfinderSource.placeholder);
+    });
+    _timers.add(timeout);
     try {
       final cameras = await (widget.cameraListLoader ?? availableCameras)();
-      if (!mounted) return;
+      timeout.cancel();
+      _timers.remove(timeout);
+      if (!mounted || expired) return;
       if (cameras.isEmpty) return _settle(CameraViewfinderSource.placeholder);
       _cameras = cameras;
       await _open();
     } catch (_) {
       _settle(CameraViewfinderSource.placeholder);
+    } finally {
+      timeout.cancel();
+      _timers.remove(timeout);
     }
   }
 
@@ -187,13 +213,14 @@ class _CameraViewfinderState extends State<CameraViewfinder>
     orElse: () => _cameras.first,
   );
 
-  Future<void> _open() async {
+  Future<void> _open({bool audio = false}) async {
     final controller = CameraController(
       _descriptionFor(_liveFacing),
       ResolutionPreset.max,
-      enableAudio: false,
+      enableAudio: audio,
     );
     _camera = controller;
+    _audioEnabled = audio;
     try {
       await controller.initialize();
     } catch (_) {
@@ -218,7 +245,11 @@ class _CameraViewfinderState extends State<CameraViewfinder>
 
   Future<void> _switchLive() async {
     final controller = _camera;
-    if (controller == null || _source != CameraViewfinderSource.camera) return;
+    if (controller == null ||
+        _source != CameraViewfinderSource.camera ||
+        controller.value.isRecordingVideo) {
+      return;
+    }
     final next = _descriptionFor(_liveFacing);
     if (controller.description == next) return;
     try {
@@ -229,6 +260,7 @@ class _CameraViewfinderState extends State<CameraViewfinder>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_askingMicrophone) return;
     if (_source != CameraViewfinderSource.camera) return;
     if (state == AppLifecycleState.inactive) {
       final controller = _camera;
@@ -237,6 +269,56 @@ class _CameraViewfinderState extends State<CameraViewfinder>
       if (mounted) setState(() {});
     } else if (state == AppLifecycleState.resumed && _camera == null) {
       _open();
+    }
+  }
+
+  Future<void> _startRecording({required bool audio}) async {
+    if (_source != CameraViewfinderSource.camera || _camera == null) {
+      throw const ApiException('camera_unavailable');
+    }
+    var withAudio = false;
+    if (audio) {
+      _askingMicrophone = true;
+      try {
+        withAudio =
+            (await permissions.Permission.microphone.request()).isGranted;
+      } finally {
+        _askingMicrophone = false;
+      }
+    }
+    if (!mounted || !widget.active) {
+      throw const ApiException('camera_unavailable');
+    }
+    if (withAudio != _audioEnabled) {
+      final previous = _camera;
+      _camera = null;
+      if (previous != null) await _disposeQuietly(previous);
+      if (!mounted || !widget.active) {
+        throw const ApiException('camera_unavailable');
+      }
+      await _open(audio: withAudio);
+    }
+    final camera = _camera;
+    if (camera == null || !camera.value.isInitialized) {
+      throw const ApiException('camera_unavailable');
+    }
+    try {
+      await camera.startVideoRecording();
+    } on CameraException {
+      throw const ApiException('camera_unavailable');
+    }
+  }
+
+  Future<CapturedPhoto> _stopRecording() async {
+    final camera = _camera;
+    if (camera == null || !camera.value.isRecordingVideo) {
+      throw const ApiException('camera_unavailable');
+    }
+    try {
+      final file = await camera.stopVideoRecording();
+      return await videoOfFile(file.path, source: CapturedPhotoSource.camera);
+    } on CameraException {
+      throw const ApiException('video_unreadable');
     }
   }
 

@@ -1493,18 +1493,18 @@ const LabV6 labV6 = LabV6(
     tabs: <LabV6TabBarTab>[
       LabV6TabBarTab(
         id: 'history',
-        icon: 'history',
-        label: '앨범',
+        icon: 'calendar-week',
+        label: '추억',
       ),
       LabV6TabBarTab(
         id: 'camera',
-        icon: 'camera',
-        label: '카메라',
+        icon: 'live-photo',
+        label: '지금',
       ),
       LabV6TabBarTab(
         id: 'settings',
-        icon: 'settings',
-        label: '설정',
+        icon: 'user',
+        label: '우리',
       ),
     ],
     callIcon: 'phone-call',
@@ -1532,8 +1532,8 @@ const LabV6 labV6 = LabV6(
     closeIcon: 'x',
   ),
   emptyAlbum: LabV6EmptyAlbum(
-    title: '아직 저장된 사진이 없어요!',
-    cta: '사진 불러오기',
+    title: '아직 저장된 사진·영상이 없어요!',
+    cta: '사진·영상 불러오기',
     ctaIcon: 'photo',
     meInitialSample: '이',
     partnerPhoto: LabImages.albumSungsuCover,
@@ -1685,18 +1685,18 @@ const LabV6 labV6En = LabV6(
     tabs: <LabV6TabBarTab>[
       LabV6TabBarTab(
         id: 'history',
-        icon: 'history',
-        label: 'Album',
+        icon: 'calendar-week',
+        label: 'Memories',
       ),
       LabV6TabBarTab(
         id: 'camera',
-        icon: 'camera',
-        label: 'Camera',
+        icon: 'live-photo',
+        label: 'Now',
       ),
       LabV6TabBarTab(
         id: 'settings',
-        icon: 'settings',
-        label: 'Settings',
+        icon: 'user',
+        label: 'Us',
       ),
     ],
     callIcon: 'phone-call',
@@ -1724,8 +1724,8 @@ const LabV6 labV6En = LabV6(
     closeIcon: 'x',
   ),
   emptyAlbum: LabV6EmptyAlbum(
-    title: 'No photos saved yet!',
-    cta: 'Import photos',
+    title: 'No photos or videos yet!',
+    cta: 'Import media',
     ctaIcon: 'photo',
     meInitialSample: 'J',
     partnerPhoto: LabImages.albumSungsuCover,

@@ -34,7 +34,7 @@ class AppContent {
 }
 
 class AppContentV6 {
-  const AppContentV6({required this.backend, required this.billing, required this.breakup, required this.welcome, required this.partner, required this.verify, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.viewer, required this.review, required this.emptyAlbum, required this.accessibility});
+  const AppContentV6({required this.backend, required this.billing, required this.breakup, required this.welcome, required this.partner, required this.verify, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.viewer, required this.review, required this.emptyAlbum, required this.accessibility, required this.phone, required this.storage, required this.mediaDetails, required this.record});
   final AppContentV6Backend backend;
   final AppContentV6Billing billing;
   final AppContentV6Breakup breakup;
@@ -49,6 +49,74 @@ class AppContentV6 {
   final AppContentV6Review review;
   final AppContentV6EmptyAlbum emptyAlbum;
   final AppContentV6Accessibility accessibility;
+  final AppContentV6Phone phone;
+  final AppContentV6Storage storage;
+  final AppContentV6MediaDetails mediaDetails;
+  final AppContentV6Record record;
+}
+
+class AppContentV6Record {
+  const AppContentV6Record({required this.viewContext, required this.collapseContext, required this.collapse, required this.expand, required this.highlight, required this.remaining, required this.showControls, required this.seek, required this.play, required this.pause});
+  final String viewContext;
+  final String collapseContext;
+  final String collapse;
+  final String expand;
+  final String highlight;
+  final String remaining;
+  final String showControls;
+  final String seek;
+  final String play;
+  final String pause;
+}
+
+class AppContentV6MediaDetails {
+  const AppContentV6MediaDetails({required this.title, required this.more, required this.photo, required this.video, required this.dimensions, required this.duration, required this.close});
+  final String title;
+  final String more;
+  final String photo;
+  final String video;
+  final String dimensions;
+  final String duration;
+  final String close;
+}
+
+class AppContentV6Storage {
+  const AppContentV6Storage({required this.title, required this.freePlan, required this.proPlan, required this.usage, required this.reserved, required this.unavailable, required this.upgrade, required this.full, required this.quotaExceeded, required this.proFull, required this.serverUnavailable, required this.freeDetail, required this.keepAccess, required this.videoUnsupported, required this.videoTooLarge, required this.videoFailed, required this.recordingFailed, required this.media, required this.playVideo, required this.pauseVideo, required this.replayVideo, required this.unlimited, required this.proCapacity, required this.freeCapacity, required this.videoNotReady});
+  final String title;
+  final String freePlan;
+  final String proPlan;
+  final String usage;
+  final String reserved;
+  final String unavailable;
+  final String upgrade;
+  final String full;
+  final String quotaExceeded;
+  final String proFull;
+  final String serverUnavailable;
+  final String freeDetail;
+  final String keepAccess;
+  final String videoUnsupported;
+  final String videoTooLarge;
+  final String videoFailed;
+  final String recordingFailed;
+  final String media;
+  final String playVideo;
+  final String pauseVideo;
+  final String replayVideo;
+  final String unlimited;
+  final String proCapacity;
+  final String freeCapacity;
+  final String videoNotReady;
+}
+
+class AppContentV6Phone {
+  const AppContentV6Phone({required this.countryTitle, required this.countrySearch, required this.noCountries, required this.numberPlaceholder, required this.countryLabel, required this.invalidPhone});
+  final String countryTitle;
+  final String countrySearch;
+  final String noCountries;
+  final String numberPlaceholder;
+  final String countryLabel;
+  final String invalidPhone;
 }
 
 class AppContentV6Accessibility {
@@ -120,8 +188,9 @@ class AppContentV6Review {
 }
 
 class AppContentV6Viewer {
-  const AppContentV6Viewer({required this.thumbnailLabel});
+  const AppContentV6Viewer({required this.thumbnailLabel, required this.unavailable});
   final String thumbnailLabel;
+  final String unavailable;
 }
 
 class AppContentV6Album {
@@ -233,7 +302,7 @@ class AppContentV6BreakupStep {
 }
 
 class AppContentV6Billing {
-  const AppContentV6Billing({required this.section, required this.settingsLabel, required this.title, required this.brand, required this.headline, required this.subtitle, required this.currency, required this.monthlyPriceCents, required this.recoveryPriceCents, required this.monthlyLabel, required this.monthlyPeriod, required this.monthlyDetail, required this.monthlySummary, required this.monthlyBenefit, required this.monthlyRecoveryNote, required this.selected, required this.selectPlan, required this.continueLabel, required this.payLabel, required this.processing, required this.previewNote, required this.priceNote, required this.confirmTitle, required this.monthlyConfirm, required this.cancel, required this.successTitle, required this.successBody, required this.done, required this.active, required this.activeBody, required this.failure, required this.cancelled, required this.recoveryTitle, required this.recoverySubtitle, required this.recoveryLabel, required this.recoveryPeriod, required this.recoveryDetail, required this.recoverySummary, required this.recoveryNote, required this.recoveryConfirm, required this.recoverySuccessTitle, required this.recoverySuccessBody, required this.recoveryDone, required this.unavailableTitle, required this.unavailableBody, required this.photoCount, required this.callCount, required this.subscribeLabel, required this.paywallSubtitle});
+  const AppContentV6Billing({required this.section, required this.settingsLabel, required this.title, required this.brand, required this.headline, required this.subtitle, required this.currency, required this.monthlyPriceCents, required this.recoveryPriceCents, required this.monthlyLabel, required this.monthlyPeriod, required this.monthlyDetail, required this.monthlySummary, required this.monthlyBenefit, required this.monthlyRecoveryNote, required this.selected, required this.selectPlan, required this.continueLabel, required this.payLabel, required this.processing, required this.previewNote, required this.priceNote, required this.confirmTitle, required this.monthlyConfirm, required this.cancel, required this.successTitle, required this.successBody, required this.done, required this.active, required this.activeBody, required this.failure, required this.cancelled, required this.recoveryTitle, required this.recoverySubtitle, required this.recoveryLabel, required this.recoveryPeriod, required this.recoveryDetail, required this.recoverySummary, required this.recoveryNote, required this.recoveryConfirm, required this.recoverySuccessTitle, required this.recoverySuccessBody, required this.recoveryDone, required this.unavailableTitle, required this.unavailableBody, required this.photoCount, required this.callCount, required this.subscribeLabel});
   final String section;
   final String settingsLabel;
   final String title;
@@ -282,7 +351,6 @@ class AppContentV6Billing {
   final String photoCount;
   final String callCount;
   final String subscribeLabel;
-  final String paywallSubtitle;
 }
 
 class AppContentV6Backend {
@@ -844,7 +912,7 @@ const AppContent appContent = AppContent(
       callFailed: '연결되지 않은 통화',
       callEnded: '종료된 통화',
       loading: '불러오는 중…',
-      uploading: '사진을 보내는 중…',
+      uploading: '사진·영상을 보내는 중…',
       retry: '다시 시도',
       loadMore: '이전 기록 더 보기',
       refresh: '새로고침',
@@ -855,7 +923,7 @@ const AppContent appContent = AppContent(
       notConnected: '상대와 연결한 뒤 이용할 수 있어요.',
       photoTooLarge: '원본은 25MB 이하의 사진을 선택해 주세요.',
       photoUnsupported: 'JPEG, PNG, HEIC, WebP 사진을 선택해 주세요.',
-      uploadFailed: '사진을 보내지 못했어요. 다시 시도해 주세요.',
+      uploadFailed: '사진·영상을 보내지 못했어요. 다시 시도해 주세요.',
       videoUnavailable: '동영상 전송은 아직 지원하지 않아요.',
       cameraUnavailable: '이 기기에서 촬영한 사진을 사용할 수 없어요.',
       cameraEmptyThumbnail: '아직 촬영한 사진이 없어요.',
@@ -878,40 +946,40 @@ const AppContent appContent = AppContent(
       billingPending: '결제 확인 중이에요. 다시 결제하지 않고 상태를 확인할 수 있어요.',
       billingNothingToRestore: '이 계정에서 복원할 월간 구독을 찾지 못했어요.',
       billingError: '결제를 진행하지 못했어요. 잠시 후 다시 시도해 주세요.',
-      premiumRequired: '두 사람 중 한 명의 월간 구독이 필요해요.',
+      premiumRequired: '현재 이용 권한을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.',
       premiumTitle: '월간 구독이 필요해요',
       premiumAction: '월간 구독 확인하기',
       billingServerPending: '구매는 완료됐어요. 서버 확인 후 이용할 수 있어요. 다시 결제하지 않고 확인을 이어갈게요.',
       billingServerUnavailable: '서버에서 결제 상태를 확인하지 못했어요. 잠시 후 다시 확인해 주세요.',
       recoveryContextChanged: '연결된 상대가 변경됐어요. 현재 상대의 복구 화면에서 다시 확인해 주세요.',
       recoveryCreditRequired: '사용할 수 있는 복구 구매를 찾지 못했어요. 결제 상태를 다시 확인해 주세요.',
-      partnerPremium: '상대의 월간 구독으로 함께 이용 중이에요.',
+      partnerPremium: '상대의 50 GB 요금제로 함께 이용 중이에요.',
       recoveryAvailable: '이전에 함께한 기록이 있어요. 복구할 기록을 확인해 보세요.',
       useRecoveryCredit: '기존 구매로 기록 복구',
       recoveryCreditNote: '사용하지 않은 복구 구매가 있어요. 추가 결제 없이 한 번 사용할 수 있어요.',
       recoveryResume: '기록 복구 이어서 확인',
       recoveryAction: '기록 복구하기',
-      recoveryConfirm: '현재 연결된 {partner}님과의 이전 기록을 복구해요. 월간 구독과 별도로 {amount} USD가 한 번 결제돼요.',
+      recoveryConfirm: '현재 연결된 {partner}님과의 이전 기록을 복구해요. {amount} USD가 한 번 결제돼요.',
       recoveryCreditConfirm: '현재 연결된 {partner}님과의 이전 기록을 복구해요. 추가 요금은 청구되지 않아요.',
-      recoveryNote: '같은 상대와 다시 연결한 상태에서 월간 구독과 별도의 복구 구매가 필요해요. 이미 삭제한 기록은 복구되지 않아요.',
+      recoveryNote: '같은 상대와 다시 연결한 상태에서 복구권을 사용할 수 있어요. 이미 삭제한 기록은 복구되지 않아요.',
       recoverySuccess: '함께했던 사진과 통화 기록을 다시 볼 수 있어요.',
     ),
     billing: AppContentV6Billing(
-      section: '멤버십',
-      settingsLabel: '요금제 및 결제',
-      title: '결제',
-      brand: 'CAMEO 멤버십',
-      headline: '우리의 순간을\n계속 함께.',
-      subtitle: '월간 요금제를 선택하고 결제 내용을 확인해 주세요.',
+      section: '저장 공간',
+      settingsLabel: '저장 공간 요금제',
+      title: '저장 공간',
+      brand: 'CAMEO Pro',
+      headline: '둘이 함께,\n더 넉넉하게.',
+      subtitle: '사진·영상 저장 공간 50 GB',
       currency: 'USD',
       monthlyPriceCents: 499,
       recoveryPriceCents: 2990,
-      monthlyLabel: '월간 구독',
+      monthlyLabel: '50 GB 저장 공간',
       monthlyPeriod: '/ 월',
-      monthlyDetail: '한 달씩 이용하는 멤버십',
+      monthlyDetail: '공유 저장 공간 50 GB',
       monthlySummary: '매월 {amount} USD',
-      monthlyBenefit: '둘이 함께하는 멤버십',
-      monthlyRecoveryNote: '헤어진 상대와의 기록 복구는 별도 일회성 결제예요.',
+      monthlyBenefit: '두 사람이 함께 쓰는 저장 공간',
+      monthlyRecoveryNote: '1 GB는 무료로 이용할 수 있어요. 기록 복구는 별도 일회성 구매예요.',
       selected: '선택됨',
       selectPlan: '월간 요금제 선택',
       continueLabel: '결제 내용 확인',
@@ -920,13 +988,13 @@ const AppContent appContent = AppContent(
       previewNote: '매월 자동 갱신 · 구독 설정에서 해지 가능',
       priceNote: '가격은 미국 달러(USD) 기준입니다.',
       confirmTitle: '결제 내용을 확인해 주세요',
-      monthlyConfirm: '월간 구독 · {amount} USD / 월\n\n매월 자동 갱신되며, 스토어의 구독 설정에서 관리하거나 해지할 수 있어요.',
+      monthlyConfirm: '공유 저장 공간 50 GB · {amount} USD / 월\n\n매월 자동 갱신되며 스토어의 구독 설정에서 해지할 수 있어요.',
       cancel: '취소',
-      successTitle: '멤버십이 준비됐어요',
-      successBody: '월간 구독이 시작됐어요. 두 사람의 사진과 통화 기록을 함께 남겨 보세요.',
+      successTitle: '저장 공간이 넓어졌어요',
+      successBody: '50 GB 저장 공간에 사진과 영상을 계속 남겨 보세요.',
       done: '설정으로 돌아가기',
-      active: '월간 구독 이용 중',
-      activeBody: '월간 멤버십이 활성화되어 있어요.',
+      active: '50 GB 요금제 이용 중',
+      activeBody: '두 사람이 함께 50 GB까지 저장할 수 있어요.',
       failure: '결제를 완료하지 못했어요. 다시 시도해 주세요.',
       cancelled: '결제가 취소됐어요. 변경된 내용은 없어요.',
       recoveryTitle: '우리의 기록 되찾기',
@@ -945,7 +1013,6 @@ const AppContent appContent = AppContent(
       photoCount: '사진 {count}장',
       callCount: '통화 기록 {count}개',
       subscribeLabel: '{amount}에 구독하기',
-      paywallSubtitle: '구독하고 연인을 연결해요.',
     ),
     breakup: AppContentV6Breakup(
       settingsLabel: '헤어지기',
@@ -966,7 +1033,7 @@ const AppContent appContent = AppContent(
         AppContentV6BreakupStep(
           title: '기록은 따로 보관해요',
           body: '함께한 사진과 통화 기록은 이 계정에 보관되고, 연결 해제 후에는 앨범에서 숨겨져요.',
-          detail: '다시 로그인해 같은 상대와 연결한 뒤, 월간 구독과 {amount} USD의 일회성 복구 구매가 있으면 기록을 복구할 수 있어요.',
+          detail: '같은 상대와 다시 연결한 뒤 {amount} USD의 일회성 복구 구매로 기록을 되돌릴 수 있어요.',
         ),
         AppContentV6BreakupStep(
           title: '마지막으로 확인해 주세요',
@@ -1042,7 +1109,7 @@ const AppContent appContent = AppContent(
     ),
     album: AppContentV6Album(
       selectLabel: '사진 선택',
-      importLabel: '사진 불러오기',
+      importLabel: '사진·영상 불러오기',
       likedLabel: '좋아요한 사진',
       deletedLabel: '최근 삭제한 사진',
       closeLabel: '닫기',
@@ -1060,6 +1127,7 @@ const AppContent appContent = AppContent(
     ),
     viewer: AppContentV6Viewer(
       thumbnailLabel: '사진 {index}',
+      unavailable: '이 추억을 불러올 수 없어요.',
     ),
     review: AppContentV6Review(
       sendLabel: '보내기',
@@ -1122,6 +1190,62 @@ const AppContent appContent = AppContent(
       videoCapture: '동영상 촬영',
       call: '통화',
       inlinePhoto: '통화 중 공유한 사진',
+    ),
+    phone: AppContentV6Phone(
+      countryTitle: '국가 또는 지역',
+      countrySearch: '국가명 또는 국가번호 검색',
+      noCountries: '검색 결과가 없어요',
+      numberPlaceholder: '전화번호',
+      countryLabel: '국가 {country}, 국가번호 +{code}',
+      invalidPhone: '국가번호와 전화번호를 확인해 주세요.',
+    ),
+    storage: AppContentV6Storage(
+      title: '저장 공간',
+      freePlan: '무료 · 1 GB',
+      proPlan: 'Pro · 50 GB',
+      usage: '{limit} 중 {used} 사용',
+      reserved: '{amount} 업로드 중',
+      unavailable: '사용량 확인 불가',
+      upgrade: '50 GB로 업그레이드',
+      full: '저장 공간이 가득 찼어요',
+      quotaExceeded: '저장 공간이 부족해요. 업그레이드하거나 사진·영상을 정리해 주세요.',
+      proFull: '저장 공간이 가득 찼어요. 사진이나 영상을 정리한 뒤 다시 시도해 주세요.',
+      serverUnavailable: '저장 공간 요금제를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.',
+      freeDetail: '1 GB까지 무료로 저장해요. 필요할 때 확장할 수 있어요.',
+      keepAccess: '한도를 넘어도 기존 사진·영상과 통화 기록은 계속 볼 수 있어요.',
+      videoUnsupported: 'MP4 또는 MOV 영상을 선택해 주세요.',
+      videoTooLarge: '영상 한 개는 250 MB 이하로 선택해 주세요.',
+      videoFailed: '영상을 열지 못했어요. 다른 파일을 선택해 주세요.',
+      recordingFailed: '영상을 촬영하지 못했어요. 다시 시도해 주세요.',
+      media: '사진과 영상',
+      playVideo: '영상 재생',
+      pauseVideo: '영상 일시정지',
+      replayVideo: '영상 다시 재생',
+      unlimited: '무제한 저장 공간',
+      proCapacity: 'Pro · {amount}',
+      freeCapacity: '무료 · {amount}',
+      videoNotReady: '지금은 영상을 저장할 수 없어요. 잠시 후 다시 시도해 주세요.',
+    ),
+    mediaDetails: AppContentV6MediaDetails(
+      title: '미디어 정보',
+      more: '더 보기',
+      photo: '사진',
+      video: '영상',
+      dimensions: '크기: {width} × {height}',
+      duration: '길이: {duration}',
+      close: '닫기',
+    ),
+    record: AppContentV6Record(
+      viewContext: '이전 5분 보기',
+      collapseContext: '이전 대화 접기',
+      collapse: '대화 접기',
+      expand: '대화 펼치기',
+      highlight: '하이라이트 #{number} · {time}',
+      remaining: '{time} 남음',
+      showControls: '재생 컨트롤 표시',
+      seek: '재생 위치',
+      play: '재생',
+      pause: '일시정지',
     ),
   ),
 );
@@ -1377,7 +1501,7 @@ const AppContent appContentEn = AppContent(
       callFailed: 'Call failed',
       callEnded: 'Call ended',
       loading: 'Loading…',
-      uploading: 'Sending photos…',
+      uploading: 'Uploading media…',
       retry: 'Try again',
       loadMore: 'Load earlier records',
       refresh: 'Refresh',
@@ -1388,7 +1512,7 @@ const AppContent appContentEn = AppContent(
       notConnected: 'Connect with your partner to use this feature.',
       photoTooLarge: 'Choose an original photo of 25 MB or less.',
       photoUnsupported: 'Choose a JPEG, PNG, HEIC, or WebP photo.',
-      uploadFailed: 'Couldn\'t send your photos. Please try again.',
+      uploadFailed: 'Couldn’t upload your media. Please try again.',
       videoUnavailable: 'Video sharing isn\'t available yet.',
       cameraUnavailable: 'Photos captured on this device are unavailable.',
       cameraEmptyThumbnail: 'No photos taken yet.',
@@ -1411,40 +1535,40 @@ const AppContent appContentEn = AppContent(
       billingPending: 'Verifying your purchase. You can check its status without buying again.',
       billingNothingToRestore: 'No monthly subscription was found for this account.',
       billingError: 'Couldn\'t start your purchase. Please try again later.',
-      premiumRequired: 'One of you needs an active monthly subscription.',
+      premiumRequired: 'Couldn’t check account access. Please try again shortly.',
       premiumTitle: 'A monthly subscription is needed',
       premiumAction: 'View monthly subscription',
       billingServerPending: 'Your purchase is complete. Access will be available after server verification. We\'ll keep checking without charging you again.',
       billingServerUnavailable: 'Couldn\'t verify your purchase with the server. Please check again later.',
       recoveryContextChanged: 'Your connected partner has changed. Open recovery for your current partner and try again.',
       recoveryCreditRequired: 'No unused recovery purchase was found. Please check your purchase status.',
-      partnerPremium: 'You\'re sharing your partner\'s monthly subscription.',
+      partnerPremium: 'You’re sharing your partner’s 50 GB plan.',
       recoveryAvailable: 'You have memories together. Check which records can be recovered.',
       useRecoveryCredit: 'Use existing recovery purchase',
       recoveryCreditNote: 'You have an unused recovery purchase. Use it once at no extra cost.',
       recoveryResume: 'Continue record recovery',
       recoveryAction: 'Recover records',
-      recoveryConfirm: 'Recover past records with your current partner, {partner}. This is a one-time payment of {amount} USD, separate from your subscription.',
+      recoveryConfirm: 'Recover past records with your current partner, {partner}, for a one-time payment of {amount} USD.',
       recoveryCreditConfirm: 'Recover past records with your current partner, {partner}, at no extra cost.',
-      recoveryNote: 'Reconnect with the same partner first. Recovery requires a monthly subscription and a separate recovery purchase. Deleted records can\'t be recovered.',
+      recoveryNote: 'Use a recovery purchase after reconnecting with the same partner. Deleted records can’t be recovered.',
       recoverySuccess: 'Your shared photos and call records are available again.',
     ),
     billing: AppContentV6Billing(
-      section: 'Membership',
-      settingsLabel: 'Plans and payments',
-      title: 'Payment',
-      brand: 'CAMEO membership',
-      headline: 'Together.\nEvery day.',
-      subtitle: 'Choose your monthly plan.',
+      section: 'Storage',
+      settingsLabel: 'Storage plans',
+      title: 'Storage',
+      brand: 'CAMEO Pro',
+      headline: 'More room.\nFor you two.',
+      subtitle: '50 GB for media.',
       currency: 'USD',
       monthlyPriceCents: 499,
       recoveryPriceCents: 2990,
-      monthlyLabel: 'Monthly plan',
+      monthlyLabel: '50 GB storage',
       monthlyPeriod: '/ mo',
-      monthlyDetail: 'Monthly access',
+      monthlyDetail: '50 GB shared',
       monthlySummary: '{amount} USD per month',
-      monthlyBenefit: 'One membership for both of you',
-      monthlyRecoveryNote: 'Recovering records with a previous partner is a separate one-time purchase.',
+      monthlyBenefit: 'Shared by both of you',
+      monthlyRecoveryNote: '1 GB is free. Record recovery is a separate one-time purchase.',
       selected: 'Selected',
       selectPlan: 'Select monthly plan',
       continueLabel: 'Review purchase',
@@ -1453,13 +1577,13 @@ const AppContent appContentEn = AppContent(
       previewNote: 'Renews monthly · Cancel anytime',
       priceNote: 'Prices are in US dollars (USD).',
       confirmTitle: 'Review your purchase',
-      monthlyConfirm: 'Monthly subscription · {amount} USD / month\n\nRenews automatically each month. Manage or cancel in your store subscription settings.',
+      monthlyConfirm: '50 GB shared storage · {amount} USD / month\n\nRenews monthly. Cancel in your store subscription settings.',
       cancel: 'Cancel',
-      successTitle: 'Your membership is ready',
-      successBody: 'Your monthly subscription is active. Keep your photos and call records together.',
+      successTitle: 'More room for memories',
+      successBody: 'Keep your photos and videos in 50 GB of shared storage.',
       done: 'Back to settings',
-      active: 'Monthly subscription active',
-      activeBody: 'Your monthly membership is active.',
+      active: '50 GB plan active',
+      activeBody: 'You can store up to 50 GB together.',
       failure: 'Couldn\'t complete your purchase. Please try again.',
       cancelled: 'Purchase canceled. Nothing has changed.',
       recoveryTitle: 'Recover your memories',
@@ -1478,7 +1602,6 @@ const AppContent appContentEn = AppContent(
       photoCount: 'Photos: {count}',
       callCount: 'Call records: {count}',
       subscribeLabel: 'Subscribe for {amount}',
-      paywallSubtitle: 'Subscribe to pair.',
     ),
     breakup: AppContentV6Breakup(
       settingsLabel: 'Disconnect partner',
@@ -1499,7 +1622,7 @@ const AppContent appContentEn = AppContent(
         AppContentV6BreakupStep(
           title: 'Your memories stay archived',
           body: 'Your shared photos and call records stay with this account and are hidden from the album after you disconnect.',
-          detail: 'Log back in and reconnect with the same partner. An active monthly subscription and a one-time {amount} USD recovery purchase let you recover your records.',
+          detail: 'Reconnect with the same partner, then recover your records with a one-time {amount} USD purchase.',
         ),
         AppContentV6BreakupStep(
           title: 'One last check',
@@ -1575,7 +1698,7 @@ const AppContent appContentEn = AppContent(
     ),
     album: AppContentV6Album(
       selectLabel: 'Select photos',
-      importLabel: 'Import photos',
+      importLabel: 'Import photos and videos',
       likedLabel: 'Favorite photos',
       deletedLabel: 'Recently deleted photos',
       closeLabel: 'Close',
@@ -1593,6 +1716,7 @@ const AppContent appContentEn = AppContent(
     ),
     viewer: AppContentV6Viewer(
       thumbnailLabel: 'Photo {index}',
+      unavailable: 'This memory is unavailable.',
     ),
     review: AppContentV6Review(
       sendLabel: 'Send',
@@ -1655,6 +1779,62 @@ const AppContent appContentEn = AppContent(
       videoCapture: 'Record video',
       call: 'Call',
       inlinePhoto: 'Photo shared during the call',
+    ),
+    phone: AppContentV6Phone(
+      countryTitle: 'Country or region',
+      countrySearch: 'Country or calling code',
+      noCountries: 'No countries found',
+      numberPlaceholder: 'Phone number',
+      countryLabel: 'Region {country}, calling code +{code}',
+      invalidPhone: 'Check your country code and phone number.',
+    ),
+    storage: AppContentV6Storage(
+      title: 'Storage',
+      freePlan: 'Free · 1 GB',
+      proPlan: 'Pro · 50 GB',
+      usage: '{used} of {limit} used',
+      reserved: 'Uploading {amount}',
+      unavailable: 'Usage unavailable',
+      upgrade: 'Upgrade to 50 GB',
+      full: 'Storage is full',
+      quotaExceeded: 'Not enough storage. Upgrade or remove some photos and videos.',
+      proFull: 'Your storage is full. Remove some photos or videos and try again.',
+      serverUnavailable: 'Storage plans are unavailable. Please try again later.',
+      freeDetail: 'Start with 1 GB free. Upgrade when you need more space.',
+      keepAccess: 'Existing photos, videos, and call records stay available when storage is full.',
+      videoUnsupported: 'Choose an MP4 or MOV video.',
+      videoTooLarge: 'Choose a video of 250 MB or less.',
+      videoFailed: 'Couldn’t open this video. Please choose another file.',
+      recordingFailed: 'Couldn’t record the video. Please try again.',
+      media: 'Photos and videos',
+      playVideo: 'Play video',
+      pauseVideo: 'Pause video',
+      replayVideo: 'Replay video',
+      unlimited: 'Unlimited storage',
+      proCapacity: 'Pro · {amount}',
+      freeCapacity: 'Free · {amount}',
+      videoNotReady: 'Video uploads are unavailable right now. Please try again later.',
+    ),
+    mediaDetails: AppContentV6MediaDetails(
+      title: 'Media details',
+      more: 'More options',
+      photo: 'Photo',
+      video: 'Video',
+      dimensions: 'Dimensions: {width} × {height}',
+      duration: 'Duration: {duration}',
+      close: 'Close',
+    ),
+    record: AppContentV6Record(
+      viewContext: 'View previous 5 min',
+      collapseContext: 'Hide earlier conversation',
+      collapse: 'Collapse conversation',
+      expand: 'Expand conversation',
+      highlight: 'Highlight #{number} · {time}',
+      remaining: '{time} left',
+      showControls: 'Show playback controls',
+      seek: 'Playback position',
+      play: 'Play',
+      pause: 'Pause',
     ),
   ),
 );

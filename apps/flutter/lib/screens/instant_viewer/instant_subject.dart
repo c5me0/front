@@ -12,6 +12,7 @@ class InstantSubject {
     required this.share,
     this.albumPhotoId,
     this.video = false,
+    this.aspectRatio = 3 / 4,
   });
 
   final ImageProvider image;
@@ -21,6 +22,7 @@ class InstantSubject {
   final String? albumPhotoId;
 
   final bool video;
+  final double aspectRatio;
 }
 
 final InstantSubject partnerInstant = InstantSubject(

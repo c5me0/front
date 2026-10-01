@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../api/cameo_api.dart';
 import '../api/media_models.dart';
+import '../api/api_models.dart';
 import 'captured_photo.dart';
 import 'photo_upload.dart';
 
@@ -13,6 +14,8 @@ class RemoteAlbum extends ChangeNotifier {
   CameoApi? _api;
   String? ownerId, _partnerId;
   void Function(ApiException)? onError;
+  ApiStorage? Function()? _storage;
+  VoidCallback? _storageChanged;
   final Map<String, ApiPhoto> photos = {};
   final Map<String, ApiCall> calls = {};
   final Map<String, ApiPhoto> favoritePhotos = {};
@@ -34,13 +37,22 @@ class RemoteAlbum extends ChangeNotifier {
   bool get busy => loading || uploading || _mutating.isNotEmpty;
   bool _current(int epoch) => !_disposed && epoch == _epoch;
 
+  void reportUploadError(ApiException problem) {
+    _failure(problem, _epoch);
+    if (!_disposed) notifyListeners();
+  }
+
   void configure(
     CameoApi? api,
     String? owner,
     String? partner, {
     void Function(ApiException)? onError,
+    ApiStorage? Function()? storage,
+    VoidCallback? onStorageChanged,
   }) {
     this.onError = onError;
+    _storage = storage;
+    _storageChanged = onStorageChanged;
     if (identical(api, _api) && owner == ownerId && partner == _partnerId) {
       return;
     }
@@ -297,6 +309,7 @@ class RemoteAlbum extends ChangeNotifier {
       _mutate('photo:$id', (api) => api.deletePhoto(id), () {
         photos.remove(id);
         favoritePhotos.remove(id);
+        _storageChanged?.call();
       });
   Future<bool> favoriteCall(String id, bool value) =>
       _mutate('call:$id', (api) => api.favoriteCall(id, value), () {
@@ -314,6 +327,7 @@ class RemoteAlbum extends ChangeNotifier {
       _mutate('call:$id', (api) => api.deleteCall(id), () {
         calls.remove(id);
         favoriteCalls.remove(id);
+        _storageChanged?.call();
       });
 
   Future<List<ApiPhoto>> upload(List<CapturedPhoto> captures) async {
@@ -324,20 +338,27 @@ class RemoteAlbum extends ChangeNotifier {
     error = null;
     notifyListeners();
     final added = <ApiPhoto>[];
+    String? pendingId;
     try {
       for (final capture in captures) {
         final data = await preparePhoto(capture);
         if (!_current(epoch)) return const [];
+        if (_storage?.call()?.fits(data.sizeBytes + data.thumbnail.length) ==
+            false) {
+          throw const ApiException('storage:quota_exceeded');
+        }
         final upload = await api.reservePhoto(
           contentType: data.contentType,
-          sizeBytes: data.bytes.length,
+          sizeBytes: data.sizeBytes,
           thumbnailSizeBytes: data.thumbnail.length,
           width: data.width,
           height: data.height,
           takenAt: DateTime.now(),
+          durationSeconds: data.durationSeconds,
         );
+        pendingId = upload.photoId;
         if (!_current(epoch)) return const [];
-        await api.uploadObject(upload.url, data.bytes, data.contentType);
+        await data.uploadOriginal(api, upload.url);
         if (!_current(epoch)) return const [];
         await api.uploadObject(
           upload.thumbnailUrl,
@@ -346,6 +367,7 @@ class RemoteAlbum extends ChangeNotifier {
         );
         if (!_current(epoch)) return const [];
         final photo = await api.completePhoto(upload.photoId);
+        pendingId = null;
         if (!_current(epoch)) return const [];
         photos[photo.id] = photo;
         added.add(photo);
@@ -355,8 +377,16 @@ class RemoteAlbum extends ChangeNotifier {
     } catch (problem) {
       _failure(problem, epoch);
     } finally {
+      // Remove this account's pending object after a failed transfer. Never
+      // issue cleanup mutations after account or couple ownership changes.
+      if (pendingId != null && _current(epoch)) {
+        try {
+          await api.deletePhoto(pendingId);
+        } catch (_) {}
+      }
       if (_current(epoch)) {
         uploading = false;
+        _storageChanged?.call();
         notifyListeners();
       }
     }

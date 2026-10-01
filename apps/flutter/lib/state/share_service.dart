@@ -54,40 +54,63 @@ class SystemShareService implements ShareService {
   @override
   Future<ShareOutcome> shareImages(List<String> images, {Rect? origin}) async {
     if (images.isEmpty) return ShareOutcome.unavailable;
+    Directory? directory;
+    final client = http.Client();
     try {
-      final assets = [
-        for (final i in images)
-          if (isBundleAsset(i)) i,
-      ];
-      final written = await writeAssetsToTemp(assets);
-      var next = 0;
-      final paths = [
-        for (final i in images) isBundleAsset(i) ? written[next++] : i,
-      ];
-      for (var i = 0; i < paths.length; i++) {
-        if (!paths[i].startsWith('https://') && !paths[i].startsWith('http://')) continue;
-        final client = http.Client();
-        try {
-          final request = http.Request('GET', mediaUri(paths[i]))..followRedirects = false;
-          final response = await client.send(request).timeout(const Duration(seconds: 30));
+      directory = await Directory.systemTemp.createTemp('cameo-share-');
+      final paths = <String>[];
+      for (var i = 0; i < images.length; i++) {
+        final source = images[i];
+        if (isBundleAsset(source)) {
+          paths.addAll(await writeAssetsToTemp([source], directory: directory));
+        } else if (source.startsWith('https://') ||
+            source.startsWith('http://')) {
+          final request = http.Request('GET', mediaUri(source))
+            ..followRedirects = false;
+          final response = await client
+              .send(request)
+              .timeout(const Duration(seconds: 30));
           if (response.statusCode != 200) return ShareOutcome.unavailable;
-          final bytes = <int>[];
-          await for (final chunk in response.stream.timeout(const Duration(seconds: 30))) {
-            bytes.addAll(chunk);
-            if (bytes.length > 25 << 20) return ShareOutcome.unavailable;
-          }
-          final extension = switch (response.headers['content-type']?.split(';').first) {
-            'image/png' => 'png', 'image/webp' => 'webp', 'image/heic' => 'heic', _ => 'jpg',
+          final type = response.headers['content-type']?.split(';').first;
+          final extension = switch (type) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/heic' => 'heic',
+            'video/mp4' => 'mp4',
+            'video/quicktime' => 'mov',
+            _ => null,
           };
-          final directory = await Directory.systemTemp.createTemp('cameo-share-');
-          final file = File('${directory.path}/photo.$extension');
-          await file.writeAsBytes(bytes);
-          paths[i] = file.path;
-        } finally { client.close(); }
+          if (extension == null) return ShareOutcome.unavailable;
+          final limit = type!.startsWith('video/') ? 250000000 : 25 << 20;
+          if ((response.contentLength ?? 0) > limit) {
+            return ShareOutcome.unavailable;
+          }
+          final file = File('${directory.path}/moment-$i.$extension');
+          final sink = file.openWrite();
+          var received = 0;
+          try {
+            await sink.addStream(
+              response.stream.timeout(const Duration(seconds: 30)).map((chunk) {
+                received += chunk.length;
+                if (received > limit) {
+                  throw const FormatException('Media exceeds share limit');
+                }
+                return chunk;
+              }),
+            );
+          } finally {
+            await sink.close();
+          }
+          if (received == 0) return ShareOutcome.unavailable;
+          paths.add(file.path);
+        } else {
+          paths.add(source);
+        }
       }
       final result = await SharePlus.instance.share(
         ShareParams(
-          files: [for (final p in paths) XFile(p)],
+          files: [for (final path in paths) XFile(path)],
           sharePositionOrigin: origin,
         ),
       );
@@ -96,9 +119,15 @@ class SystemShareService implements ShareService {
         ShareResultStatus.dismissed => ShareOutcome.dismissed,
         ShareResultStatus.unavailable => ShareOutcome.unavailable,
       };
-    } catch (error) {
-      debugPrint('[cameo] sharing unavailable');
+    } catch (_) {
       return ShareOutcome.unavailable;
+    } finally {
+      client.close();
+      if (directory != null) {
+        try {
+          await directory.delete(recursive: true);
+        } on FileSystemException catch (_) {}
+      }
     }
   }
 }

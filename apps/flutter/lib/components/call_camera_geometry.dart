@@ -143,26 +143,35 @@ double shotRingSweepDeg(Duration elapsed) => shotRingProgress(elapsed) * 360;
 double shotRingCircumference() => 2 * math.pi * CameoLayout.shotV6RingRadius;
 
 double shotRingBox() =>
-    2 * (CameoLayout.shotV6RingRadius + CameoLayout.shotV6RingStrokeWidth / 2);
+    CameoLayout.shotV6RecordingSize + 2 * CameoLayout.shotV6RingStrokeWidth;
 
 String recordingLabel(Duration duration) {
   final s = math.max(0, (duration.inMilliseconds / 1000).round());
   return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
 }
 
-Rect cameraViewfinderRect(double w) {
-  const pad = CameoLayout.cameraV6ViewfinderContainerPadding;
-  final width = w - 2 * pad;
-  return Rect.fromLTWH(
-    pad,
-    CameoLayout.cameraV6ViewfinderTop,
-    width,
-    width / CameoLayout.cameraV6ViewfinderAspectRatio,
+Rect cameraViewfinderRect(
+  double w, {
+  double height = CameoLayout.screenV6Height,
+}) {
+  const top = CameoLayout.cameraV6ViewfinderTop;
+  const ratio = CameoLayout.cameraV6ViewfinderAspectRatio;
+  final available = math.max(
+    1.0,
+    height - top - CameoLayout.cameraV6BottomNavHeight - CameoSpace.s12,
   );
+  final width = math.min(
+    w - 2 * CameoLayout.cameraV6ViewfinderContainerPadding,
+    available * ratio,
+  );
+  return Rect.fromLTWH((w - width) / 2, top, width, width / ratio);
 }
 
-Offset cameraShotCenter(double w) {
-  final vf = cameraViewfinderRect(w);
+Offset cameraShotCenter(
+  double w, {
+  double height = CameoLayout.screenV6Height,
+}) {
+  final vf = cameraViewfinderRect(w, height: height);
   return Offset(w / 2, vf.bottom - CameoLayout.cameraV6ShotBottomOffset);
 }
 

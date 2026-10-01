@@ -386,15 +386,14 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   String? _pairingCode;
   String? _partnerPhone;
   String? backendError;
-  ApiPremium? _premium;
-  Timer? _premiumExpiry;
+  Timer? _storageExpiry;
 
-  void _applyPremium(ApiPremium? premium) {
-    _premiumExpiry?.cancel();
-    _premium = premium;
-    final until = premium?.until;
-    if (premium?.paidAt(_now()) == true && until != null) {
-      _premiumExpiry = Timer(until.difference(_now()), () {
+  void _applyStorage(ApiStorage? storage) {
+    _storageExpiry?.cancel();
+    _storage = storage;
+    final until = storage?.until;
+    if (storage?.paidAt(_now()) == true && until != null) {
+      _storageExpiry = Timer(until.difference(_now()), () {
         if (_disposed) return;
         _syncBackendAlbum();
         notifyListeners();
@@ -403,15 +402,20 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     }
   }
 
+  ApiStorage? _storage;
+  @override
+  ApiStorage? get storage => usesBackend ? _storage : null;
+  bool get hasPaidStorage =>
+      usesBackend ? _storage?.paidAt(_now()) == true : monthlyActive;
+  bool get shouldOfferStorageUpgrade =>
+      storage?.isPro == false || !hasPaidStorage;
+
   int _restoreCredits = 0;
   ApiCouple? _remoteCouple;
-  @override
-  ApiPremium? get premium => usesBackend ? _premium : null;
   @override
   int get restoreCredits => usesBackend ? _restoreCredits : 0;
   @override
   ApiCouple? get remoteCouple => usesBackend ? _remoteCouple : null;
-  bool get premiumRequired => usesBackend && _premium?.paidAt(_now()) != true;
   bool get hasRestorable => remoteCouple?.canRestore == true;
   bool _updatingPreference = false;
   int _remoteRevision = 0;
@@ -439,7 +443,9 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     _album?.remote.configure(
       backend,
       userId,
-      usesBackend && !premiumRequired ? _session.partner?.id : null,
+      usesBackend ? _session.partner?.id : null,
+      storage: () => storage,
+      onStorageChanged: () => unawaited(refreshBackend()),
       onError: (error) {
         if (error.status == 401) _recordBackendError(error);
         if (error.status == 402) _recordBackendError(error);
@@ -501,14 +507,14 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     if (_disposed || generation != _generation || user.id != userId) {
       throw const ApiException('request_cancelled');
     }
-    if (user.premium == null) {
+    if (user.storage == null) {
       throw const ApiException('billing_server_unavailable');
     }
     if (user.partner?.id != _session.partner?.id) {
       await refreshBackend();
       throw const ApiException('request_cancelled');
     }
-    _applyPremium(user.premium);
+    _applyStorage(user.storage);
     _restoreCredits = user.restoreCredits;
     backendError = null;
     _syncBackendAlbum();
@@ -678,7 +684,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   void completeVerification(String phone, {bool forceOnboarding = false}) {
     if (usesBackend) {
       final verified = _verifiedRemote;
-      if (verified == null || verified.user.phone != koreanPhoneToE164(phone)) {
+      if (verified == null || verified.user.phone != phoneToE164(phone)) {
         return;
       }
       _verifiedRemote = null;
@@ -732,9 +738,6 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   Future<Partner> connectPartner(String code) async {
-    if (premiumRequired) {
-      throw const ApiException('purchase:required', status: 402);
-    }
     final generation = _generation;
     if (usesBackend) {
       _remoteRevision++;
@@ -779,7 +782,6 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   void skipPartner() {
-    if (premiumRequired) return;
     _set(_session.copyWith(partnerSkipped: true));
   }
 
@@ -790,7 +792,6 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   void completeOnboarding() {
-    if (premiumRequired) return;
     _set(_session.copyWith(status: SessionStatus.member));
   }
 
@@ -935,9 +936,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
 
   Future<bool> breakUp({required String expectedPartnerId}) async {
     if (usesBackend) {
-      if (_transaction ||
-          _premium == null ||
-          _session.partner?.id != expectedPartnerId) {
+      if (_transaction || _session.partner?.id != expectedPartnerId) {
         return false;
       }
       _transaction = true;
@@ -1096,8 +1095,9 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       _remoteUserId = null;
       _pairingCode = null;
       _partnerPhone = null;
-      _applyPremium(null);
+      _applyStorage(null);
       _restoreCredits = 0;
+      _storage = null;
       _remoteCouple = null;
     }
     _syncBackendAlbum();
@@ -1128,7 +1128,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   @override
   void dispose() {
     _disposed = true;
-    _premiumExpiry?.cancel();
+    _storageExpiry?.cancel();
     _generation++;
     _album = null;
     _api?.close();
@@ -1137,7 +1137,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
 
   Partner _remotePartner(ApiPartner partner) => Partner(
     id: partner.id,
-    name: partner.displayName ?? appContent.v6.backend.partnerName,
+    name: partner.displayName ?? appContentEn.v6.backend.partnerName,
     avatar: '',
   );
 
@@ -1146,7 +1146,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       _partnerPhone = null;
       _remoteCouple = null;
     }
-    _applyPremium(user.premium);
+    _applyStorage(user.storage);
     _restoreCredits = user.restoreCredits;
     backendError = null;
     _remoteUserId = user.id;
@@ -1154,7 +1154,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     _set(
       _session.copyWith(
         status: status ?? _session.status,
-        phone: localPhoneDisplay(user.phone),
+        phone: user.phone,
         name: user.displayName,
         partner: user.partner == null ? null : _remotePartner(user.partner!),
         prefs: SessionPrefs(
@@ -1178,7 +1178,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       if (error.meta['required'] == 'restore') {
         _restoreCredits = 0;
       } else {
-        _applyPremium(const ApiPremium(active: false, source: 'none'));
+        unawaited(refreshBackend());
       }
       _syncBackendAlbum();
       notifyListeners();

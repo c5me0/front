@@ -6,15 +6,10 @@ import '../../api/cameo_api.dart';
 import '../../api/media_models.dart';
 import '../../components/backend_notice.dart';
 import '../../components/confirm_sheet.dart';
-import '../../components/highlight_card_v6.dart';
 import '../../components/playback_controller.dart';
-import '../../components/player_bar_v6.dart';
-import '../../components/solid_button.dart';
-import '../../components/transcript_nav_v6.dart';
-import '../../components/transcript_v6_line.dart';
-import '../../components/transcript_v6_title.dart';
+import '../../components/transcript_reader.dart';
+import '../instant_viewer/instant_subject.dart';
 import '../../content/app.g.dart';
-import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/cameo_nav.dart';
 import '../../state/album_store.dart';
@@ -80,7 +75,6 @@ class _LiveTranscriptScreenState extends State<LiveTranscriptScreen>
                 position.inMilliseconds / 1000,
                 audio.playing,
               );
-              if (mounted) setState(() {});
             }),
           );
           _subscriptions.add(
@@ -197,202 +191,117 @@ class _LiveTranscriptScreenState extends State<LiveTranscriptScreen>
 
   @override
   Widget build(BuildContext context) {
-    final c = CameoTheme.colorsOf(context),
-        copy = AppContent.of(context).v6.backend;
-    final detail = _detail, playback = _playback;
-    final seconds = playback?.seconds ?? 0;
+    final copy = AppContent.of(context).v6.backend;
+    final detail = _detail;
     final owner = SessionScope.read(context).userId;
-    final highlights = <HighlightCardV6Line>[];
-    final lines = <Widget>[];
+    final entries = <TranscriptEntry>[];
     if (detail != null) {
       for (var i = 0; i < detail.transcript.length; i++) {
         final segment = detail.transcript[i];
-        final current = seconds >= segment.start && seconds < segment.end;
-        final side = segment.speakerId == owner
-            ? LabAlign.right
-            : LabAlign.left;
-        final highlighted = detail.highlights.any(
-          (h) =>
-              h.offsetSeconds >= segment.start &&
-              h.offsetSeconds <= segment.end,
-        );
-        if (highlighted) {
-          highlights.add((
+        // Highlights preserve the 15 seconds preceding the user's mark.
+        final highlight = detail.highlights
+            .where(
+              (mark) =>
+                  segment.end > mark.offsetSeconds - 15 &&
+                  segment.start <= mark.offsetSeconds,
+            )
+            .firstOrNull;
+        entries.add(
+          TranscriptEntry(
             id: '$i',
             text: segment.text,
-            side: side,
-            current: current,
-          ));
-        } else {
-          lines.add(
-            TranscriptLineV6(
-              id: '$i',
-              text: segment.text,
-              side: side,
-              current: current,
-              onPress: playback == null
-                  ? null
-                  : () => playback.seekTo(segment.start / playback.durationSec),
-            ),
-          );
-        }
+            start: segment.start,
+            end: segment.end,
+            right: segment.speakerId == owner,
+            highlight: highlight?.id,
+          ),
+        );
       }
     }
-    return ColoredBox(
-      color: c.backgroundCanvasNeutralStrong,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          SingleChildScrollView(
-            key: const ValueKey('transcript.live'),
-            padding: const EdgeInsets.only(
-              top: CameoLayout.transcriptV6HeaderHeight,
-              bottom: CameoLayout.tabBarV6FullContainerHeight,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_error != null)
-                  BackendNotice(
-                    message:
-                        '${apiErrorCodeText(_error!, copy: AppContent.of(context))} ${copy.retry}',
-                    onRetry: _load,
-                  ),
-                if (detail == null && _error == null)
-                  BackendNotice(message: copy.loading),
-                if (detail != null) ...[
-                  TranscriptTitleV6(
-                    title: detail.call.title ?? copy.callRecord,
-                    date: formatAlbumDate(
-                      detail.call.createdAt.toLocal(),
-                      languageCode: Localizations.localeOf(
-                        context,
-                      ).languageCode,
-                    ),
-                  ),
-                  if (detail.call.summary?.isNotEmpty == true)
-                    Padding(
-                      padding: const EdgeInsets.all(
-                        CameoLayout.transcriptV6LinePaddingX,
+    final notice = _error != null
+        ? '${apiErrorCodeText(_error!, copy: AppContent.of(context))} ${copy.retry}'
+        : detail == null
+        ? copy.loading
+        : detail.transcript.isEmpty
+        ? ({'pending', 'processing'}.contains(detail.call.transcriptStatus)
+              ? copy.transcriptPending
+              : copy.transcriptUnavailable)
+        : detail.recordingUrl == null
+        ? copy.recordingUnavailable
+        : null;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        TranscriptReader(
+          title: detail?.call.title ?? copy.callRecord,
+          subtitle: detail == null
+              ? ''
+              : formatAlbumDate(
+                  detail.call.createdAt.toLocal(),
+                  languageCode: Localizations.localeOf(context).languageCode,
+                ),
+          entries: entries,
+          playback: _playback,
+          liked: detail?.call.favorite ?? false,
+          onClose: () => CameoNav.pop(context),
+          onCall: () => CameoNav.openCall(context),
+          onLike: () => unawaited(_like()),
+          onDelete: () => setState(() => _deleteSheet = true),
+          notice: notice == null
+              ? null
+              : BackendNotice(
+                  message: notice,
+                  onRetry: _error == null ? null : _load,
+                ),
+          media: [
+            for (final photo in detail?.photos ?? const <ApiPhoto>[])
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: PressScale(
+                  accessibilityLabel: AppContent.of(context).v6.storage.media,
+                  onPress: () {
+                    _playback?.pause();
+                    AlbumScope.read(context).remote.receivedPhoto(photo);
+                    setInstantSubject(
+                      InstantSubject(
+                        image: NetworkImage(
+                          photo.isVideo ? photo.thumbnailUrl : photo.url,
+                        ),
+                        share: photo.url,
+                        albumPhotoId: photo.id,
+                        video: photo.isVideo,
+                        aspectRatio: (photo.height ?? 0) > 0
+                            ? (photo.width ?? 0) / photo.height!
+                            : 3 / 4,
                       ),
-                      child: CameoText(
-                        detail.call.summary!,
-                        style: CameoTextStyles.bodyLg,
-                        color: c.foregroundNeutralBase,
-                      ),
-                    ),
-                  if (detail.transcript.isEmpty)
-                    BackendNotice(
-                      message:
-                          {
-                            'pending',
-                            'processing',
-                          }.contains(detail.call.transcriptStatus)
-                          ? copy.transcriptPending
-                          : copy.transcriptUnavailable,
-                    ),
-                  ...lines,
-                  if (highlights.isNotEmpty)
-                    HighlightCardV6(
-                      lines: highlights,
-                      onLinePress: (line) {
-                        if (playback != null) {
-                          playback.seekTo(
-                            detail.transcript[int.parse(line.id)].start /
-                                playback.durationSec,
-                          );
-                        }
-                      },
-                    ),
-                  for (final photo in detail.photos)
-                    Padding(
-                      padding: const EdgeInsets.all(
-                        CameoLayout.transcriptV6LinePaddingX,
-                      ),
-                      child: Image.network(
-                        photo.url,
-                        fit: BoxFit.contain,
-                        semanticLabel: AppContent.of(
-                          context,
-                        ).v6.album.shareLabel,
-                      ),
-                    ),
-                  if (detail.recordingUrl == null)
-                    BackendNotice(message: copy.recordingUnavailable),
-                  Padding(
-                    padding: const EdgeInsets.all(
-                      CameoLayout.transcriptV6LinePaddingX,
-                    ),
-                    child: SolidButton(
-                      label: copy.delete,
-                      icon: CameoIconName.trash,
-                      onPress: () => setState(() => _deleteSheet = true),
+                    );
+                    CameoNav.openInstant(context);
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(CameoRadius.xl),
+                    child: Image.network(
+                      photo.thumbnailUrl,
+                      fit: BoxFit.contain,
                     ),
                   ),
-                ],
-              ],
+                ),
+              ),
+          ],
+        ),
+        if (_deleteSheet)
+          Positioned.fill(
+            child: ConfirmSheet(
+              visible: true,
+              title: copy.callDelete,
+              body: '',
+              confirmLabel: copy.delete,
+              cancelLabel: copy.cancel,
+              destructive: true,
+              onConfirm: _delete,
+              onCancel: () => setState(() => _deleteSheet = false),
             ),
           ),
-          if (playback != null)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: PlayerBarV6(
-                playback: playback,
-                markers: [
-                  for (final highlight in detail!.highlights)
-                    PlayerV5MarkerContent(
-                      nodeId: highlight.id,
-                      leftPx: 0,
-                      widthPx: 0,
-                      start: (highlight.offsetSeconds / playback.durationSec)
-                          .clamp(0, 1),
-                      width: (1 / playback.durationSec).clamp(0, 1),
-                    ),
-                ],
-              ),
-            ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            height: CameoLayout.transcriptV6HeaderHeight,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(gradient: c.gradients.topLinear),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: CameoLayout.topNavV6Top,
-            child: TranscriptNavV6(
-              onClose: () => CameoNav.pop(context),
-              onCall: () {
-                unawaited(_audio?.pause());
-                CameoNav.openCall(context);
-              },
-              liked: detail?.call.favorite ?? false,
-              onToggleLike: _like,
-            ),
-          ),
-          if (_deleteSheet)
-            Positioned.fill(
-              child: ConfirmSheet(
-                visible: true,
-                title: copy.callDelete,
-                body: '',
-                confirmLabel: copy.delete,
-                cancelLabel: copy.cancel,
-                destructive: true,
-                onConfirm: _delete,
-                onCancel: () => setState(() => _deleteSheet = false),
-              ),
-            ),
-        ],
-      ),
+      ],
     );
   }
 }

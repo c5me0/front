@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:purchases_flutter/purchases_flutter.dart' as rc;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../api/cameo_api.dart';
+import '../api/api_models.dart';
 import 'purchase_account.dart';
 import 'payment_service.dart' show PaymentKind, paymentAmountCents;
 
@@ -84,8 +85,10 @@ class RevenueCatBilling extends ChangeNotifier {
   bool get active =>
       _ownerId != null &&
       account.userId == _ownerId &&
-      account.premium?.paidAt(DateTime.now()) == true;
-  bool get serverReady => account.premium != null;
+      account.storage?.paidAt(DateTime.now()) == true &&
+      account.storage?.tier == config.entitlementId &&
+      (account.storage?.quotaBytes ?? 0) >= ApiStorage.proBytes;
+  bool get serverReady => account.storage?.quotaBytes != null;
   bool get storeSubscriptionActive {
     final value = entitlement;
     return _ownerId != null &&
@@ -272,6 +275,7 @@ class RevenueCatBilling extends ChangeNotifier {
       await account.refreshPurchaseStatus();
     }
     if (!_current(epoch)) return;
+    if (!serverReady) throw const ApiException('storage_plan_unavailable');
     await account.refreshCouple();
     if (!_current(epoch)) return;
     if (active) pending = false;
@@ -326,7 +330,6 @@ class RevenueCatBilling extends ChangeNotifier {
           await _forgetRecovery(owner);
           return CheckoutOutcome.completed;
         }
-        if (!active) throw const ApiException('purchase:required', status: 402);
         if (account.restoreCredits == 0) {
           if (recoveryPending) {
             throw const ApiException('billing_server_pending');

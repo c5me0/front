@@ -3,7 +3,7 @@ import '../api/api_models.dart';
 /// The authenticated backend is authoritative for shared membership and credits.
 abstract interface class PurchaseAccount {
   String? get userId;
-  ApiPremium? get premium;
+  ApiStorage? get storage;
   int get restoreCredits;
   ApiCouple? get remoteCouple;
   Future<ApiUser> refreshPurchaseStatus();

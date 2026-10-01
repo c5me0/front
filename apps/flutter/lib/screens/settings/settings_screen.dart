@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../components/confirm_sheet.dart';
 import '../../components/settings_v6.dart';
+import '../../components/storage_usage.dart';
 import '../../components/solid_button.dart';
 import '../../content/app.g.dart';
 import '../../content/lab.g.dart';
@@ -328,6 +329,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     key: SettingsScreen.billingKey,
                     title: AppContent.of(context).v6.billing.section,
                     children: [
+                      StorageUsage(storage: controller.storage),
                       SettingsRowV6(
                         key: SettingsScreen.paymentKey,
                         label: AppContent.of(context).v6.billing.settingsLabel,

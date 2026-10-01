@@ -42,14 +42,12 @@ import 'route_params.dart';
 import 'status_bar.dart';
 import 'zoom_source.dart';
 
-/// Live accounts must finish each step in order. The server's paid entitlement
-/// is authoritative; a receipt, local flag, or unconfigured free server is not.
+/// Authentication and partner setup are independent of the storage plan.
 String? requiredLiveLocation(SessionController controller) {
   if (!controller.usesBackend) return null;
   final session = controller.session;
   if (session.status == SessionStatus.signedOut) return CameoRoutes.welcome;
   if (session.name?.trim().isNotEmpty != true) return CameoRoutes.profile;
-  if (controller.premiumRequired) return CameoRoutes.paywall;
   if (session.partner == null && !session.partnerSkipped) {
     return CameoRoutes.partner;
   }
@@ -68,7 +66,6 @@ String? liveRouteRedirect(SessionController controller, String path) {
       CameoRoutes.verifyPath,
     },
     CameoRoutes.profile => const {CameoRoutes.profile},
-    CameoRoutes.paywall => const {CameoRoutes.paywall},
     CameoRoutes.partner => const {
       CameoRoutes.partner,
       CameoRoutes.profile,
@@ -83,8 +80,8 @@ String? liveRouteRedirect(SessionController controller, String path) {
     _ => null,
   };
   if (allowed != null) return allowed.contains(path) ? null : required;
-  if (path == CameoRoutes.paywall ||
-      CameoRoutes.table[path]?.guard == SessionStatus.signedOut ||
+  if (path == CameoRoutes.paywall) return CameoRoutes.payment;
+  if (CameoRoutes.table[path]?.guard == SessionStatus.signedOut ||
       (CameoRoutes.table[path]?.guard == SessionStatus.onboarding &&
           path != CameoRoutes.partner)) {
     return CameoRoutes.home;
@@ -425,7 +422,7 @@ abstract final class CameoRoutes {
       path: paywall,
       presentation: CameoPresentation.push,
       statusBar: _dark,
-      builder: (_, _) => const RevenueCatPaymentScreen(requiredAccess: true),
+      builder: (_, _) => const RevenueCatPaymentScreen(),
     ),
     CameoRouteSpec(
       path: payment,

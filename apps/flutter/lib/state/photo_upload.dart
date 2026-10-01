@@ -4,22 +4,46 @@ import 'dart:ui' as ui;
 
 import '../api/cameo_api.dart';
 import 'captured_photo.dart';
+import 'video_media.dart';
 
 class PreparedPhoto {
-  const PreparedPhoto(
-    this.bytes,
+  PreparedPhoto(
+    Uint8List data,
     this.thumbnail,
     this.contentType,
     this.width,
     this.height,
-  );
-  final Uint8List bytes, thumbnail;
+  ) : bytes = data,
+      filePath = null,
+      sizeBytes = data.length,
+      durationSeconds = null;
+  PreparedPhoto.video(
+    String path,
+    int size,
+    this.thumbnail,
+    this.contentType,
+    this.width,
+    this.height,
+    this.durationSeconds,
+  ) : bytes = null,
+      filePath = path,
+      sizeBytes = size;
+
+  final Uint8List? bytes;
+  final Uint8List thumbnail;
+  final String? filePath;
+  final int sizeBytes;
+  final double? durationSeconds;
+
+  Future<void> uploadOriginal(CameoApi api, String url) => filePath == null
+      ? api.uploadObject(url, bytes!, contentType)
+      : api.uploadFileObject(url, filePath!, sizeBytes, contentType);
   final String contentType;
   final int width, height;
 }
 
 Future<PreparedPhoto> preparePhoto(CapturedPhoto photo) async {
-  if (photo.isVideo) throw const ApiException('video_unavailable');
+  if (photo.isVideo) return _prepareVideo(photo);
   if (photo.source == CapturedPhotoSource.placeholder) {
     throw const ApiException('camera_unavailable');
   }
@@ -47,6 +71,10 @@ Future<PreparedPhoto> preparePhoto(CapturedPhoto photo) async {
     if (thumbnail.length > 1 << 20) throw const ApiException('photo_too_large');
     final type = _contentType(bytes);
     return PreparedPhoto(bytes, thumbnail, type, width, height);
+  } on ApiException {
+    rethrow;
+  } catch (_) {
+    throw const ApiException('photo_unsupported');
   } finally {
     image?.dispose();
     codec?.dispose();
@@ -84,4 +112,48 @@ String _contentType(Uint8List bytes) {
     return 'image/heic';
   }
   throw const ApiException('photo_unsupported');
+}
+
+Future<PreparedPhoto> _prepareVideo(CapturedPhoto photo) async {
+  if (photo.source == CapturedPhotoSource.placeholder) {
+    throw const ApiException('camera_unavailable');
+  }
+  final file = File(photo.uri);
+  final size = await file.length();
+  if (size > maxVideoBytes) throw const ApiException('video_too_large');
+  if (size < 12) throw const ApiException('video_unsupported');
+  final handle = await file.open();
+  late Uint8List header;
+  try {
+    header = await handle.read(32);
+  } finally {
+    await handle.close();
+  }
+  if (String.fromCharCodes(header.sublist(4, 8)) != 'ftyp') {
+    throw const ApiException('video_unsupported');
+  }
+  final brand = String.fromCharCodes(header.sublist(8, 12));
+  final type = switch (brand) {
+    'qt  ' => 'video/quicktime',
+    'isom' || 'iso2' || 'mp41' || 'mp42' || 'avc1' || 'M4V ' => 'video/mp4',
+    _ => throw const ApiException('video_unsupported'),
+  };
+  final metadata = photo.thumbnailPath == null
+      ? await videoOfFile(photo.uri, source: photo.source)
+      : photo;
+  final thumbnail = await File(metadata.thumbnailPath!).readAsBytes();
+  if (thumbnail.isEmpty ||
+      thumbnail.length > 1 << 20 ||
+      metadata.videoDuration == null) {
+    throw const ApiException('video_unreadable');
+  }
+  return PreparedPhoto.video(
+    photo.uri,
+    size,
+    thumbnail,
+    type,
+    metadata.width.round(),
+    metadata.height.round(),
+    metadata.videoDuration!.inMilliseconds / 1000,
+  );
 }

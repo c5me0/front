@@ -14,7 +14,9 @@ import '../../components/confirm_sheet.dart';
 import '../../components/empty_album_v6.dart';
 import '../../components/backend_notice.dart';
 import '../../components/solid_button.dart';
+import '../../components/glass_caption.dart';
 import '../../api/api_error_text.dart';
+import '../../api/cameo_api.dart' show ApiException;
 import '../../components/photo_grid_v6.dart';
 import '../../content/app.g.dart';
 import '../../design_system/design_system.dart';
@@ -511,8 +513,19 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
 
   void _import() {
     if (!_isTop) return;
-    if (SessionScope.read(context).premiumRequired) {
-      unawaited(CameoNav.openPayment(context));
+    final session = SessionScope.read(context);
+    if (session.usesBackend && session.session.partner == null) {
+      unawaited(CameoNav.openConnect(context));
+      return;
+    }
+    if (session.storage?.isFull == true) {
+      if (session.shouldOfferStorageUpgrade) {
+        unawaited(CameoNav.openPayment(context));
+      } else {
+        AlbumScope.read(context).remote.reportUploadError(
+          const ApiException('storage:quota_exceeded'),
+        );
+      }
       return;
     }
     unawaited(importPhotosFrom(context));
@@ -645,6 +658,7 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
 
   void _reportTabBarMode() {
     final forced = isSelectionMode(_mode);
+    TabBarVisibility.report(context, hidden: forced);
     final mode = forced || _barScroll.minimized
         ? TabBarV6Mode.mini
         : TabBarV6Mode.full;
@@ -929,12 +943,6 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                         EmptyAlbumV6(
                           hasPartner: data.hasPartner,
                           meName: session.name,
-                          title: controller.premiumRequired && hasPartner
-                              ? AppContent.of(context).v6.backend.premiumTitle
-                              : null,
-                          actionLabel: controller.premiumRequired && hasPartner
-                              ? AppContent.of(context).v6.backend.premiumAction
-                              : null,
                           onImport: _import,
                           onConnect: () => CameoNav.openConnect(context),
                         ),
@@ -962,17 +970,16 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                       : null,
                 ),
               ),
-              if (recoveryId != null ||
-                  (controller.premiumRequired && hasPartner && !showEmpty))
+              if (recoveryId != null)
                 Positioned(
                   key: const ValueKey('album.membershipNotice'),
                   top: CameoLayout.albumNavV6HeaderHeight,
                   left: 0,
                   right: 0,
                   child: BackendNotice(
-                    message: recoveryId != null
-                        ? AppContent.of(context).v6.backend.recoveryAvailable
-                        : AppContent.of(context).v6.backend.premiumRequired,
+                    message: AppContent.of(
+                      context,
+                    ).v6.backend.recoveryAvailable,
                     onRetry: () =>
                         CameoNav.openPayment(context, archiveId: recoveryId),
                   ),
@@ -987,16 +994,77 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                   left: 0,
                   right: 0,
                   child: BackendNotice(
-                    message: album.remote.error != null
+                    message: album.remote.error == 'storage:quota_exceeded'
+                        ? SessionScope.read(context).shouldOfferStorageUpgrade
+                              ? '${AppContent.of(context).v6.storage.quotaExceeded} ${AppContent.of(context).v6.storage.upgrade}'
+                              : AppContent.of(context).v6.storage.proFull
+                        : album.remote.error != null
                         ? '${apiErrorCodeText(album.remote.error!, copy: AppContent.of(context))} ${AppContent.of(context).v6.backend.retry}'
                         : album.remote.uploading
                         ? AppContent.of(context).v6.backend.uploading
                         : AppContent.of(context).v6.backend.loading,
-                    onRetry: album.remote.error != null
+                    onRetry: album.remote.error == 'storage:quota_exceeded'
+                        ? SessionScope.read(context).shouldOfferStorageUpgrade
+                              ? () => unawaited(CameoNav.openPayment(context))
+                              : null
+                        : album.remote.error != null
                         ? () => unawaited(album.remote.refresh())
                         : null,
                   ),
                 ),
+              Positioned(
+                left: CameoSpace.s16,
+                right: CameoSpace.s16,
+                bottom: CameoLayout.screenV6HomeIndicatorHeight,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([_modeProgress, _scrollY]),
+                  builder: (context, _) {
+                    final sections = _drawn(_data);
+                    if (sections.isEmpty || _modeProgress.value <= 0) {
+                      return const SizedBox.shrink();
+                    }
+                    final section =
+                        sections
+                            .where(
+                              (s) =>
+                                  (_tops[s.id]?.value ?? 0) <=
+                                  _scrollY.value +
+                                      CameoLayout.albumNavV6HeaderHeight,
+                            )
+                            .lastOrNull ??
+                        sections.first;
+                    final date =
+                        section.date ??
+                        section.photos.firstOrNull?.remote?.takenAt ??
+                        section.photos.firstOrNull?.remote?.createdAt;
+                    final label = date == null
+                        ? section.content.subtitle
+                              .split(
+                                Localizations.localeOf(context).languageCode ==
+                                        'ko'
+                                    ? ', '
+                                    : ' · ',
+                              )
+                              .first
+                        : formatAlbumDate(
+                            date.toLocal(),
+                            languageCode: Localizations.localeOf(
+                              context,
+                            ).languageCode,
+                          );
+                    return IgnorePointer(
+                      child: Transform.translate(
+                        offset: Offset(
+                          0,
+                          (1 - _modeProgress.value) *
+                              CameoLayout.tabBarV6FullContainerHeight,
+                        ),
+                        child: Center(child: GlassCaption(label: label)),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),

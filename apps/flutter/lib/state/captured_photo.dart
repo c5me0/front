@@ -20,6 +20,7 @@ class CapturedPhoto {
     required this.height,
     required this.source,
     this.videoDuration,
+    this.thumbnailPath,
   });
 
   factory CapturedPhoto.placeholder([
@@ -42,6 +43,7 @@ class CapturedPhoto {
   final CapturedPhotoSource source;
 
   final Duration? videoDuration;
+  final String? thumbnailPath;
 
   Map<String, Object?> toJson() => {
     'uri': uri,
@@ -49,6 +51,7 @@ class CapturedPhoto {
     'height': height,
     'source': source.name,
     'videoMs': videoDuration?.inMilliseconds,
+    'thumbnailPath': thumbnailPath,
   };
 
   factory CapturedPhoto.fromJson(Map<String, dynamic> json) => CapturedPhoto(
@@ -59,6 +62,7 @@ class CapturedPhoto {
     videoDuration: json['videoMs'] == null
         ? null
         : Duration(milliseconds: json['videoMs'] as int),
+    thumbnailPath: json['thumbnailPath'] as String?,
   );
 
   bool get isVideo => videoDuration != null;
@@ -69,12 +73,13 @@ class CapturedPhoto {
     height: height,
     source: source,
     videoDuration: duration,
+    thumbnailPath: thumbnailPath,
   );
 
   ImageProvider get image => switch (source) {
     CapturedPhotoSource.placeholder => AssetImage(uri),
     CapturedPhotoSource.camera ||
-    CapturedPhotoSource.library => FileImage(File(uri)),
+    CapturedPhotoSource.library => FileImage(File(thumbnailPath ?? uri)),
   };
 
   double get aspectRatio => height == 0 ? 0 : width / height;
@@ -86,10 +91,12 @@ class CapturedPhoto {
       other.width == width &&
       other.height == height &&
       other.source == source &&
-      other.videoDuration == videoDuration;
+      other.videoDuration == videoDuration &&
+      other.thumbnailPath == thumbnailPath;
 
   @override
-  int get hashCode => Object.hash(uri, width, height, source, videoDuration);
+  int get hashCode =>
+      Object.hash(uri, width, height, source, videoDuration, thumbnailPath);
 
   @override
   String toString() =>

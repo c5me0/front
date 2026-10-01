@@ -352,6 +352,7 @@ class AlbumSectionV6State extends State<AlbumSectionV6>
                 id: s.photos[i].id,
                 image: s.photos[i].thumbnailProvider,
                 tile: tiles[i],
+                video: s.photos[i].isVideo,
                 label:
                     fillTemplate(
                       AppContent.of(context).v6.accessibility.photo,

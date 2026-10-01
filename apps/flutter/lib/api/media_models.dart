@@ -37,6 +37,7 @@ class ApiPhoto {
     this.width,
     this.height,
     this.takenAt,
+    this.durationSeconds,
   });
   final String id, uploaderId, contentType, url, thumbnailUrl;
   final String? callId;
@@ -45,6 +46,8 @@ class ApiPhoto {
   final DateTime urlExpiresAt, createdAt;
   final DateTime? takenAt;
   final bool favorite;
+  final double? durationSeconds;
+  bool get isVideo => contentType.startsWith('video/');
   factory ApiPhoto.fromJson(JsonObject json) => ApiPhoto(
     id: json['id'] as String,
     uploaderId: json['uploader_id'] as String,
@@ -59,6 +62,7 @@ class ApiPhoto {
     thumbnailUrl: json['thumbnail_url'] as String,
     urlExpiresAt: DateTime.parse(json['url_expires_at'] as String),
     createdAt: DateTime.parse(json['created_at'] as String),
+    durationSeconds: (json['duration_seconds'] as num?)?.toDouble(),
   );
   ApiPhoto withFavorite(bool value) => _copy(favorite: value);
   ApiPhoto retainingUrlsFrom(ApiPhoto previous) => id != previous.id
@@ -87,6 +91,7 @@ class ApiPhoto {
     width: width,
     height: height,
     takenAt: takenAt,
+    durationSeconds: durationSeconds,
   );
 }
 

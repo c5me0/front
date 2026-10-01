@@ -15,6 +15,8 @@ import '../../navigation/navigation.dart';
 import '../../api/api_error_text.dart';
 import '../../design_system/design_system.dart';
 import '../../state/session.dart';
+import '../../state/international_phone.dart';
+import 'country_screen.dart';
 
 String appendDigit(String digits, String digit, [int? maxDigits]) =>
     digits.length >= (maxDigits ?? appContent.phone.maxDigits)
@@ -36,6 +38,8 @@ class PhoneScreen extends StatefulWidget {
 
 class _PhoneScreenState extends State<PhoneScreen> {
   String _digits = '';
+  IsoCode _country = IsoCode.US;
+  bool _countryInitialized = false;
   bool _sending = false;
   String? _error;
 
@@ -45,7 +49,38 @@ class _PhoneScreenState extends State<PhoneScreen> {
 
   final List<VoidCallback> _unregisterFlow = [];
 
-  bool get _valid => isValidPhone(_digits);
+  String? get _phone => parseNationalPhone(_digits, _country)?.international;
+  bool get _valid => _phone != null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_countryInitialized) return;
+    _countryInitialized = true;
+    if (!SessionScope.read(context).usesBackend) {
+      _country = IsoCode.KR;
+    } else {
+      final region =
+          WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+      _country =
+          IsoCode.values.where((value) => value.name == region).firstOrNull ??
+          IsoCode.US;
+    }
+  }
+
+  Future<void> _selectCountry() async {
+    if (_sending) return;
+    final country = await CameoNav.pushPage<IsoCode>(
+      context,
+      (_) => CountryScreen(selected: _country),
+    );
+    if (mounted && country != null) {
+      setState(() {
+        _country = country;
+        _error = null;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -66,7 +101,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
 
   void _onKey(String digit) {
     if (_sending) return;
-    setState(() => _digits = appendDigit(_digits, digit));
+    setState(() => _digits = appendDigit(_digits, digit, 15));
   }
 
   void _onDelete() {
@@ -79,7 +114,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
     _typing?.cancel();
     _typing = null;
     final session = SessionScope.read(context);
-    final phone = _digits;
+    final phone = SessionScope.read(context).usesBackend ? _phone! : _digits;
     setState(() {
       _sending = true;
       _error = null;
@@ -169,7 +204,18 @@ class _PhoneScreenState extends State<PhoneScreen> {
         disabled: _sending,
         controller: _keypad,
       ),
-      child: PhoneNumberField(key: PhoneScreen.fieldKey, value: _digits),
+      child: PhoneNumberField(
+        key: PhoneScreen.fieldKey,
+        value: _digits,
+        prefix: '+${callingCode(_country)}',
+        placeholder: AppContent.of(context).v6.phone.numberPlaceholder,
+        formattedValue: formatNationalPhone(_digits, _country),
+        countryLabel: fillTemplate(
+          AppContent.of(context).v6.phone.countryLabel,
+          {'country': _country.name, 'code': callingCode(_country)},
+        ),
+        onSelectCountry: _sending ? null : _selectCountry,
+      ),
     );
   }
 }
