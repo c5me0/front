@@ -50,8 +50,17 @@ class CameoLaunch {
     this.albumEmpty,
   });
 
-  factory CameoLaunch.parse(String name) {
+  factory CameoLaunch.parse(String name, {bool allowDemo = true}) {
     final raw = CameoLocation.parse(name);
+    if (!allowDemo) {
+      final location = CameoRoutes.withoutDevParams(raw);
+      return CameoLaunch(
+        location: CameoLocation(location.path, {
+          for (final entry in location.params.entries)
+            if (entry.key != 'demo') entry.key: entry.value,
+        }),
+      );
+    }
     if (CameoRoutes.flowDemoOf(raw)) {
       return const CameoLaunch(
         location: CameoLocation(CameoRoutes.welcome),

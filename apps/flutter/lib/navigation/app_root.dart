@@ -45,6 +45,7 @@ class CameoAppRootState extends State<CameoAppRoot>
     implements FlowDemoHost, CameoLocationHost {
   late SessionStatus _status;
   String? _partnerId;
+  String? _requiredLocation;
 
   bool _applying = false;
 
@@ -54,6 +55,7 @@ class CameoAppRootState extends State<CameoAppRoot>
   void initState() {
     super.initState();
     _status = widget.session.session.status;
+    _requiredLocation = requiredLiveLocation(widget.session);
     _partnerId = widget.session.session.partner?.id;
     widget.session.addListener(_onSession);
     if (widget.startFlowDemo) {
@@ -70,6 +72,7 @@ class CameoAppRootState extends State<CameoAppRoot>
       oldWidget.session.removeListener(_onSession);
       widget.session.addListener(_onSession);
       _status = widget.session.session.status;
+      _requiredLocation = requiredLiveLocation(widget.session);
     }
   }
 
@@ -85,7 +88,15 @@ class CameoAppRootState extends State<CameoAppRoot>
     final partnerId = widget.session.session.partner?.id;
     final lostPartner = _partnerId != null && _partnerId != partnerId;
     _partnerId = partnerId;
-    if (status == _status &&
+    final previousRequired = _requiredLocation;
+    _requiredLocation = requiredLiveLocation(widget.session);
+    final accessChanged =
+        previousRequired != _requiredLocation &&
+        (previousRequired == CameoRoutes.paywall ||
+            _requiredLocation == CameoRoutes.paywall ||
+            previousRequired == CameoRoutes.profile);
+    if (!accessChanged &&
+        status == _status &&
         !(status == SessionStatus.member &&
             lostPartner &&
             widget.session.usesBackend)) {
@@ -96,8 +107,17 @@ class CameoAppRootState extends State<CameoAppRoot>
     if (_applying) return;
 
     final album = widget.album;
-    if (wasMember && album != null) album.reset(empty: album.emptyMode);
-    _replaceStack(cameoSessionEntryRoute(widget.session.session));
+    if (wasMember &&
+        album != null &&
+        (status != SessionStatus.member || lostPartner)) {
+      album.reset(empty: album.emptyMode);
+    }
+    _replaceStack(
+      cameoSessionEntryRoute(
+        widget.session.session,
+        controller: widget.session,
+      ),
+    );
   }
 
   void _replaceStack(Route<dynamic> route) {
@@ -119,7 +139,10 @@ class CameoAppRootState extends State<CameoAppRoot>
 
   @override
   void openLocation(String location) {
-    final launch = CameoLaunch.parse(location);
+    final launch = CameoLaunch.parse(
+      location,
+      allowDemo: !widget.session.usesBackend,
+    );
     final dev = launch.devSession;
     _applying = true;
     try {
@@ -132,8 +155,18 @@ class CameoAppRootState extends State<CameoAppRoot>
     final albumReset = launch.albumReset;
     if (albumReset != null) widget.album?.reset(empty: albumReset);
     final session = widget.session.session;
-    final names = initialLocationsFor(launch.location, session);
-    _replaceStack(cameoSessionEntryRoute(session, location: names.last));
+    final names = initialLocationsFor(
+      launch.location,
+      session,
+      controller: widget.session,
+    );
+    _replaceStack(
+      cameoSessionEntryRoute(
+        session,
+        location: names.last,
+        controller: widget.session,
+      ),
+    );
     if (launch.flowDemo) {
       _startRunner();
     } else {

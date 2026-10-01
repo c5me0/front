@@ -24,7 +24,20 @@ List<String> entryLocationsFor(Session session) {
   }
 }
 
-List<String> initialLocationsFor(CameoLocation location, Session session) {
+List<String> initialLocationsFor(
+  CameoLocation location,
+  Session session, {
+  SessionController? controller,
+}) {
+  if (controller?.usesBackend == true) {
+    final redirect = liveRouteRedirect(controller!, location.path);
+    if (redirect != null) return [redirect];
+    // No app tabs or unpaid back stack underneath the required account flow.
+    final required = requiredLiveLocation(controller);
+    if (required != null && required != CameoRoutes.welcome) {
+      return [location.toString()];
+    }
+  }
   final entry = entryLocationsFor(session);
   final spec = CameoRoutes.table[location.path];
   if (spec == null) return entry;
@@ -58,14 +71,26 @@ List<String> initialLocationsFor(CameoLocation location, Session session) {
 
 List<Route<dynamic>> cameoInitialRoutes(
   CameoLocation location,
-  Session session,
-) => [
-  for (final name in initialLocationsFor(location, session))
+  Session session, {
+  SessionController? controller,
+}) => [
+  for (final name in initialLocationsFor(
+    location,
+    session,
+    controller: controller,
+  ))
     onGenerateCameoRoute(RouteSettings(name: name)),
 ];
 
-Route<dynamic> cameoSessionEntryRoute(Session session, {String? location}) {
-  final name = location ?? entryLocationsFor(session).last;
+Route<dynamic> cameoSessionEntryRoute(
+  Session session, {
+  String? location,
+  SessionController? controller,
+}) {
+  final name =
+      location ??
+      (controller == null ? null : requiredLiveLocation(controller)) ??
+      entryLocationsFor(session).last;
   final signedOut = session.status == SessionStatus.signedOut;
   final guarded =
       CameoRoutes.table[CameoLocation.parse(name).path]?.guard != null;

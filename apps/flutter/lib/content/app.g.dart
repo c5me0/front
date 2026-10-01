@@ -233,7 +233,7 @@ class AppContentV6BreakupStep {
 }
 
 class AppContentV6Billing {
-  const AppContentV6Billing({required this.section, required this.settingsLabel, required this.title, required this.brand, required this.headline, required this.subtitle, required this.currency, required this.monthlyPriceCents, required this.recoveryPriceCents, required this.monthlyLabel, required this.monthlyPeriod, required this.monthlyDetail, required this.monthlySummary, required this.monthlyBenefit, required this.monthlyRecoveryNote, required this.selected, required this.selectPlan, required this.continueLabel, required this.payLabel, required this.processing, required this.previewNote, required this.priceNote, required this.confirmTitle, required this.monthlyConfirm, required this.cancel, required this.successTitle, required this.successBody, required this.done, required this.active, required this.activeBody, required this.failure, required this.cancelled, required this.recoveryTitle, required this.recoverySubtitle, required this.recoveryLabel, required this.recoveryPeriod, required this.recoveryDetail, required this.recoverySummary, required this.recoveryNote, required this.recoveryConfirm, required this.recoverySuccessTitle, required this.recoverySuccessBody, required this.recoveryDone, required this.unavailableTitle, required this.unavailableBody, required this.photoCount, required this.callCount, required this.subscribeLabel});
+  const AppContentV6Billing({required this.section, required this.settingsLabel, required this.title, required this.brand, required this.headline, required this.subtitle, required this.currency, required this.monthlyPriceCents, required this.recoveryPriceCents, required this.monthlyLabel, required this.monthlyPeriod, required this.monthlyDetail, required this.monthlySummary, required this.monthlyBenefit, required this.monthlyRecoveryNote, required this.selected, required this.selectPlan, required this.continueLabel, required this.payLabel, required this.processing, required this.previewNote, required this.priceNote, required this.confirmTitle, required this.monthlyConfirm, required this.cancel, required this.successTitle, required this.successBody, required this.done, required this.active, required this.activeBody, required this.failure, required this.cancelled, required this.recoveryTitle, required this.recoverySubtitle, required this.recoveryLabel, required this.recoveryPeriod, required this.recoveryDetail, required this.recoverySummary, required this.recoveryNote, required this.recoveryConfirm, required this.recoverySuccessTitle, required this.recoverySuccessBody, required this.recoveryDone, required this.unavailableTitle, required this.unavailableBody, required this.photoCount, required this.callCount, required this.subscribeLabel, required this.paywallSubtitle});
   final String section;
   final String settingsLabel;
   final String title;
@@ -282,10 +282,11 @@ class AppContentV6Billing {
   final String photoCount;
   final String callCount;
   final String subscribeLabel;
+  final String paywallSubtitle;
 }
 
 class AppContentV6Backend {
-  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.cameraEmptyThumbnail, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumTitle, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.freeAccess, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
+  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.cameraEmptyThumbnail, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumTitle, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
   final String partnerName;
   final String networkError;
   final String rateLimit;
@@ -349,7 +350,6 @@ class AppContentV6Backend {
   final String recoveryContextChanged;
   final String recoveryCreditRequired;
   final String partnerPremium;
-  final String freeAccess;
   final String recoveryAvailable;
   final String useRecoveryCredit;
   final String recoveryCreditNote;
@@ -886,7 +886,6 @@ const AppContent appContent = AppContent(
       recoveryContextChanged: '연결된 상대가 변경됐어요. 현재 상대의 복구 화면에서 다시 확인해 주세요.',
       recoveryCreditRequired: '사용할 수 있는 복구 구매를 찾지 못했어요. 결제 상태를 다시 확인해 주세요.',
       partnerPremium: '상대의 월간 구독으로 함께 이용 중이에요.',
-      freeAccess: '현재 이용 가능한 상태예요.',
       recoveryAvailable: '이전에 함께한 기록이 있어요. 복구할 기록을 확인해 보세요.',
       useRecoveryCredit: '기존 구매로 기록 복구',
       recoveryCreditNote: '사용하지 않은 복구 구매가 있어요. 추가 결제 없이 한 번 사용할 수 있어요.',
@@ -946,6 +945,7 @@ const AppContent appContent = AppContent(
       photoCount: '사진 {count}장',
       callCount: '통화 기록 {count}개',
       subscribeLabel: '{amount}에 구독하기',
+      paywallSubtitle: '구독하고 연인을 연결해요.',
     ),
     breakup: AppContentV6Breakup(
       settingsLabel: '헤어지기',
@@ -1419,7 +1419,6 @@ const AppContent appContentEn = AppContent(
       recoveryContextChanged: 'Your connected partner has changed. Open recovery for your current partner and try again.',
       recoveryCreditRequired: 'No unused recovery purchase was found. Please check your purchase status.',
       partnerPremium: 'You\'re sharing your partner\'s monthly subscription.',
-      freeAccess: 'You currently have access.',
       recoveryAvailable: 'You have memories together. Check which records can be recovered.',
       useRecoveryCredit: 'Use existing recovery purchase',
       recoveryCreditNote: 'You have an unused recovery purchase. Use it once at no extra cost.',
@@ -1479,6 +1478,7 @@ const AppContent appContentEn = AppContent(
       photoCount: 'Photos: {count}',
       callCount: 'Call records: {count}',
       subscribeLabel: 'Subscribe for {amount}',
+      paywallSubtitle: 'Subscribe to pair.',
     ),
     breakup: AppContentV6Breakup(
       settingsLabel: 'Disconnect partner',

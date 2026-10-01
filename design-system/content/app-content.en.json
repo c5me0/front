@@ -162,7 +162,6 @@
   "v6.backend.recoveryContextChanged": "Your connected partner has changed. Open recovery for your current partner and try again.",
   "v6.backend.recoveryCreditRequired": "No unused recovery purchase was found. Please check your purchase status.",
   "v6.backend.partnerPremium": "You're sharing your partner's monthly subscription.",
-  "v6.backend.freeAccess": "You currently have access.",
   "v6.backend.recoveryAvailable": "You have memories together. Check which records can be recovered.",
   "v6.backend.useRecoveryCredit": "Use existing recovery purchase",
   "v6.backend.recoveryCreditNote": "You have an unused recovery purchase. Use it once at no extra cost.",
@@ -331,5 +330,6 @@
   "v6.accessibility.photoCapture": "Take photo",
   "v6.accessibility.videoCapture": "Record video",
   "v6.accessibility.call": "Call",
-  "v6.accessibility.inlinePhoto": "Photo shared during the call"
+  "v6.accessibility.inlinePhoto": "Photo shared during the call",
+  "v6.billing.paywallSubtitle": "Subscribe to pair."
 }

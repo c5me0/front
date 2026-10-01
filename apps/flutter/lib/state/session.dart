@@ -376,7 +376,6 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   bool _disposed = false;
   bool _historyReadFailed = false;
   bool _flowDemoSession = false;
-  bool _demoOverride = false;
   final CameoApi? _api;
   String? _remoteUserId;
   @override
@@ -388,6 +387,22 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   String? _partnerPhone;
   String? backendError;
   ApiPremium? _premium;
+  Timer? _premiumExpiry;
+
+  void _applyPremium(ApiPremium? premium) {
+    _premiumExpiry?.cancel();
+    _premium = premium;
+    final until = premium?.until;
+    if (premium?.paidAt(_now()) == true && until != null) {
+      _premiumExpiry = Timer(until.difference(_now()), () {
+        if (_disposed) return;
+        _syncBackendAlbum();
+        notifyListeners();
+        unawaited(refreshBackend());
+      });
+    }
+  }
+
   int _restoreCredits = 0;
   ApiCouple? _remoteCouple;
   @override
@@ -396,11 +411,11 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   int get restoreCredits => usesBackend ? _restoreCredits : 0;
   @override
   ApiCouple? get remoteCouple => usesBackend ? _remoteCouple : null;
-  bool get premiumRequired => usesBackend && _premium?.active != true;
+  bool get premiumRequired => usesBackend && _premium?.paidAt(_now()) != true;
   bool get hasRestorable => remoteCouple?.canRestore == true;
   bool _updatingPreference = false;
   int _remoteRevision = 0;
-  bool get usesBackend => _api != null && !_demoOverride && !_flowDemoSession;
+  bool get usesBackend => _api != null;
   String get pairingCode => usesBackend ? (_pairingCode ?? '') : labPairingCode;
   String get partnerPhone => _partnerPhone ?? '';
   bool get updatingPreference => _updatingPreference;
@@ -493,7 +508,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       await refreshBackend();
       throw const ApiException('request_cancelled');
     }
-    _premium = user.premium;
+    _applyPremium(user.premium);
     _restoreCredits = user.restoreCredits;
     backendError = null;
     _syncBackendAlbum();
@@ -574,7 +589,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       if (dev != null) applyDevSession(dev, partnerNone: partnerNone);
       return;
     }
-    if (_api != null && dev == null) {
+    if (_api != null) {
       await _loadBackend();
       return;
     }
@@ -661,7 +676,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   void completeVerification(String phone, {bool forceOnboarding = false}) {
-    if (usesBackend && !forceOnboarding) {
+    if (usesBackend) {
       final verified = _verifiedRemote;
       if (verified == null || verified.user.phone != koreanPhoneToE164(phone)) {
         return;
@@ -717,6 +732,9 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   Future<Partner> connectPartner(String code) async {
+    if (premiumRequired) {
+      throw const ApiException('purchase:required', status: 402);
+    }
     final generation = _generation;
     if (usesBackend) {
       _remoteRevision++;
@@ -760,7 +778,10 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     return partner;
   }
 
-  void skipPartner() => _set(_session.copyWith(partnerSkipped: true));
+  void skipPartner() {
+    if (premiumRequired) return;
+    _set(_session.copyWith(partnerSkipped: true));
+  }
 
   void setPermission(PermissionKind kind, PermissionState state) {
     _set(
@@ -768,8 +789,10 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     );
   }
 
-  void completeOnboarding() =>
-      _set(_session.copyWith(status: SessionStatus.member));
+  void completeOnboarding() {
+    if (premiumRequired) return;
+    _set(_session.copyWith(status: SessionStatus.member));
+  }
 
   Future<void> setPref(SessionPref key, bool value) async {
     if (!usesBackend) {
@@ -1059,9 +1082,9 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   void applyDevSession(DevSessionKind kind, {bool partnerNone = false}) {
+    if (usesBackend) return;
     _generation++;
     _flowDemoSession = false;
-    _demoOverride = true;
     _set(devSessionOf(kind, partnerNone: partnerNone), force: true);
   }
 
@@ -1073,7 +1096,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       _remoteUserId = null;
       _pairingCode = null;
       _partnerPhone = null;
-      _premium = null;
+      _applyPremium(null);
       _restoreCredits = 0;
       _remoteCouple = null;
     }
@@ -1105,6 +1128,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   @override
   void dispose() {
     _disposed = true;
+    _premiumExpiry?.cancel();
     _generation++;
     _album = null;
     _api?.close();
@@ -1122,7 +1146,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       _partnerPhone = null;
       _remoteCouple = null;
     }
-    _premium = user.premium;
+    _applyPremium(user.premium);
     _restoreCredits = user.restoreCredits;
     backendError = null;
     _remoteUserId = user.id;
@@ -1154,7 +1178,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
       if (error.meta['required'] == 'restore') {
         _restoreCredits = 0;
       } else {
-        _premium = const ApiPremium(active: false, source: 'none');
+        _applyPremium(const ApiPremium(active: false, source: 'none'));
       }
       _syncBackendAlbum();
       notifyListeners();
@@ -1235,4 +1259,7 @@ class SessionScope extends InheritedNotifier<SessionController> {
 
   static SessionController? maybeRead(BuildContext context) =>
       context.getInheritedWidgetOfExactType<SessionScope>()?.notifier;
+
+  static SessionController? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SessionScope>()?.notifier;
 }

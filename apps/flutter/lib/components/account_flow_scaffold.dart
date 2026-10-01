@@ -17,6 +17,8 @@ class AccountFlowScaffold extends StatelessWidget {
     required this.footer,
     this.trailing,
     this.busy = false,
+    this.backLabel,
+    this.backIcon = CameoIconName.chevronLeft,
   });
   final String title;
   final VoidCallback onBack;
@@ -24,6 +26,8 @@ class AccountFlowScaffold extends StatelessWidget {
   final Widget footer;
   final Widget? trailing;
   final bool busy;
+  final String? backLabel;
+  final CameoIconName backIcon;
   static const backKey = ValueKey('accountFlow.back');
   static const scrollKey = ValueKey('accountFlow.scroll');
 
@@ -50,8 +54,9 @@ class AccountFlowScaffold extends StatelessWidget {
                       key: backKey,
                       size: SolidButtonSize.md,
                       variant: SolidButtonVariant.gray,
-                      icon: CameoIconName.chevronLeft,
-                      semanticLabel: AppContent.of(context).common.back,
+                      icon: backIcon,
+                      semanticLabel:
+                          backLabel ?? AppContent.of(context).common.back,
                       disabled: busy,
                       onPress: onBack,
                     ),

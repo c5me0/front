@@ -90,6 +90,7 @@ class ApiPremium {
   final String source;
   final DateTime? until;
   bool get paid => active && source != 'none';
+  bool paidAt(DateTime now) => paid && (until == null || until!.isAfter(now));
   factory ApiPremium.fromJson(JsonObject json) {
     final source = json['source'] as String;
     if (!{'self', 'partner', 'none'}.contains(source)) {

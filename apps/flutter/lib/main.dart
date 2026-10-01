@@ -77,7 +77,10 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
     RevenueCatConfig.fromEnvironment(),
     account: _session,
   );
-  late final CameoLaunch _launch = CameoLaunch.parse(widget.initialRoute);
+  late final CameoLaunch _launch = CameoLaunch.parse(
+    widget.initialRoute,
+    allowDemo: !_session.usesBackend,
+  );
   late final SessionController _session = widget.session ?? _createSession();
 
   SessionController _createSession() {
@@ -245,9 +248,20 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
         navigatorKey: _navigator,
         initialRoute: _launch.location.toString(),
 
-        onGenerateInitialRoutes: (_) =>
-            cameoInitialRoutes(_launch.location, _session.session),
-        onGenerateRoute: onGenerateCameoRoute,
+        onGenerateInitialRoutes: (_) => cameoInitialRoutes(
+          _launch.location,
+          _session.session,
+          controller: _session,
+        ),
+        onGenerateRoute: (settings) {
+          final path = CameoLocation.parse(
+            settings.name ?? CameoRoutes.home,
+          ).path;
+          final redirect = liveRouteRedirect(_session, path);
+          return onGenerateCameoRoute(
+            redirect == null ? settings : RouteSettings(name: redirect),
+          );
+        },
 
         builder: (context, navigator) => SessionScope(
           controller: _session,

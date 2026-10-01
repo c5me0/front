@@ -42,6 +42,56 @@ import 'route_params.dart';
 import 'status_bar.dart';
 import 'zoom_source.dart';
 
+/// Live accounts must finish each step in order. The server's paid entitlement
+/// is authoritative; a receipt, local flag, or unconfigured free server is not.
+String? requiredLiveLocation(SessionController controller) {
+  if (!controller.usesBackend) return null;
+  final session = controller.session;
+  if (session.status == SessionStatus.signedOut) return CameoRoutes.welcome;
+  if (session.name?.trim().isNotEmpty != true) return CameoRoutes.profile;
+  if (controller.premiumRequired) return CameoRoutes.paywall;
+  if (session.partner == null && !session.partnerSkipped) {
+    return CameoRoutes.partner;
+  }
+  return session.status == SessionStatus.onboarding
+      ? CameoRoutes.permissions
+      : null;
+}
+
+String? liveRouteRedirect(SessionController controller, String path) {
+  if (!controller.usesBackend) return null;
+  final required = requiredLiveLocation(controller);
+  final allowed = switch (required) {
+    CameoRoutes.welcome => const {
+      CameoRoutes.welcome,
+      CameoRoutes.phone,
+      CameoRoutes.verifyPath,
+    },
+    CameoRoutes.profile => const {CameoRoutes.profile},
+    CameoRoutes.paywall => const {CameoRoutes.paywall},
+    CameoRoutes.partner => const {
+      CameoRoutes.partner,
+      CameoRoutes.profile,
+      CameoRoutes.payment,
+    },
+    CameoRoutes.permissions => const {
+      CameoRoutes.profile,
+      CameoRoutes.partner,
+      CameoRoutes.permissions,
+      CameoRoutes.payment,
+    },
+    _ => null,
+  };
+  if (allowed != null) return allowed.contains(path) ? null : required;
+  if (path == CameoRoutes.paywall ||
+      CameoRoutes.table[path]?.guard == SessionStatus.signedOut ||
+      (CameoRoutes.table[path]?.guard == SessionStatus.onboarding &&
+          path != CameoRoutes.partner)) {
+    return CameoRoutes.home;
+  }
+  return null;
+}
+
 enum CameoPresentation { push, modal, tab, viewer }
 
 typedef CameoScreenBuilder =
@@ -94,6 +144,7 @@ abstract final class CameoRoutes {
   static const String settings = '/settings';
   static const String connect = '/connect';
   static const String payment = '/payment';
+  static const String paywall = '/paywall';
   static const String breakup = '/breakup';
 
   // v5
@@ -371,6 +422,12 @@ abstract final class CameoRoutes {
       builder: (_, _) => const PartnerScreen(mode: PartnerMode.settings),
     ),
     CameoRouteSpec(
+      path: paywall,
+      presentation: CameoPresentation.push,
+      statusBar: _dark,
+      builder: (_, _) => const RevenueCatPaymentScreen(requiredAccess: true),
+    ),
+    CameoRouteSpec(
       path: payment,
       presentation: CameoPresentation.push,
       statusBar: _dark,
@@ -542,22 +599,26 @@ Route<T> cameoRouteFor<T>(
 
     CameoPresentation.tab => CameoShellRoute<T>(
       settings: routeSettings,
-      builder: (context) => CameoStatusBar(
-        style: CameoStatusBarStyle.lightContent,
-        child: AppTabs(
-          initialTab: spec.tab ?? CameoTabs.albums,
+      builder: (context) => _liveAccessGate(
+        context,
+        location,
+        (context) => CameoStatusBar(
+          style: CameoStatusBarStyle.lightContent,
+          child: AppTabs(
+            initialTab: spec.tab ?? CameoTabs.albums,
 
-          albumsRoutes: spec.nested
-              ? [CameoRoutes.home, location.toString()]
-              : [
-                  location.path == CameoRoutes.home
-                      ? location.toString()
-                      : CameoRoutes.home,
-                ],
+            albumsRoutes: spec.nested
+                ? [CameoRoutes.home, location.toString()]
+                : [
+                    location.path == CameoRoutes.home
+                        ? location.toString()
+                        : CameoRoutes.home,
+                  ],
 
-          initialLocation: spec.nested || spec.tab == CameoTabs.albums
-              ? null
-              : location.toString(),
+            initialLocation: spec.nested || spec.tab == CameoTabs.albums
+                ? null
+                : location.toString(),
+          ),
         ),
       ),
     ),
@@ -624,10 +685,39 @@ CameoRouteSpec _specOf(CameoLocation location, String name) {
 }
 
 WidgetBuilder _screenBuilder(CameoRouteSpec spec, CameoLocation location) =>
-    (context) => CameoStatusBar(
-      style: spec.statusBar(location),
-      child: spec.builder(context, location),
+    (context) => _liveAccessGate(
+      context,
+      location,
+      (context) => CameoStatusBar(
+        style: spec.statusBar(location),
+        child: spec.builder(context, location),
+      ),
     );
+
+Widget _liveAccessGate(
+  BuildContext context,
+  CameoLocation location,
+  WidgetBuilder builder,
+) {
+  final session = SessionScope.maybeOf(context);
+  final redirect = session == null
+      ? null
+      : liveRouteRedirect(session, location.path);
+  if (redirect == null) return builder(context);
+  // Outgoing routes must not mount another account form during the root
+  // transition, or compete with the new screen for focus and SDK refreshes.
+  if (ModalRoute.of(context)?.isCurrent == false) {
+    return const SizedBox.expand();
+  }
+  final target = CameoLocation.parse(redirect);
+  final spec = CameoRoutes.table[target.path]!;
+  return CameoStatusBar(
+    style: spec.statusBar(target),
+    child: spec.presentation == CameoPresentation.tab
+        ? AppTabs(initialTab: spec.tab ?? CameoTabs.albums)
+        : spec.builder(context, target),
+  );
+}
 
 void _warnInvalidParams(CameoLocation location) {
   if (!kDebugMode) return;

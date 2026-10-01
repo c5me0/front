@@ -151,6 +151,11 @@ class _PartnerScreenState extends State<PartnerScreen> {
       CameoNav.pop(context);
       return;
     }
+    if (controller.usesBackend &&
+        controller.session.status == SessionStatus.member) {
+      CameoNav.openLocation(context, CameoRoutes.home);
+      return;
+    }
     await CameoNav.openPermissions(context);
     if (!mounted || _phase != _Phase.done) return;
     setState(() {
@@ -161,8 +166,14 @@ class _PartnerScreenState extends State<PartnerScreen> {
 
   void _skip() {
     if (_phase != _Phase.idle || !CameoNav.isTop(context)) return;
-    SessionScope.read(context).skipPartner();
-    CameoNav.openPermissions(context);
+    final controller = SessionScope.read(context);
+    controller.skipPartner();
+    if (controller.usesBackend &&
+        controller.session.status == SessionStatus.member) {
+      CameoNav.openLocation(context, CameoRoutes.home);
+    } else {
+      CameoNav.openPermissions(context);
+    }
   }
 
   void _copy() {

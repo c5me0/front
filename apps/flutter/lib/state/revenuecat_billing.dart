@@ -84,9 +84,8 @@ class RevenueCatBilling extends ChangeNotifier {
   bool get active =>
       _ownerId != null &&
       account.userId == _ownerId &&
-      account.premium?.active == true;
+      account.premium?.paidAt(DateTime.now()) == true;
   bool get serverReady => account.premium != null;
-  bool get freeAccess => active && account.premium?.source == 'none';
   bool get storeSubscriptionActive {
     final value = entitlement;
     return _ownerId != null &&
@@ -328,7 +327,7 @@ class RevenueCatBilling extends ChangeNotifier {
           return CheckoutOutcome.completed;
         }
         if (!active) throw const ApiException('purchase:required', status: 402);
-        if (account.restoreCredits == 0 && !freeAccess) {
+        if (account.restoreCredits == 0) {
           if (recoveryPending) {
             throw const ApiException('billing_server_pending');
           }

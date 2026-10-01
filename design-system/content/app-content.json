@@ -305,7 +305,6 @@
       "recoveryContextChanged": "연결된 상대가 변경됐어요. 현재 상대의 복구 화면에서 다시 확인해 주세요.",
       "recoveryCreditRequired": "사용할 수 있는 복구 구매를 찾지 못했어요. 결제 상태를 다시 확인해 주세요.",
       "partnerPremium": "상대의 월간 구독으로 함께 이용 중이에요.",
-      "freeAccess": "현재 이용 가능한 상태예요.",
       "recoveryAvailable": "이전에 함께한 기록이 있어요. 복구할 기록을 확인해 보세요.",
       "useRecoveryCredit": "기존 구매로 기록 복구",
       "recoveryCreditNote": "사용하지 않은 복구 구매가 있어요. 추가 결제 없이 한 번 사용할 수 있어요.",
@@ -365,7 +364,8 @@
       "unavailableBody": "이 계정과 상대의 보관 기록을 다시 확인해 주세요.",
       "photoCount": "사진 {count}장",
       "callCount": "통화 기록 {count}개",
-      "subscribeLabel": "{amount}에 구독하기"
+      "subscribeLabel": "{amount}에 구독하기",
+      "paywallSubtitle": "구독하고 연인을 연결해요."
     },
     "breakup": {
       "settingsLabel": "헤어지기",

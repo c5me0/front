@@ -1,4 +1,4 @@
-// Onboarding profile-name entry. Successful validation advances to partner connection;
+// Onboarding profile-name entry. Live sessions advance through the paid access gate;
 // cancelling the authentication flow signs out.
 
 import 'dart:async';
@@ -93,6 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted) return;
     setState(() => _saving = false);
     _focus.unfocus();
+    if (SessionScope.read(context).usesBackend) return;
     CameoNav.openPartner(context).then((_) {
       if (mounted && CameoNav.isTop(context)) _focus.requestFocus();
     });
