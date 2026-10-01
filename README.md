@@ -8,6 +8,17 @@
 
 CAMEO is a shared space for couples. Keep photo memories on a timeline, make voice calls, and revisit the moments you highlighted together. The Flutter app supports Android and iOS, starts in English, and also supports Korean.
 
+<p align="center">
+  <a href="readme-assets/cameo-intro-music.mp4?raw=true">
+    <picture>
+      <source media="(prefers-reduced-motion: reduce)" srcset="readme-assets/cameo-intro-preview.jpg" />
+      <img src="readme-assets/cameo-intro-preview.gif" alt="CAMEO introduction — download the full video with music" width="320" />
+    </picture>
+  </a>
+</p>
+
+[Download the full CAMEO introduction with music](readme-assets/cameo-intro-music.mp4?raw=true) — 36 seconds. The animated preview is silent; the MP4 includes the original soundtrack.
+
 [Download the Android demo](https://github.com/c5me0/front/releases/download/v1.0.1-demo/cameo-1.0.1-demo.apk) · [Watch the sign-in clip](readme-assets/login-walkthrough.mp4)
 
 **Using an iPhone? You need a Mac with Xcode and must build the iOS app from source.** Follow the [iOS build guide](#build-and-run-on-ios-mac-required) below.
