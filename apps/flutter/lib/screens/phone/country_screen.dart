@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../components/settings_v6.dart';
 import '../../components/solid_button.dart';
 import '../../components/text_field_v6.dart';
+import '../../components/text_input_gestures.dart';
 import '../../content/app.g.dart';
 import '../../design_system/design_system.dart';
 import '../../state/international_phone.dart';
@@ -18,6 +19,7 @@ class CountryScreen extends StatefulWidget {
 }
 
 class _CountryScreenState extends State<CountryScreen> {
+  final _editableTextKey = GlobalKey<EditableTextState>();
   final _search = TextEditingController();
   final _focus = FocusNode();
   final _countries = CountryService()
@@ -94,42 +96,49 @@ class _CountryScreenState extends State<CountryScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: CameoSpace.s16),
-              child: TextFieldV6(
-                variant: TextFieldV6Variant.name,
-                focused: _focus.hasFocus,
-                children: [
-                  TextFieldV6Slot(
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
-                      children: [
-                        if (_search.text.isEmpty)
-                          IgnorePointer(
-                            child: CameoText(
-                              copy.countrySearch,
-                              style: CameoTextStyles.bodyLg,
-                              color: colors.foregroundNeutralSubtle,
+              child: TextInputGestures(
+                editableTextKey: _editableTextKey,
+                child: TextFieldV6(
+                  variant: TextFieldV6Variant.name,
+                  focused: _focus.hasFocus,
+                  children: [
+                    TextFieldV6Slot(
+                      child: Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          if (_search.text.isEmpty)
+                            IgnorePointer(
+                              child: CameoText(
+                                copy.countrySearch,
+                                style: CameoTextStyles.bodyLg,
+                                color: colors.foregroundNeutralSubtle,
+                              ),
+                            ),
+                          Semantics(
+                            label: copy.countrySearch,
+                            child: KeyedSubtree(
+                              key: const ValueKey('phone.countrySearch'),
+                              child: EditableText(
+                                key: _editableTextKey,
+                                rendererIgnoresPointer: true,
+                                controller: _search,
+                                focusNode: _focus,
+                                style: CameoTextStyles.bodyLg.copyWith(
+                                  color: colors.foregroundNeutralBase,
+                                ),
+                                cursorColor: colors.foregroundNeutralBase,
+                                backgroundCursorColor:
+                                    colors.foregroundNeutralSubtle,
+                                autocorrect: false,
+                                textInputAction: TextInputAction.search,
+                              ),
                             ),
                           ),
-                        Semantics(
-                          label: copy.countrySearch,
-                          child: EditableText(
-                            key: const ValueKey('phone.countrySearch'),
-                            controller: _search,
-                            focusNode: _focus,
-                            style: CameoTextStyles.bodyLg.copyWith(
-                              color: colors.foregroundNeutralBase,
-                            ),
-                            cursorColor: colors.foregroundNeutralBase,
-                            backgroundCursorColor:
-                                colors.foregroundNeutralSubtle,
-                            autocorrect: false,
-                            textInputAction: TextInputAction.search,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: CameoSpace.s16),

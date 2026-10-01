@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import '../../components/auth_scaffold.dart';
 import '../../components/solid_cta.dart';
 import '../../components/text_field_v6.dart';
+import '../../components/text_input_gestures.dart';
 import '../../content/app.g.dart';
 import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
@@ -29,6 +30,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final _editableTextKey = GlobalKey<EditableTextState>();
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focus = FocusNode(debugLabel: 'profile.name');
   Timer? _typing;
@@ -169,67 +171,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
         busy: _saving,
         onPress: _submit,
       ),
-      child: TextFieldV6(
-        key: ProfileScreen.fieldKey,
-        variant: TextFieldV6Variant.name,
-        focused: true,
-        children: [
-          TextFieldV6Slot(
-            child: Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                IgnorePointer(
-                  key: const ValueKey('profile.placeholderLayer'),
-                  child: ExcludeSemantics(
-                    child: AnimatedOpacity(
-                      opacity: empty ? 1 : 0,
-                      duration: CameoMotion.durationFast,
-                      curve: CameoMotion.easingStandard,
-                      child: CameoText(
-                        profile.placeholder,
-                        key: ProfileScreen.placeholderKey,
-                        style: CameoTextStyles.bodyLg,
-                        color: c.foregroundNeutralSubtle,
+      child: TextInputGestures(
+        editableTextKey: _editableTextKey,
+        child: TextFieldV6(
+          key: ProfileScreen.fieldKey,
+          variant: TextFieldV6Variant.name,
+          focused: true,
+          children: [
+            TextFieldV6Slot(
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  IgnorePointer(
+                    key: const ValueKey('profile.placeholderLayer'),
+                    child: ExcludeSemantics(
+                      child: AnimatedOpacity(
+                        opacity: empty ? 1 : 0,
+                        duration: CameoMotion.durationFast,
+                        curve: CameoMotion.easingStandard,
+                        child: CameoText(
+                          profile.placeholder,
+                          key: ProfileScreen.placeholderKey,
+                          style: CameoTextStyles.bodyLg,
+                          color: c.foregroundNeutralSubtle,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Semantics(
+                    key: const ValueKey('profile.inputLayer'),
+                    label: profile.placeholder,
+                    child: KeyedSubtree(
+                      key: ProfileScreen.inputKey,
+                      child: EditableText(
+                        key: _editableTextKey,
+                        rendererIgnoresPointer: true,
+                        controller: _controller,
+                        focusNode: _focus,
                         maxLines: 1,
+                        autocorrect: false,
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+
+                        keyboardAppearance: Brightness.light,
+                        autofillHints: const [AutofillHints.name],
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(
+                            AppContent.of(context).profile.maxLength,
+                          ),
+                        ],
+                        style: CameoTextStyles.bodyLg.copyWith(
+                          color: c.foregroundNeutralBase,
+                        ),
+                        strutStyle: cameoStrutOf(CameoTextStyles.bodyLg),
+                        cursorColor: c.foregroundNeutralBase,
+                        backgroundCursorColor: c.foregroundNeutralSubtle,
+                        selectionColor: c.backgroundFillNeutralStrong,
+
+                        onEditingComplete: () {},
+                        onSubmitted: (_) => _submit(),
                       ),
                     ),
                   ),
-                ),
-                Semantics(
-                  key: const ValueKey('profile.inputLayer'),
-                  label: profile.placeholder,
-                  child: EditableText(
-                    key: ProfileScreen.inputKey,
-                    controller: _controller,
-                    focusNode: _focus,
-                    maxLines: 1,
-                    autocorrect: false,
-                    keyboardType: TextInputType.name,
-                    textInputAction: TextInputAction.next,
-
-                    keyboardAppearance: Brightness.light,
-                    autofillHints: const [AutofillHints.name],
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(
-                        AppContent.of(context).profile.maxLength,
-                      ),
-                    ],
-                    style: CameoTextStyles.bodyLg.copyWith(
-                      color: c.foregroundNeutralBase,
-                    ),
-                    strutStyle: cameoStrutOf(CameoTextStyles.bodyLg),
-                    cursorColor: c.foregroundNeutralBase,
-                    backgroundCursorColor: c.foregroundNeutralSubtle,
-                    selectionColor: c.backgroundFillNeutralStrong,
-
-                    onEditingComplete: () {},
-                    onSubmitted: (_) => _submit(),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
