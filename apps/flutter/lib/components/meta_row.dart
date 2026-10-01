@@ -2,6 +2,7 @@
 // sections.
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -21,8 +22,15 @@ MetaRowRoles metaRowRoles(CameoPalette c, LabTone tone) => switch (tone) {
   ),
 };
 
-String metaRowAccessibilityLabel(String label, AlbumStatsContent stats) =>
-    '$label, 사진 ${stats.photos}장, 통화 ${stats.calls}건';
+String metaRowAccessibilityLabel(
+  String label,
+  AlbumStatsContent stats, {
+  AppContent copy = appContent,
+}) => fillTemplate(copy.v6.accessibility.albumStats, {
+  'label': label,
+  'photos': stats.photos,
+  'calls': stats.calls,
+});
 
 class MetaRow extends StatelessWidget {
   const MetaRow({
@@ -62,7 +70,11 @@ class MetaRow extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: metaRowAccessibilityLabel(label, stats),
+      label: metaRowAccessibilityLabel(
+        label,
+        stats,
+        copy: AppContent.of(context),
+      ),
       excludeSemantics: true,
       // 2042:2794 row · gap 8 · items-center · justify-center
       child: Row(

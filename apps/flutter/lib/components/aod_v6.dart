@@ -175,8 +175,8 @@ class AodV6EndButton extends StatelessWidget {
                     child: SolidButton(
                       key: buttonKey,
                       size: SolidButtonSize.lg,
-                      icon: _iconOf(labV6.call.sleepEnd.icon),
-                      label: labV6.call.sleepEnd.label,
+                      icon: _iconOf(LabV6.of(context).call.sleepEnd.icon),
+                      label: LabV6.of(context).call.sleepEnd.label,
                       onPress: onEnd,
                     ),
                   ),

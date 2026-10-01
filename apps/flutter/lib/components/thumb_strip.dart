@@ -63,7 +63,7 @@ class ThumbStrip extends StatelessWidget {
                         child: Semantics(
                           button: onTap != null,
                           label: fillTemplate(
-                            appContent.v6.viewer.thumbnailLabel,
+                            AppContent.of(context).v6.viewer.thumbnailLabel,
                             {'index': k + 1},
                           ),
                           excludeSemantics: true,

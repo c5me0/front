@@ -176,7 +176,7 @@ class ConnectDoneV6State extends State<ConnectDoneV6>
     final c = CameoTheme.colorsOf(context);
     final padding = MediaQuery.paddingOf(context);
     final size = MediaQuery.sizeOf(context);
-    final message = fillTemplate(labV6.connected.message, {
+    final message = fillTemplate(LabV6.of(context).connected.message, {
       'partner': widget.partnerName,
     });
     const avatar = CameoLayout.connectDoneV6AvatarSize;
@@ -249,7 +249,9 @@ class ConnectDoneV6State extends State<ConnectDoneV6>
               1,
               AvatarV6(
                 size: avatar,
-                image: widget.partnerImage ?? labV6.connected.partnerPhoto,
+                image:
+                    widget.partnerImage ??
+                    LabV6.of(context).connected.partnerPhoto,
                 name: widget.partnerName,
                 initialStyle: CameoTextStyles.headingLg,
               ),

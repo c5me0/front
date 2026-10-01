@@ -66,7 +66,10 @@ CameoIconName _iconOf(String name) => CameoIconName.values.firstWhere(
 
 Size _sizeOf(AlbumPhoto photo) {
   if (photo.remote case final remote?) {
-    return Size((remote.width ?? 1).toDouble(), (remote.height ?? 1).toDouble());
+    return Size(
+      (remote.width ?? 1).toDouble(),
+      (remote.height ?? 1).toDouble(),
+    );
   }
   final capture = photo.capture;
   if (capture != null) return Size(capture.width, capture.height);
@@ -324,7 +327,10 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
         live.error != _lastCallError &&
         live.error != 'call_reconnecting') {
       _lastCallError = live.error;
-      _toast.show(apiErrorCodeText(live.error!), CameoIconName.x);
+      _toast.show(
+        apiErrorCodeText(live.error!, copy: AppContent.of(context)),
+        CameoIconName.x,
+      );
     }
   }
 
@@ -467,7 +473,7 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
     _closeSheet();
     _hideSlider();
     setState(() => _toastPinned = pinned);
-    final t = labV6.call.highlightToast;
+    final t = LabV6.of(context).call.highlightToast;
     _toast.show(t.text, toastIconOf(t.icon));
     HapticFeedback.mediumImpact();
   }
@@ -598,7 +604,10 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
         if (!mounted) return;
         if (saved.isEmpty) {
           _toast.show(
-            apiErrorCodeText(album.remote.error ?? 'upload_failed'),
+            apiErrorCodeText(
+              album.remote.error ?? 'upload_failed',
+              copy: AppContent.of(context),
+            ),
             CameoIconName.x,
           );
         } else {
@@ -863,8 +872,8 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
         final name = live == null
             ? labInCallV5.name
             : SessionScope.read(context).session.partner?.name ??
-                  appContent.v6.backend.partnerName;
-        final copy = appContent.v6.backend;
+                  AppContent.of(context).v6.backend.partnerName;
+        final copy = AppContent.of(context).v6.backend;
         final time = live == null
             ? formatCallTime(_timerBase + elapsed)
             : live.error == 'call_reconnecting'
@@ -875,7 +884,10 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
             ? copy.callRinging
             : copy.callEnded;
         return Semantics(
-          label: '$name, 통화 시간 $time',
+          label: fillTemplate(
+            AppContent.of(context).v6.accessibility.callDuration,
+            {'name': name, 'time': time},
+          ),
           excludeSemantics: true,
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -1004,8 +1016,10 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
                         key: CallScreen.minimizeKey,
                         size: ScrimButtonSize.md,
                         tone: ScrimButtonTone.light,
-                        icon: _iconOf(labV6.call.navIcons[0]),
-                        semanticLabel: '통화 화면 닫기',
+                        icon: _iconOf(LabV6.of(context).call.navIcons[0]),
+                        semanticLabel: AppContent.of(
+                          context,
+                        ).v6.accessibility.closeCall,
                         onPress: _onMinimize,
                       ),
                     ),
@@ -1016,8 +1030,10 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
                         key: CallScreen.moonKey,
                         size: ScrimButtonSize.md,
                         tone: ScrimButtonTone.light,
-                        icon: _iconOf(labV6.call.navIcons[1]),
-                        semanticLabel: '취침 모드',
+                        icon: _iconOf(LabV6.of(context).call.navIcons[1]),
+                        semanticLabel: AppContent.of(
+                          context,
+                        ).v6.accessibility.sleepMode,
                         onPress: _startSleep,
                       ),
                     ),

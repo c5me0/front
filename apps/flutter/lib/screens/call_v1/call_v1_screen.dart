@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import '../../content/app.g.dart';
 
 import '../../components/call_background.dart';
 import '../../components/call_control_bar.dart';
@@ -152,7 +153,7 @@ class _CallV1ScreenState extends State<CallV1Screen> {
               leading: NavLeading(
                 icon: CameoIconName.chevronDown,
                 onPress: _close,
-                accessibilityLabel: '닫기',
+                accessibilityLabel: AppContent.of(context).v6.album.closeLabel,
               ),
               actions: [
                 NavAction(
@@ -160,11 +161,15 @@ class _CallV1ScreenState extends State<CallV1Screen> {
                   activeIcon: CameoIconName.moonFilled,
                   active: _sleep,
                   onPress: _toggleSleep,
-                  accessibilityLabel: '취침 모드',
+                  accessibilityLabel: AppContent.of(
+                    context,
+                  ).v6.accessibility.sleepMode,
                 ),
-                const NavAction(
+                NavAction(
                   icon: CameoIconName.focus,
-                  accessibilityLabel: '포커스',
+                  accessibilityLabel: AppContent.of(
+                    context,
+                  ).v6.accessibility.focus,
                 ),
               ],
             ),

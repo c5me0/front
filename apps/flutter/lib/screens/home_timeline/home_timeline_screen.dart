@@ -930,10 +930,10 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                           hasPartner: data.hasPartner,
                           meName: session.name,
                           title: controller.premiumRequired && hasPartner
-                              ? appContent.v6.backend.premiumTitle
+                              ? AppContent.of(context).v6.backend.premiumTitle
                               : null,
                           actionLabel: controller.premiumRequired && hasPartner
-                              ? appContent.v6.backend.premiumAction
+                              ? AppContent.of(context).v6.backend.premiumAction
                               : null,
                           onImport: _import,
                           onConnect: () => CameoNav.openConnect(context),
@@ -971,8 +971,8 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                   right: 0,
                   child: BackendNotice(
                     message: recoveryId != null
-                        ? appContent.v6.backend.recoveryAvailable
-                        : appContent.v6.backend.premiumRequired,
+                        ? AppContent.of(context).v6.backend.recoveryAvailable
+                        : AppContent.of(context).v6.backend.premiumRequired,
                     onRetry: () =>
                         CameoNav.openPayment(context, archiveId: recoveryId),
                   ),
@@ -988,10 +988,10 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                   right: 0,
                   child: BackendNotice(
                     message: album.remote.error != null
-                        ? '${apiErrorCodeText(album.remote.error!)} ${appContent.v6.backend.retry}'
+                        ? '${apiErrorCodeText(album.remote.error!, copy: AppContent.of(context))} ${AppContent.of(context).v6.backend.retry}'
                         : album.remote.uploading
-                        ? appContent.v6.backend.uploading
-                        : appContent.v6.backend.loading,
+                        ? AppContent.of(context).v6.backend.uploading
+                        : AppContent.of(context).v6.backend.loading,
                     onRetry: album.remote.error != null
                         ? () => unawaited(album.remote.refresh())
                         : null,
@@ -1093,7 +1093,7 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                       ),
                       child: SolidButton(
                         key: const ValueKey('album.loadMore'),
-                        label: appContent.v6.backend.loadMore,
+                        label: AppContent.of(context).v6.backend.loadMore,
                         onPress: () => unawaited(
                           _mode == AlbumMode.liked
                               ? AlbumScope.read(
@@ -1113,14 +1113,14 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
   }
 
   Widget _buildSheet(BuildContext context) {
-    final copy = appContent.v6.album.deleteSheet;
+    final copy = AppContent.of(context).v6.album.deleteSheet;
     return KeyedSubtree(
       key: HomeTimelineScreen.deleteSheetKey,
       child: ConfirmSheet(
         visible: _sheetOpen,
         title: fillTemplate(copy.title, {'count': _sheetCount}),
         body: AlbumScope.read(context).usesBackend
-            ? appContent.v6.backend.permanentDelete
+            ? AppContent.of(context).v6.backend.permanentDelete
             : copy.body,
         confirmLabel: copy.confirm,
         cancelLabel: copy.cancel,

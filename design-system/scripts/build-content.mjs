@@ -18,6 +18,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generatedComments } from './generated-comments.mjs';
+import { translateContent } from './content-locales.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const CHECK = process.argv.includes('--check');
@@ -1282,20 +1283,24 @@ const dViewer = (v) =>
   `ViewerContent(screenNodeId: ${dStr(v.screenNodeId)}, cardNodeId: ${dStr(v.cardNodeId)}, image: ${dImg(v.image)}, date: ${dStr(v.date)}, actions: ${dStrList(v.actions)})`;
 const dAction = (a) => `SettingsActionContent(nodeId: ${dStr(a.nodeId)}, label: ${dStr(a.label)}, icon: ${dStr(a.icon)})`;
 
-const A = content.albumDay;
-const G = content.albumGangneung;
-const T = content.transcript;
-const P = T.player;
-const C = content.inCall;
-const B = content.photoBoothSample;
-const K = content.camera;
+function buildLabDart(content) {
+  const A = content.albumDay;
+  const G = content.albumGangneung;
+  const T = content.transcript;
+  const P = T.player;
+  const C = content.inCall;
+  const B = content.photoBoothSample;
+  const K = content.camera;
 
-const dart = `// ${HEADER}
+  return `// ${HEADER}
 // dart format off
 // ignore_for_file: lines_longer_than_80_chars, constant_identifier_names
 // 콘텐츠는 Figma 원문 그대로 (오타 '자긴 전 대화', 시간 표기 불일치 포함 — 수정 금지).
 // 색은 없다 (색은 tokens.json 색 역할 — Figma 값·모드). 이미지 필드는 에셋 경로 문자열 → Image.asset(path).
 // 그리드 row/col 은 1-based (파일명 rRcC 와 동일). PhotoGridContent.photos = 그리드 순서 사진 목록 (배치는 layoutPhotoGrid).
+
+import 'package:flutter/widgets.dart';
+import 'content_locale.dart';
 
 /// 콘텐츠 이미지 에셋 경로 (pubspec: assets/content/).
 abstract final class LabImages {
@@ -2022,9 +2027,26 @@ const TranscriptV5Content labTranscriptV5 = TranscriptV5Content(
 );
 `;
 
-// ---------------------------------------------------------------------------
+}
+const labMessages = readJson(resolve(CONTENT_DIR, 'lab-content.en.json'));
+const labEnglish = translateContent(raw, labMessages, { validate: true });
+const dart = buildLabDart(content);
+const englishLab = buildLabDart(translateContent(content, labMessages));
+const sampleDeclarations = [...dart.matchAll(/^const (\w+) (lab\w+) =/gm)];
+const englishSamples = englishLab.slice(englishLab.indexOf('const AlbumDayContent labAlbumDay'))
+  .replace(/\blab[A-Z]\w*/g, (name) => `${name}En`);
+const samplesDart = `
+${englishSamples}
+class LabSamples {
+  const LabSamples({${sampleDeclarations.map(([, , name]) => `required this.${name}`).join(', ')}});
+${sampleDeclarations.map(([, type, name]) => `  final ${type} ${name};`).join('\n')}
+  static LabSamples of(BuildContext context) => Localizations.of<LabSamples>(context, LabSamples) ?? labSamples;
+  static const delegate = ContentLocaleDelegate<LabSamples>(ko: labSamples, en: labSamplesEn);
+}
+const labSamples = LabSamples(${sampleDeclarations.map(([, , name]) => `${name}: ${name}`).join(', ')});
+const labSamplesEn = LabSamples(${sampleDeclarations.map(([, , name]) => `${name}: ${name}En`).join(', ')});
+`;
 
-// ---------------------------------------------------------------------------
 const APP_CONTENT = resolve(CONTENT_DIR, 'app-content.json');
 const OUT_APP_TS = resolve(root, 'apps/rn/src/content/app.generated.ts');
 const OUT_APP_DART = resolve(root, 'apps/flutter/lib/content/app.g.dart');
@@ -2042,6 +2064,7 @@ const stripMeta = (v) =>
         )
       : v;
 const app = stripMeta(readJson(APP_CONTENT));
+const appEnglish = translateContent(app, readJson(resolve(CONTENT_DIR, 'app-content.en.json')), { validate: true });
 const kindOf = (v) =>
   Array.isArray(v) ? 'array' : v === null ? 'null' : typeof v === 'number' ? (Number.isInteger(v) ? 'int' : 'double') : typeof v;
 const shapeOf = (v) => (kindOf(v) === 'object' ? `{${Object.keys(v).join(',')}}` : kindOf(v));
@@ -2104,12 +2127,21 @@ function dartOf(v, className, n, classes = dartClasses) {
   return [className, `${className}(\n${fields.map((f) => `${ind(n + 1)}${f.key}: ${f.expr},`).join('\n')}\n${ind(n)})`];
 }
 const [, appExpr] = dartOf(app, 'AppContent', 0);
+const [, appEnExpr] = dartOf(appEnglish, 'AppContent', 0);
+function localizedRoot(name, ko, en) {
+  return `
+  static ${name} of(BuildContext context) => Localizations.of<${name}>(context, ${name}) ?? ${ko};
+  static const delegate = ContentLocaleDelegate<${name}>(ko: ${ko}, en: ${en});
+`;
+}
 const appDart = `// ${APP_HEADER}
 // v4 cameo 문구 (Figma 에 없는 화면 — docs/v4-plan.md). 이미지 = LabImages 에셋 경로.
 // '{name}' 자리표시는 fillTemplate 으로 채운다 (RN fillTemplate 과 같은 규칙).
 // dart format off
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:flutter/widgets.dart';
+import 'content_locale.dart';
 import 'lab.g.dart';
 
 /// '{key}' 를 vars[key] 로 바꾼다. 모르는 키는 그대로 둔다. RN \`fillTemplate\` 과 같다.
@@ -2119,7 +2151,7 @@ String fillTemplate(String template, Map<String, Object> vars) =>
 ${dartClasses
   .reverse()
   .map(
-    (c) => `class ${c.name} {
+    (c) => `class ${c.name} {${c.name === 'AppContent' ? localizedRoot('AppContent', 'appContent', 'appContentEn') : ''}
   const ${c.name}({${c.fields.map((f) => `required this.${f.key}`).join(', ')}});
 ${c.fields.map((f) => `  final ${f.type} ${f.key};`).join('\n')}
 }`,
@@ -2128,6 +2160,7 @@ ${c.fields.map((f) => `  final ${f.type} ${f.key};`).join('\n')}
 
 /// v4 앱 문구 (app-content.json)
 const AppContent appContent = ${appExpr};
+const AppContent appContentEn = ${appEnExpr};
 `;
 
 // ---------------------------------------------------------------------------
@@ -2166,6 +2199,7 @@ export type LabV6Content = typeof labV6;
 `;
 const labV6Classes = [];
 const [, labV6Expr] = dartOf(labV6, 'LabV6', 0, labV6Classes);
+const [, labV6EnExpr] = dartOf(stripMeta(labEnglish.v6), 'LabV6', 0, labV6Classes);
 const labV6Dart = `
 // ---------------------------------------------------------------------------
 // v6 (reference/figma-v6 — 원본 페이지 product 2256:4477). 범용 트리: lab-content.json v6 그대로 ('$' 메모 제외).
@@ -2174,7 +2208,7 @@ const labV6Dart = `
 ${labV6Classes
   .reverse()
   .map(
-    (c) => `class ${c.name} {
+    (c) => `class ${c.name} {${c.name === 'LabV6' ? localizedRoot('LabV6', 'labV6', 'labV6En') : ''}
   const ${c.name}({${c.fields.map((f) => `required this.${f.key}`).join(', ')}});
 ${c.fields.map((f) => `  final ${f.type} ${f.key};`).join('\n')}
 }`,
@@ -2183,6 +2217,7 @@ ${c.fields.map((f) => `  final ${f.type} ${f.key};`).join('\n')}
 
 /// v6 원문 (lab-content.json v6)
 const LabV6 labV6 = ${labV6Expr};
+const LabV6 labV6En = ${labV6EnExpr};
 `;
 
 // ---------------------------------------------------------------------------
@@ -2221,7 +2256,7 @@ for (const dir of [FL_ASSETS, ...(process.argv.includes('--rn') ? [RN_ASSETS] : 
   }
 }
 if (process.argv.includes('--rn')) sync(OUT_TS, ts + labV6Ts);
-sync(OUT_DART, generatedComments(dart + labV6Dart));
+sync(OUT_DART, generatedComments(dart + labV6Dart + samplesDart));
 if (process.argv.includes('--rn')) sync(OUT_APP_TS, appTs);
 sync(OUT_APP_DART, generatedComments(appDart));
 

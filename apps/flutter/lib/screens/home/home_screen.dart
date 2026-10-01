@@ -10,6 +10,7 @@ import '../../components/empty_state.dart';
 import '../../components/glass_tab_bar.dart';
 import '../../components/scroll_edge_fade.dart';
 import '../../content/app.g.dart';
+import '../../content/lab.g.dart';
 import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/session.dart';
@@ -104,7 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     final partner = SessionScope.read(context).session.partner;
     final tone = homeTabBarTone(
-      cardCount: partner == null ? 0 : appContent.home.albums.length,
+      cardCount: partner == null
+          ? 0
+          : AppContent.of(context).home.albums.length,
       scrollOffset: _scroll.hasClients ? _scroll.offset : 0,
       screen: MediaQuery.sizeOf(context),
       safeTop: MediaQuery.paddingOf(context).top,
@@ -143,7 +146,10 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _demo(int index) {
     final card = _cards[index].currentState;
     if (card == null) return false;
-    return _open(_targetOf(appContent.home.albums[index]), card.drawnRect);
+    return _open(
+      _targetOf(AppContent.of(context).home.albums[index]),
+      card.drawnRect,
+    );
   }
 
   @override
@@ -158,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final c = CameoTheme.colorsOf(context);
     final insets = MediaQuery.paddingOf(context);
     final partner = SessionScope.of(context).session.partner;
-    final home = appContent.home;
+    final home = AppContent.of(context).home;
     final top = homeHeaderTop(insets.top);
     _reportTone();
     const bottom =
@@ -212,7 +218,10 @@ class _HomeScreenState extends State<HomeScreen> {
               index: i + 1,
               child: AlbumCard(
                 key: _cards[i],
-                data: albumCardDataFor(home.albums[i]),
+                data: albumCardDataFor(
+                  home.albums[i],
+                  samples: LabSamples.of(context),
+                ),
                 onPress: (rect) => _open(_targetOf(home.albums[i]), rect),
               ),
             ),

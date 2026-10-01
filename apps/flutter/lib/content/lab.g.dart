@@ -2,6 +2,9 @@
 // dart format off
 // ignore_for_file: lines_longer_than_80_chars, constant_identifier_names
 
+import 'package:flutter/widgets.dart';
+import 'content_locale.dart';
+
 abstract final class LabImages {
   static const String album3Cover = 'assets/content/album-3-cover.jpg';
   static const String album3GridR1c2 = 'assets/content/album-3-grid-r1c2.jpg';
@@ -1183,6 +1186,9 @@ const TranscriptV5Content labTranscriptV5 = TranscriptV5Content(
 // ---------------------------------------------------------------------------
 
 class LabV6 {
+  static LabV6 of(BuildContext context) => Localizations.of<LabV6>(context, LabV6) ?? labV6;
+  static const delegate = ContentLocaleDelegate<LabV6>(ko: labV6, en: labV6En);
+
   const LabV6({required this.welcome, required this.phone, required this.verify, required this.profile, required this.partner, required this.connected, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.emptyAlbum, required this.viewer, required this.transcript, required this.call, required this.camera, required this.review});
   final LabV6Welcome welcome;
   final LabV6Phone phone;
@@ -1488,17 +1494,17 @@ const LabV6 labV6 = LabV6(
       LabV6TabBarTab(
         id: 'history',
         icon: 'history',
-        label: 'history',
+        label: '앨범',
       ),
       LabV6TabBarTab(
         id: 'camera',
         icon: 'camera',
-        label: 'camera',
+        label: '카메라',
       ),
       LabV6TabBarTab(
         id: 'settings',
         icon: 'settings',
-        label: 'settings',
+        label: '설정',
       ),
     ],
     callIcon: 'phone-call',
@@ -1584,3 +1590,768 @@ const LabV6 labV6 = LabV6(
     sendIcon: 'arrow-up',
   ),
 );
+const LabV6 labV6En = LabV6(
+  welcome: LabV6Welcome(
+    wordmark: 'CAMEO',
+    tagline: 'Call, capture, and keep your moments together.',
+    cta: 'Continue with phone',
+  ),
+  phone: LabV6Phone(
+    title: 'Mobile number',
+    subtitle: 'Get a code by text.',
+    prefix: '+82',
+    placeholder: '010-0000-0000',
+    cta: 'Send code',
+  ),
+  verify: LabV6Verify(
+    title: 'Enter your code',
+    timerSample: '02:58',
+    codePlaceholder: '0',
+    resend: 'Resend code',
+    successIcon: 'check',
+  ),
+  profile: LabV6Profile(
+    title: 'Your name',
+    subtitle: 'For your partner.',
+    placeholder: 'Name',
+    cta: 'Continue',
+  ),
+  partner: LabV6Partner(
+    title: 'Partner',
+    subtitle: 'Their 6-digit code',
+    codePlaceholder: '0',
+    myCodeLabel: 'My code',
+    myCode: '735102',
+    copyIcon: 'copy',
+  ),
+  connected: LabV6Connected(
+    message: 'You\'re connected with {partner}!',
+    meInitialSample: 'J',
+    partnerPhoto: LabImages.albumSungsuCover,
+  ),
+  permissions: LabV6Permissions(
+    title: 'Permissions',
+    subtitle: 'Needed to use cameo.',
+    skip: 'Later',
+    cta: 'Allow all',
+    items: <LabV6PermissionsItem>[
+      LabV6PermissionsItem(
+        id: 'microphone',
+        icon: 'microphone',
+        title: 'Microphone',
+        description: 'Record calls and save your conversations.',
+      ),
+      LabV6PermissionsItem(
+        id: 'camera',
+        icon: 'camera',
+        title: 'Camera',
+        description: 'Capture and share photos together.',
+      ),
+      LabV6PermissionsItem(
+        id: 'notifications',
+        icon: 'notification',
+        title: 'Notifications',
+        description: 'Know when your partner is active.',
+      ),
+    ],
+  ),
+  settings: LabV6Settings(
+    title: 'Settings',
+    me: LabV6SettingsMe(
+      name: 'Juyoung Lee',
+      phone: '+82 10 3929 8983',
+      initial: 'J',
+    ),
+    partnerSection: 'Partner',
+    partner: LabV6SettingsPartner(
+      name: 'Yurim Lee',
+      phone: '+82 10 3929 8983',
+      initial: 'J',
+      status: 'Connected',
+    ),
+    notificationsSection: 'Notifications',
+    callAlerts: 'Call alerts',
+    highlightAlerts: 'Highlight summary alerts',
+    developerSection: 'Developer',
+    lab: 'Screen library (Lab)',
+    flowDemo: 'Play flow demo',
+    rowIcon: 'chevron-right',
+    disconnect: LabV6SettingsDisconnect(
+      label: 'Disconnect',
+      icon: 'link-off',
+    ),
+  ),
+  tabBar: LabV6TabBar(
+    tabs: <LabV6TabBarTab>[
+      LabV6TabBarTab(
+        id: 'history',
+        icon: 'history',
+        label: 'Album',
+      ),
+      LabV6TabBarTab(
+        id: 'camera',
+        icon: 'camera',
+        label: 'Camera',
+      ),
+      LabV6TabBarTab(
+        id: 'settings',
+        icon: 'settings',
+        label: 'Settings',
+      ),
+    ],
+    callIcon: 'phone-call',
+  ),
+  album: LabV6Album(
+    selectLabel: 'Select',
+    navActions: <String>[
+      'plus',
+      'heart',
+      'history',
+    ],
+    selectActions: <String>[
+      'share-2',
+      'heart',
+      'trash',
+    ],
+    likedActions: <String>[
+      'share-2',
+      'heart',
+      'trash',
+    ],
+    deletedActions: <String>[
+      'archive',
+    ],
+    closeIcon: 'x',
+  ),
+  emptyAlbum: LabV6EmptyAlbum(
+    title: 'No photos saved yet!',
+    cta: 'Import photos',
+    ctaIcon: 'photo',
+    meInitialSample: 'J',
+    partnerPhoto: LabImages.albumSungsuCover,
+  ),
+  viewer: LabV6Viewer(
+    date: 'Today, 12:00 PM',
+    actions: <String>[
+      'share-2',
+      'heart',
+      'trash',
+    ],
+    image: LabImages.albumSungsuGridR5c4Hires,
+    closeIcon: 'x',
+  ),
+  transcript: LabV6Transcript(
+    navActions: <String>[
+      'phone-call',
+      'heart',
+    ],
+    closeIcon: 'x',
+  ),
+  call: LabV6Call(
+    navIcons: <String>[
+      'chevron-down',
+      'moon',
+    ],
+    barIcons: <String>[
+      'volume',
+      'microphone',
+      'camera',
+      'rewind-backward-15',
+      'x',
+    ],
+    highlightToast: LabV6CallHighlightToast(
+      text: 'Saved a highlight with 15 seconds before and after!',
+      icon: 'info-circle',
+    ),
+    sleepEnd: LabV6CallSleepEnd(
+      label: 'End sleep mode',
+      icon: 'sunrise',
+    ),
+  ),
+  camera: LabV6Camera(
+    partnerToast: LabV6CameraPartnerToast(
+      text: 'Yurim shared a photo!',
+      icon: 'info-circle',
+    ),
+    viewfinder: LabImages.cameraViewfinderV5,
+    thumbnail: LabImages.albumSungsuGridR5c4Hires,
+    flipIcon: 'refresh',
+  ),
+  review: LabV6Review(
+    discardIcon: 'trash',
+    sendIcon: 'arrow-up',
+  ),
+);
+
+const AlbumDayContent labAlbumDayEn = AlbumDayContent(
+  screenNodeId: '2028:435',
+  sections: <AlbumSectionContent>[
+    AlbumSectionContent(
+      id: 'sungsu',
+      figmaName: '1',
+      nodeId: '2042:2791',
+      tone: LabTone.dark,
+      cover: LabImages.albumSungsuCover,
+      title: 'Seongsu → Hannam',
+      subtitle: 'August 20, 2026 · 6 hours',
+      stats: AlbumStatsContent(photos: '30', calls: '3'),
+      callCards: <CallCardContent>[
+        CallCardContent(
+          nodeId: '2042:2804',
+          direction: CallDirection.outgoing,
+          icon: 'arrow-up-right',
+          title: 'Planning our Seongsu date',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('12:20 PM', LabTextWeight.medium),
+            LabTextSpan(' ∙ Outgoing call, 21m 17s', LabTextWeight.regular),
+          ],
+        ),
+        CallCardContent(
+          nodeId: '2042:2809',
+          direction: CallDirection.incoming,
+          icon: 'arrow-down-left',
+          title: 'Good morning',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('8:12 AM', LabTextWeight.medium),
+            LabTextSpan(' ∙ Incoming call, 5m 10s', LabTextWeight.regular),
+          ],
+        ),
+        CallCardContent(
+          nodeId: '2042:2814',
+          direction: CallDirection.missed,
+          icon: 'arrow-down-left',
+          title: 'Juyoung, wake up!',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('8:10 AM', LabTextWeight.medium),
+            LabTextSpan(' ∙ Missed call', LabTextWeight.regular),
+          ],
+        ),
+      ],
+      grid: PhotoGridContent(
+        columns: 5,
+        rows: <List<String>>[
+          <String>[LabImages.albumSungsuGridR1c1, LabImages.albumSungsuGridR1c2, LabImages.albumSungsuGridR1c3, LabImages.albumSungsuGridR1c4, LabImages.albumSungsuGridR1c5],
+          <String>[LabImages.albumSungsuGridR2c1, LabImages.albumSungsuGridR2c2, LabImages.albumSungsuGridR2c3, LabImages.albumSungsuGridR2c4, LabImages.albumSungsuGridR2c5],
+          <String>[LabImages.albumSungsuGridR3c1, LabImages.albumSungsuGridR3c2, LabImages.albumSungsuGridR3c3, LabImages.albumSungsuGridR3c4, LabImages.albumSungsuGridR3c5],
+          <String>[LabImages.albumSungsuGridR4c1, LabImages.albumSungsuGridR4c2, LabImages.albumSungsuGridR4c3, LabImages.albumSungsuGridR4c4, LabImages.albumSungsuGridR4c5],
+          <String>[LabImages.albumSungsuGridR5c1, LabImages.albumSungsuGridR5c2, LabImages.albumSungsuGridR5c3, LabImages.albumSungsuGridR5c4, LabImages.albumSungsuGridR5c5],
+          <String>[LabImages.albumSungsuGridR6c1, LabImages.albumSungsuGridR6c2, LabImages.albumSungsuGridR6c3, LabImages.albumSungsuGridR6c4, LabImages.albumSungsuGridR6c5],
+        ],
+        photos: <GridPhotoContent>[
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c5, liked: false),
+        ],
+      ),
+    ),
+    AlbumSectionContent(
+      id: 'empty-photo',
+      figmaName: 'empty photo',
+      nodeId: '2042:2856',
+      tone: LabTone.light,
+      cover: null,
+      title: 'August 20, 2026',
+      subtitle: 'Call summary',
+      stats: AlbumStatsContent(photos: '0', calls: '2'),
+      callCards: <CallCardContent>[
+        CallCardContent(
+          nodeId: '2042:2869',
+          direction: CallDirection.outgoing,
+          icon: 'arrow-up-right',
+          title: 'A chat before bed',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('11:10 PM', LabTextWeight.medium),
+            LabTextSpan(' ∙ Outgoing call, 21m 17s', LabTextWeight.regular),
+          ],
+        ),
+        CallCardContent(
+          nodeId: '2042:2874',
+          direction: CallDirection.incoming,
+          icon: 'arrow-down-left',
+          title: 'Good morning',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('8:00 AM', LabTextWeight.medium),
+            LabTextSpan(' ∙ Incoming call, 5m 10s', LabTextWeight.regular),
+          ],
+        ),
+      ],
+      grid: null,
+    ),
+    AlbumSectionContent(
+      id: 'section-3',
+      figmaName: '2',
+      nodeId: '2042:2879',
+      tone: LabTone.dark,
+      cover: LabImages.album3Cover,
+      title: 'August 20, 2026',
+      subtitle: 'Photo summary',
+      stats: AlbumStatsContent(photos: '2', calls: '0'),
+      callCards: <CallCardContent>[],
+      grid: PhotoGridContent(
+        columns: 5,
+        rows: <List<String>>[
+          <String>[LabImages.album3Cover, LabImages.album3GridR1c2],
+        ],
+        photos: <GridPhotoContent>[
+          GridPhotoContent(image: LabImages.album3Cover, liked: false),
+          GridPhotoContent(image: LabImages.album3GridR1c2, liked: false),
+        ],
+      ),
+    ),
+  ],
+);
+
+const AlbumGangneungContent labAlbumGangneungEn = AlbumGangneungContent(
+  screenNodeId: '2001:1126',
+  title: 'Gangneung',
+  date: 'August 20, 2026',
+  cover: LabImages.albumSungsuCover,
+  grid: PhotoGridContent(
+    columns: 5,
+    rows: <List<String>>[
+      <String>[LabImages.albumSungsuGridR1c1, LabImages.albumSungsuGridR1c2, LabImages.albumSungsuGridR1c3, LabImages.albumSungsuGridR1c4, LabImages.albumSungsuGridR1c5],
+      <String>[LabImages.albumSungsuGridR2c1, LabImages.albumSungsuGridR2c2, LabImages.albumSungsuGridR2c3, LabImages.albumSungsuGridR2c4, LabImages.albumSungsuGridR2c5],
+      <String>[LabImages.albumSungsuGridR3c1, LabImages.albumSungsuGridR3c2, LabImages.albumSungsuGridR3c3, LabImages.albumSungsuGridR3c4, LabImages.albumSungsuGridR3c5],
+      <String>[LabImages.albumSungsuGridR4c1, LabImages.albumSungsuGridR4c2, LabImages.albumSungsuGridR4c3, LabImages.albumSungsuGridR4c4, LabImages.albumSungsuGridR4c5],
+      <String>[LabImages.albumSungsuGridR5c1, LabImages.albumSungsuGridR5c2, LabImages.albumSungsuGridR5c3, LabImages.albumSungsuGridR5c4, LabImages.albumSungsuGridR5c5],
+      <String>[LabImages.albumSungsuGridR6c1, LabImages.albumSungsuGridR6c2, LabImages.albumSungsuGridR6c3, LabImages.albumSungsuGridR6c4, LabImages.albumSungsuGridR6c5],
+    ],
+    photos: <GridPhotoContent>[
+      GridPhotoContent(image: LabImages.albumSungsuGridR1c1, liked: true),
+      GridPhotoContent(image: LabImages.albumSungsuGridR1c3, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR1c4, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR1c5, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR2c3, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR2c4, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR2c5, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR3c1, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR3c2, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR3c3, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR3c4, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR3c5, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR4c1, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR4c2, liked: true),
+      GridPhotoContent(image: LabImages.albumSungsuGridR4c4, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR4c5, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR5c1, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR5c4, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR5c5, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR6c1, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR6c2, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR6c3, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR6c4, liked: false),
+      GridPhotoContent(image: LabImages.albumSungsuGridR6c5, liked: false),
+    ],
+  ),
+  featured: <FeaturedTileContent>[
+    FeaturedTileContent(nodeId: '2001:1168', image: LabImages.albumSungsuGridR1c1, row: 1, col: 1, rowSpan: 2, colSpan: 2, liked: true),
+    FeaturedTileContent(nodeId: '2001:1171', image: LabImages.albumSungsuGridR4c2, row: 4, col: 2, rowSpan: 2, colSpan: 2, liked: true),
+  ],
+  quoteCard: QuoteCardContent(
+    nodeId: '2015:1954',
+    label: 'Highlight #1',
+    labelAlign: LabAlign.left,
+    lines: <QuoteLineContent>[
+      QuoteLineContent(nodeId: '2015:1956', text: 'My exam is tomorrow. I really need that pen!', align: LabAlign.left, gradient: GradientTextContent(solidUntil: 0.46635)),
+      QuoteLineContent(nodeId: '2015:1957', text: 'Got it. I\'ll make sure to bring it!', align: LabAlign.right, gradient: null),
+    ],
+  ),
+  tabBar: TabBarContent(nodeId: '2001:1375', selectedIndex: 0, avatar: LabImages.tabbarAvatar),
+);
+
+const TranscriptContent labTranscriptEn = TranscriptContent(
+  screenNodeIds: LabNodeIds(light: '2042:3219', dark: '2042:2933'),
+  title: 'Planning our Seongsu date',
+  date: 'August 20, 12:20 PM',
+  darkBackground: LabImages.transcriptDarkBackground,
+  lines: <TranscriptLineContent>[
+    TranscriptLineContent(id: 'l1', nodeIds: LabNodeIds(light: '2042:3246', dark: '2042:3132'), text: 'Juyoung, want to go to Seongsu on Saturday?', side: LabAlign.left, inHighlight: false, current: false, gradient: null),
+    TranscriptLineContent(id: 'l2', nodeIds: LabNodeIds(light: '2042:3257', dark: '2042:3135'), text: 'Yes! There\'s a place I\'ve been wanting to try', side: LabAlign.right, inHighlight: false, current: false, gradient: null),
+    TranscriptLineContent(id: 'l3', nodeIds: LabNodeIds(light: '2042:3248', dark: '2042:3137'), text: 'That new cafe on Yeonmujang-gil,\nnot the Daelim Warehouse we talked about?', side: LabAlign.left, inHighlight: false, current: false, gradient: null),
+    TranscriptLineContent(id: 'l4', nodeIds: LabNodeIds(light: '2042:3251', dark: '2042:3139'), text: 'They say there\'s no wait before 3! Let\'s meet at Seoul Forest around 1 on Saturday and walk there', side: LabAlign.left, inHighlight: true, current: false, gradient: null),
+    TranscriptLineContent(id: 'l5', nodeIds: LabNodeIds(light: '2042:3252', dark: '2042:3141'), text: 'Sounds good! See you at exit 4 of Seoul Forest Station at 1!', side: LabAlign.right, inHighlight: true, current: true, gradient: GradientTextContent(solidUntil: 0.60577)),
+    TranscriptLineContent(id: 'l6', nodeIds: LabNodeIds(light: '2042:3253', dark: '2042:3213'), text: 'Where should we have dinner?', side: LabAlign.left, inHighlight: true, current: false, gradient: null),
+    TranscriptLineContent(id: 'l7', nodeIds: LabNodeIds(light: '2042:3254', dark: '2042:3215'), text: 'Let\'s decide after the cafe', side: LabAlign.right, inHighlight: true, current: false, gradient: null),
+    TranscriptLineContent(id: 'l8', nodeIds: LabNodeIds(light: '2042:3255', dark: '2042:3217'), text: 'Great, I can\'t wait!', side: LabAlign.left, inHighlight: true, current: false, gradient: null),
+  ],
+  player: PlayerContent(
+    nodeIds: LabNodeIds(light: '2042:3224', dark: '2042:3105'),
+    currentTime: '00:00',
+    duration: '07:23',
+    durationSeconds: 443,
+    playing: true,
+    trackWidthPx: 155.0,
+    trackWidthPxDark: 154.0,
+    progressWidthPx: 36.0,
+    progress: 0.232258,
+    thumbLeftPx: 24.0,
+    thumbSizePx: 24.0,
+    thumbCenterPx: 36.0,
+    thumbCenter: 0.232258,
+    markers: <PlayerMarkerContent>[
+      PlayerMarkerContent(nodeIds: LabNodeIds(light: '2042:3226', dark: '2042:3107'), leftPx: 80.0, widthPx: 19.0, start: 0.516129, width: 0.122581),
+      PlayerMarkerContent(nodeIds: LabNodeIds(light: '2042:3227', dark: '2042:3108'), leftPx: 122.0, widthPx: 12.0, start: 0.787097, width: 0.077419),
+    ],
+  ),
+);
+
+const InCallContent labInCallEn = InCallContent(
+  screenNodeIds: <String>['2042:2361', '2042:2504', '2042:2581', '2042:2650', '2004:1796'],
+  name: 'Yurim',
+  timer: '00:04',
+  background: LabImages.callBackground,
+  toasts: InCallToastsContent(
+    systemMessage: ToastContent(
+      screenNodeId: '2042:2361',
+      nodeId: '2042:2498',
+      text: 'System message.',
+      icon: 'border-none',
+      iconIsPlaceholder: true,
+    ),
+    sleepModeRequest: ToastContent(
+      screenNodeId: '2004:1796',
+      nodeId: '2004:1818',
+      text: 'Sleep mode request sent to Yurim!',
+      icon: 'moon-filled',
+      iconIsPlaceholder: false,
+    ),
+  ),
+);
+
+const PhotoBoothSampleContent labPhotoBoothSampleEn = PhotoBoothSampleContent(nodeId: '2042:3117', image: LabImages.albumSungsuGridR4c2);
+
+const CameraContent labCameraEn = CameraContent(
+  screenNodeId: '2056:3280',
+  placeholderNodeId: '2058:3415',
+  placeholder: LabImages.cameraPlaceholder,
+  initialMode: CameraModeId.photo,
+  modes: <CameraModeContent>[
+    CameraModeContent(id: CameraModeId.photo, nodeId: '2056:3394', labelNodeId: '2056:3410', label: 'Photo'),
+    CameraModeContent(id: CameraModeId.video, nodeId: '2056:3412', labelNodeId: '2056:3414', label: 'Video'),
+  ],
+);
+
+const InCallV5Content labInCallV5En = InCallV5Content(
+  screenNodeIds: <String>['2170:8678', '2170:9065', '2176:9162', '2170:8774', '2170:8313'],
+  name: 'Yurim',
+  timer: '00:04',
+  background: LabImages.albumSungsuCover,
+  toasts: InCallV5ToastsContent(
+    sleep: ToastContent(
+      screenNodeId: '2170:8678',
+      nodeId: '2170:8743',
+      text: 'Yurim switched to sleep mode!',
+      icon: 'moon-filled',
+      iconIsPlaceholder: false,
+    ),
+    highlight: ToastContent(
+      screenNodeId: '2176:9162',
+      nodeId: '2176:9229',
+      text: 'Saved a highlight with 15 seconds before and after!',
+      icon: 'info-circle',
+      iconIsPlaceholder: false,
+    ),
+  ),
+  photoSheet: PhotoSheetContent(
+    screenNodeId: '2170:8774',
+    nodeId: '2170:9008',
+    title: 'Photo',
+    liveCell: SheetLiveCellContent(nodeId: '2170:9039', image: LabImages.photoSheetLiveCamera, row: 1, col: 1, rowSpan: 2),
+    columns: 3,
+    rows: <List<String>>[
+      <String>[LabImages.albumSungsuGridR1c1, LabImages.albumSungsuGridR1c2, LabImages.albumSungsuGridR1c3],
+      <String>[LabImages.albumSungsuGridR2c1, LabImages.albumSungsuGridR2c2, LabImages.albumSungsuGridR2c3],
+      <String>[LabImages.albumSungsuGridR3c1, LabImages.albumSungsuGridR3c2, LabImages.albumSungsuGridR3c3],
+      <String>[LabImages.albumSungsuGridR4c1, LabImages.albumSungsuGridR4c2, LabImages.albumSungsuGridR4c3],
+    ],
+    photos: <SheetPhotoContent>[
+      SheetPhotoContent(image: LabImages.albumSungsuGridR1c2, selected: true),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR1c3, selected: true),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR2c2, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR2c3, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR3c1, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR3c2, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR3c3, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR4c1, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR4c2, selected: false),
+      SheetPhotoContent(image: LabImages.albumSungsuGridR4c3, selected: false),
+    ],
+  ),
+  capturedCard: CapturedCardContent(nodeId: '2170:8607', image: LabImages.albumSungsuGridR3c2Hires, orientation: CapturedOrientation.portrait),
+);
+
+const CameraV5Content labCameraV5En = CameraV5Content(
+  screenNodeId: '2170:5682',
+  viewfinderNodeId: '2170:5760',
+  viewfinder: LabImages.cameraViewfinderV5,
+  thumbnailNodeId: '2170:5904',
+  thumbnail: LabImages.albumSungsuGridR5c4Hires,
+  toast: ToastContent(
+    screenNodeId: '2170:5682',
+    nodeId: '2170:9152',
+    text: 'Yurim shared a moment!',
+    icon: 'info-circle',
+    iconIsPlaceholder: false,
+  ),
+);
+
+const ViewerV5Content labViewerV5En = ViewerV5Content(
+  photo: ViewerContent(screenNodeId: '2170:7914', cardNodeId: '2170:8068', image: LabImages.albumSungsuGridR5c4Hires, date: 'Today, 12:00 AM', actions: <String>['share-2', 'heart', 'trash']),
+  instant: ViewerContent(screenNodeId: '2170:6159', cardNodeId: '2170:6162', image: LabImages.albumSungsuGridR5c4Hires, date: 'Today, 12:00 AM', actions: <String>['share-2', 'heart']),
+);
+
+const TabBarV5Content labTabBarV5En = TabBarV5Content(nodeId: '2166:5444', avatar: LabImages.albumSungsuGridR1c1Hires);
+
+const AlbumV5Content labAlbumV5En = AlbumV5Content(
+  screenNodeId: '2170:6590',
+  contentNodeId: '2232:2109',
+  nav: AlbumV5NavContent(selectLabel: 'Select', actions: <String>['phone-call', 'heart', 'history']),
+  selectNav: AlbumV5SelectNavContent(actions: <String>['share-2', 'trash']),
+  sections: <AlbumV5SectionContent>[
+    AlbumV5SectionContent(
+      id: 'sungsu',
+      figmaName: '1',
+      nodeId: '2170:7307',
+      kind: AlbumSectionKind.photosCalls,
+      tint: 'album/section-1',
+      heroGradient: 'albumHeroV5',
+      cover: LabImages.albumSungsuCover,
+      title: 'Seongsu → Hannam',
+      subtitle: 'August 20, 2026 · 6 hours',
+      stats: AlbumStatsContent(photos: '30', calls: '3'),
+      callCards: <CallCardV5Content>[
+        CallCardV5Content(
+          nodeId: '2170:7320',
+          variant: 'scrim',
+          direction: CallDirection.outgoing,
+          icon: 'arrow-up-right',
+          title: 'Planning our Seongsu date',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('12:20 PM', LabTextWeight.regular),
+            LabTextSpan(' ∙ Outgoing call, 21m 17s', LabTextWeight.regular),
+          ],
+        ),
+        CallCardV5Content(
+          nodeId: '2170:7321',
+          variant: 'scrim',
+          direction: CallDirection.incoming,
+          icon: 'arrow-down-left',
+          title: 'Good morning',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('8:12 AM', LabTextWeight.regular),
+            LabTextSpan(' ∙ Incoming call, 5m 10s', LabTextWeight.regular),
+          ],
+        ),
+        CallCardV5Content(
+          nodeId: '2170:7322',
+          variant: 'failed',
+          direction: CallDirection.missed,
+          icon: 'arrow-down-left',
+          title: 'Missed',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('8:10 AM', LabTextWeight.regular),
+          ],
+        ),
+      ],
+      grid: PhotoGridContent(
+        columns: 5,
+        rows: <List<String>>[
+          <String>[LabImages.albumSungsuGridR1c1, LabImages.albumSungsuGridR1c2, LabImages.albumSungsuGridR1c3, LabImages.albumSungsuGridR1c4, LabImages.albumSungsuGridR1c5],
+          <String>[LabImages.albumSungsuGridR2c1, LabImages.albumSungsuGridR2c2, LabImages.albumSungsuGridR2c3, LabImages.albumSungsuGridR2c4, LabImages.albumSungsuGridR2c5],
+          <String>[LabImages.albumSungsuGridR3c1, LabImages.albumSungsuGridR3c2, LabImages.albumSungsuGridR3c3, LabImages.albumSungsuGridR3c4, LabImages.albumSungsuGridR3c5],
+          <String>[LabImages.albumSungsuGridR4c1, LabImages.albumSungsuGridR4c2, LabImages.albumSungsuGridR4c3, LabImages.albumSungsuGridR4c4, LabImages.albumSungsuGridR4c5],
+          <String>[LabImages.albumSungsuGridR5c1, LabImages.albumSungsuGridR5c2, LabImages.albumSungsuGridR5c3, LabImages.albumSungsuGridR5c4, LabImages.albumSungsuGridR5c5],
+          <String>[LabImages.albumSungsuGridR6c1, LabImages.albumSungsuGridR6c2, LabImages.albumSungsuGridR6c3, LabImages.albumSungsuGridR6c4, LabImages.albumSungsuGridR6c5],
+        ],
+        photos: <GridPhotoContent>[
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c1, liked: true),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR1c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR2c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR3c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR4c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR5c5, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c1, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c2, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c3, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c4, liked: false),
+          GridPhotoContent(image: LabImages.albumSungsuGridR6c5, liked: false),
+        ],
+      ),
+      featured: <FeaturedTileContent>[
+        FeaturedTileContent(nodeId: '2170:8302', image: LabImages.albumSungsuGridR1c1, row: 1, col: 1, rowSpan: 2, colSpan: 2, liked: true),
+      ],
+    ),
+    AlbumV5SectionContent(
+      id: 'calls-only',
+      figmaName: 'empty photo',
+      nodeId: '2170:7360',
+      kind: AlbumSectionKind.callsOnly,
+      tint: 'album/section-calls',
+      heroGradient: null,
+      cover: null,
+      title: 'August 20, 2026',
+      subtitle: 'Call summary',
+      stats: AlbumStatsContent(photos: '0', calls: '2'),
+      callCards: <CallCardV5Content>[
+        CallCardV5Content(
+          nodeId: '2170:7373',
+          variant: 'default',
+          direction: CallDirection.outgoing,
+          icon: 'arrow-up-right',
+          title: 'A chat before bed',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('11:10 PM ∙ Outgoing call, 21m 17s', LabTextWeight.regular),
+          ],
+        ),
+        CallCardV5Content(
+          nodeId: '2170:7374',
+          variant: 'default',
+          direction: CallDirection.incoming,
+          icon: 'arrow-down-left',
+          title: 'Good morning',
+          subtitle: <LabTextSpan>[
+            LabTextSpan('8:00 AM ∙ Incoming call, 5m 10s', LabTextWeight.regular),
+          ],
+        ),
+      ],
+      grid: null,
+      featured: <FeaturedTileContent>[],
+    ),
+    AlbumV5SectionContent(
+      id: 'section-2',
+      figmaName: '2',
+      nodeId: '2170:7375',
+      kind: AlbumSectionKind.photosOnly,
+      tint: 'album/section-3',
+      heroGradient: 'albumHeroV5Section2',
+      cover: LabImages.album3Cover,
+      title: 'August 20, 2026',
+      subtitle: 'Photo summary',
+      stats: AlbumStatsContent(photos: '2', calls: '0'),
+      callCards: <CallCardV5Content>[],
+      grid: PhotoGridContent(
+        columns: 5,
+        rows: <List<String>>[
+          <String>[LabImages.album3Cover, LabImages.album3GridR1c2],
+        ],
+        photos: <GridPhotoContent>[
+          GridPhotoContent(image: LabImages.album3Cover, liked: false),
+          GridPhotoContent(image: LabImages.album3GridR1c2, liked: false),
+        ],
+      ),
+      featured: <FeaturedTileContent>[],
+    ),
+  ],
+);
+
+const SettingsV5Content labSettingsV5En = SettingsV5Content(
+  screenNodeId: '2176:11011',
+  hero: LabImages.albumSungsuCover,
+  names: 'Juyoung Lee, Yurim Lee',
+  days: 200,
+  dayCount: 'Day 200',
+  daySuffix: ' together',
+  editProfile: SettingsActionContent(nodeId: '2176:11374', label: 'Edit profile', icon: 'pencil'),
+  disconnect: SettingsActionContent(nodeId: '2176:11483', label: 'Disconnect', icon: 'link-off'),
+);
+
+const TranscriptV5Content labTranscriptV5En = TranscriptV5Content(
+  screenNodeId: '2176:9241',
+  variantNodeIds: <String>['2232:2862', '2232:2932', '2194:13374'],
+  title: 'Planning our Seongsu date',
+  date: 'August 20, 12:20 PM',
+  navActions: <String>['phone-call', 'heart'],
+  lines: <TranscriptV5LineContent>[
+    TranscriptV5LineContent(id: 'l1', nodeId: '2176:10929', text: 'Juyoung, want to go to Seongsu on Saturday?', side: LabAlign.left, inHighlight: false, current: false),
+    TranscriptV5LineContent(id: 'l2', nodeId: '2176:10931', text: 'Yes! There\'s a place I\'ve been wanting to try', side: LabAlign.right, inHighlight: false, current: false),
+    TranscriptV5LineContent(id: 'l3', nodeId: '2176:10933', text: 'That new cafe on Yeonmujang-gil,\nnot the Daelim Warehouse we talked about?', side: LabAlign.left, inHighlight: false, current: false),
+    TranscriptV5LineContent(id: 'l4', nodeId: '2176:10937', text: 'They say there\'s no wait before 3! Let\'s meet at Seoul Forest around 1 on Saturday and walk there', side: LabAlign.left, inHighlight: true, current: false),
+    TranscriptV5LineContent(id: 'l5', nodeId: '2176:10938', text: 'Sounds good! See you at exit 4 of Seoul Forest Station at 1!', side: LabAlign.right, inHighlight: true, current: true),
+    TranscriptV5LineContent(id: 'l6', nodeId: '2176:10939', text: 'Where should we have dinner?', side: LabAlign.left, inHighlight: true, current: false),
+    TranscriptV5LineContent(id: 'l7', nodeId: '2176:10940', text: 'Let\'s decide after the cafe', side: LabAlign.right, inHighlight: true, current: false),
+    TranscriptV5LineContent(id: 'l8', nodeId: '2176:10941', text: 'Great, I can\'t wait!', side: LabAlign.left, inHighlight: true, current: false),
+  ],
+  inlinePhoto: InlinePhotoContent(nodeId: '2176:10934', image: LabImages.transcriptInlinePhoto, afterLineId: 'l3'),
+  player: PlayerV5Content(
+    nodeId: '2176:10994',
+    currentTime: '00:00',
+    duration: '07:23',
+    durationSeconds: 443,
+    playing: true,
+    trackWidthPx: 157.0,
+    progressWidthPx: 47.0,
+    progress: 0.299363,
+    thumbLeftPx: 32.5,
+    thumbSizePx: 28.0,
+    thumbCenterPx: 46.5,
+    thumbCenter: 0.296178,
+    markers: <PlayerV5MarkerContent>[
+      PlayerV5MarkerContent(nodeId: '2176:11006', leftPx: 75.0, widthPx: 16.0, start: 0.477707, width: 0.101911),
+      PlayerV5MarkerContent(nodeId: '2176:11007', leftPx: 112.0, widthPx: 16.0, start: 0.713376, width: 0.101911),
+    ],
+  ),
+);
+
+class LabSamples {
+  const LabSamples({required this.labAlbumDay, required this.labAlbumGangneung, required this.labTranscript, required this.labInCall, required this.labPhotoBoothSample, required this.labCamera, required this.labInCallV5, required this.labCameraV5, required this.labViewerV5, required this.labTabBarV5, required this.labAlbumV5, required this.labSettingsV5, required this.labTranscriptV5});
+  final AlbumDayContent labAlbumDay;
+  final AlbumGangneungContent labAlbumGangneung;
+  final TranscriptContent labTranscript;
+  final InCallContent labInCall;
+  final PhotoBoothSampleContent labPhotoBoothSample;
+  final CameraContent labCamera;
+  final InCallV5Content labInCallV5;
+  final CameraV5Content labCameraV5;
+  final ViewerV5Content labViewerV5;
+  final TabBarV5Content labTabBarV5;
+  final AlbumV5Content labAlbumV5;
+  final SettingsV5Content labSettingsV5;
+  final TranscriptV5Content labTranscriptV5;
+  static LabSamples of(BuildContext context) => Localizations.of<LabSamples>(context, LabSamples) ?? labSamples;
+  static const delegate = ContentLocaleDelegate<LabSamples>(ko: labSamples, en: labSamplesEn);
+}
+const labSamples = LabSamples(labAlbumDay: labAlbumDay, labAlbumGangneung: labAlbumGangneung, labTranscript: labTranscript, labInCall: labInCall, labPhotoBoothSample: labPhotoBoothSample, labCamera: labCamera, labInCallV5: labInCallV5, labCameraV5: labCameraV5, labViewerV5: labViewerV5, labTabBarV5: labTabBarV5, labAlbumV5: labAlbumV5, labSettingsV5: labSettingsV5, labTranscriptV5: labTranscriptV5);
+const labSamplesEn = LabSamples(labAlbumDay: labAlbumDayEn, labAlbumGangneung: labAlbumGangneungEn, labTranscript: labTranscriptEn, labInCall: labInCallEn, labPhotoBoothSample: labPhotoBoothSampleEn, labCamera: labCameraEn, labInCallV5: labInCallV5En, labCameraV5: labCameraV5En, labViewerV5: labViewerV5En, labTabBarV5: labTabBarV5En, labAlbumV5: labAlbumV5En, labSettingsV5: labSettingsV5En, labTranscriptV5: labTranscriptV5En);

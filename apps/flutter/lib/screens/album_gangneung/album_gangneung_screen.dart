@@ -2,6 +2,7 @@
 // sources, and scroll restoration.
 
 import 'package:flutter/widgets.dart';
+import '../../content/app.g.dart';
 
 import '../../components/album_hero.dart';
 import '../../components/album_section.dart';
@@ -18,8 +19,6 @@ const CameoColorMode _colorMode = CameoColorMode.light;
 final List<String> _photos = [
   for (final p in labAlbumGangneung.grid.photos) p.image,
 ];
-
-final String _heroLabel = '${labAlbumGangneung.title}, 날짜별 앨범 열기';
 
 const int _phoneTab = 1;
 
@@ -112,7 +111,7 @@ class _AlbumGangneungScreenState extends State<AlbumGangneungScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const content = labAlbumGangneung;
+    final content = LabSamples.of(context).labAlbumGangneung;
 
     if (widget.inTabs) TabBarTone.report(context, TabBarV6Tone.photo);
 
@@ -147,7 +146,10 @@ class _AlbumGangneungScreenState extends State<AlbumGangneungScreen> {
                       gradient: AlbumHeroGradient.albumHeroGangneung,
                       scrollOffset: ScrollOffsetListenable(_scroll),
                       onPress: _openAlbum,
-                      accessibilityLabel: _heroLabel,
+                      accessibilityLabel: fillTemplate(
+                        AppContent.of(context).v6.accessibility.dateAlbum,
+                        {'title': content.title},
+                      ),
                     ),
                     PhotoGrid(
                       variant: PhotoGridVariant.gangneung,
@@ -193,12 +195,14 @@ class _GangneungNavBarState extends State<_GangneungNavBar> {
           ? NavLeading(
               icon: CameoIconName.chevronLeft,
               onPress: () => CameoNav.push(context, CameoRoutes.lab),
-              accessibilityLabel: '뒤로, 개발용 목록',
+              accessibilityLabel: AppContent.of(
+                context,
+              ).v6.accessibility.backLab,
             )
           : NavLeading(
               icon: CameoIconName.chevronLeft,
               onPress: () => CameoNav.pop(context),
-              accessibilityLabel: '뒤로',
+              accessibilityLabel: AppContent.of(context).common.back,
             ),
       actions: [
         NavAction(
@@ -206,9 +210,12 @@ class _GangneungNavBarState extends State<_GangneungNavBar> {
           activeIcon: CameoIconName.starFilled,
           active: _starred,
           onPress: () => setState(() => _starred = !_starred),
-          accessibilityLabel: '즐겨찾기',
+          accessibilityLabel: AppContent.of(context).v6.accessibility.favorite,
         ),
-        const NavAction(icon: CameoIconName.dots, accessibilityLabel: '더보기'),
+        NavAction(
+          icon: CameoIconName.dots,
+          accessibilityLabel: AppContent.of(context).v6.accessibility.more,
+        ),
       ],
     );
   }

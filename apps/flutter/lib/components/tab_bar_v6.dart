@@ -43,10 +43,12 @@ enum TabBarV6Tone {
 
 List<LabV6TabBarTab> get tabBarV6Tabs => labV6.tabBar.tabs;
 
-List<String> get tabBarV6AccessibilityLabels => [
-  appContent.v6.tabBar.historyLabel,
-  appContent.v6.tabBar.cameraLabel,
-  appContent.v6.tabBar.settingsLabel,
+List<String> get tabBarV6AccessibilityLabels => tabLabels(appContent);
+
+List<String> tabLabels(AppContent copy) => [
+  copy.v6.tabBar.historyLabel,
+  copy.v6.tabBar.cameraLabel,
+  copy.v6.tabBar.settingsLabel,
 ];
 
 CameoIconName _iconOf(String key) => CameoIconName.values.firstWhere(
@@ -509,7 +511,7 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
             Opacity(
               opacity: 1 - cam,
               child: CameoIcon(
-                _iconOf(labV6.tabBar.callIcon),
+                _iconOf(LabV6.of(context).tabBar.callIcon),
                 key: TabBarV6.callIconKey,
                 size: icon,
                 color: content,
@@ -529,7 +531,9 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
       ),
     );
     final onPress = flip ? slots?.onFlip : widget.onCall;
-    final label = flip ? slots?.flipLabel : appContent.v6.tabBar.callLabel;
+    final label = flip
+        ? slots?.flipLabel
+        : AppContent.of(context).v6.tabBar.callLabel;
     if (disabled) {
       return Semantics(
         button: true,
@@ -560,8 +564,8 @@ class TabBarV6State extends State<TabBarV6> with TickerProviderStateMixin {
     final selectedColor = mix((p) => p.foregroundNeutralBase);
     final idleColor = mix((p) => p.foregroundNeutralSubtle);
     final label = _label.value.clamp(0.0, 1.0);
-    final tabs = tabBarV6Tabs;
-    final names = tabBarV6AccessibilityLabels;
+    final tabs = LabV6.of(context).tabBar.tabs;
+    final names = tabLabels(AppContent.of(context));
     return Semantics(
       role: onSelect == null ? null : SemanticsRole.tabBar,
       container: true,

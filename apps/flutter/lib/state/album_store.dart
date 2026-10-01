@@ -12,6 +12,7 @@ import 'captured_photo.dart';
 import '../api/media_models.dart';
 import 'remote_album.dart';
 import '../content/app.g.dart';
+import 'package:intl/intl.dart';
 
 @immutable
 class AlbumPhoto {
@@ -151,8 +152,10 @@ class AlbumSection {
 
 const String todaySectionId = 'today';
 
-String formatAlbumDate(DateTime date) =>
-    '${date.year}년 ${date.month}월 ${date.day}일';
+String formatAlbumDate(DateTime date, {String languageCode = 'ko'}) =>
+    languageCode == 'ko'
+    ? '${date.year}년 ${date.month}월 ${date.day}일'
+    : DateFormat.yMMMMd('en').format(date);
 
 String _fileOf(String asset) => asset.split('/').last;
 
@@ -232,10 +235,18 @@ class AlbumSnapshot {
 
 class AlbumStore extends ChangeNotifier {
   AlbumStore({List<AlbumV5SectionContent>? content, bool empty = false})
-    : _content = content ?? labAlbumV5.sections,
+    : _customContent = content,
       _empty = empty {
     _load();
     remote.addListener(notifyListeners);
+  }
+
+  String _languageCode = 'ko';
+  AppContent get _copy => _languageCode == 'en' ? appContentEn : appContent;
+  void setLanguage(String code) {
+    if (_languageCode == code) return;
+    _languageCode = code;
+    notifyListeners();
   }
 
   final RemoteAlbum remote = RemoteAlbum();
@@ -280,7 +291,7 @@ class AlbumStore extends ChangeNotifier {
   ) {
     photos.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     calls.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final copy = appContent.v6.backend;
+    final copy = _copy.v6.backend;
     final cards = [
       for (final call in calls)
         CallCardV5Content(
@@ -318,7 +329,7 @@ class AlbumStore extends ChangeNotifier {
             : 'section/tint',
         heroGradient: null,
         cover: null,
-        title: formatAlbumDate(date),
+        title: formatAlbumDate(date, languageCode: _languageCode),
         subtitle: '',
         stats: AlbumStatsContent(
           photos: '${photos.length}',
@@ -336,7 +347,7 @@ class AlbumStore extends ChangeNotifier {
   String _duration(double seconds) =>
       '${seconds ~/ 60}:${(seconds.toInt() % 60).toString().padLeft(2, '0')}';
   String _callLabel(String status) {
-    final copy = appContent.v6.backend;
+    final copy = _copy.v6.backend;
     return switch (status) {
       'ringing' => copy.callRinging,
       'active' => copy.callActive,
@@ -367,7 +378,10 @@ class AlbumStore extends ChangeNotifier {
     return ok;
   }
 
-  final List<AlbumV5SectionContent> _content;
+  final List<AlbumV5SectionContent>? _customContent;
+  List<AlbumV5SectionContent> get _content =>
+      _customContent ??
+      (_languageCode == 'en' ? labAlbumV5En.sections : labAlbumV5.sections);
 
   final Map<String, List<AlbumPhoto>> _photos = {};
   bool _empty;

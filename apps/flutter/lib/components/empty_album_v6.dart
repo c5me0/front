@@ -15,9 +15,9 @@ import 'album_appear.dart';
 import 'solid_button.dart';
 import 'toast.dart' show toastIconOf;
 
-String emptyAlbumInitialOf(String? name) {
+String emptyAlbumInitialOf(String? name, {String? fallback}) {
   final trimmed = name?.trim() ?? '';
-  if (trimmed.isEmpty) return labV6.emptyAlbum.meInitialSample;
+  if (trimmed.isEmpty) return fallback ?? labV6.emptyAlbum.meInitialSample;
   return String.fromCharCodes(trimmed.runes.take(1));
 }
 
@@ -170,7 +170,7 @@ class EmptyAlbumV6State extends State<EmptyAlbumV6>
   @override
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
-    final lab = labV6.emptyAlbum;
+    final lab = LabV6.of(context).emptyAlbum;
     final height = MediaQuery.sizeOf(context).height;
     final rise = _reduceMotion ? 0.0 : CameoMotion.albumContentRise;
     const size = CameoLayout.emptyAlbumV6AvatarSize;
@@ -180,7 +180,7 @@ class EmptyAlbumV6State extends State<EmptyAlbumV6>
         color: c.backgroundFillNeutralInverted,
         child: Center(
           child: CameoText(
-            emptyAlbumInitialOf(widget.meName),
+            emptyAlbumInitialOf(widget.meName, fallback: lab.meInitialSample),
             key: EmptyAlbumV6.initialKey,
             style: CameoTextStyles.headingLg,
             color: c.avatarInitial,
@@ -258,7 +258,7 @@ class EmptyAlbumV6State extends State<EmptyAlbumV6>
                 : SolidButton(
                     key: EmptyAlbumV6.ctaKey,
                     icon: CameoIconName.users,
-                    label: appContent.v6.emptyAlbum.ctaNoPartner,
+                    label: AppContent.of(context).v6.emptyAlbum.ctaNoPartner,
                     variant: SolidButtonVariant.gray,
                     onPress: widget.onConnect,
                   ),

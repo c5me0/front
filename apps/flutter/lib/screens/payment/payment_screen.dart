@@ -75,8 +75,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _success = result == PaymentResult.completed;
       _error = switch (result) {
         PaymentResult.completed => null,
-        PaymentResult.cancelled => appContent.v6.billing.cancelled,
-        PaymentResult.failed => appContent.v6.billing.failure,
+        PaymentResult.cancelled => AppContent.of(context).v6.billing.cancelled,
+        PaymentResult.failed => AppContent.of(context).v6.billing.failure,
       };
     });
   }
@@ -92,7 +92,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final copy = appContent.v6.billing;
+    final copy = AppContent.of(context).v6.billing;
     final c = CameoTheme.colorsOf(context);
     final session = SessionScope.of(context);
     final active = !_recovery && session.monthlyActive;
@@ -171,7 +171,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       CameoText(
                         session.usesBackend
-                            ? appContent.v6.backend.billingUnavailable
+                            ? AppContent.of(
+                                context,
+                              ).v6.backend.billingUnavailable
                             : copy.unavailableBody,
                         style: CameoTextStyles.bodyLg,
                         color: c.foregroundNeutralMuted,
@@ -392,7 +394,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   Widget _completion(BuildContext context, {required bool active}) {
     final c = CameoTheme.colorsOf(context);
-    final copy = appContent.v6.billing;
+    final copy = AppContent.of(context).v6.billing;
     return Semantics(
       liveRegion: true,
       child: Column(

@@ -66,7 +66,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final c = CameoTheme.colorsOf(context);
     final padding = MediaQuery.paddingOf(context);
     final block = welcomeTextBlock(padding.top, padding.bottom);
-    final welcome = labV6.welcome;
+    final welcome = LabV6.of(context).welcome;
     return ColoredBox(
       color: c.backgroundCanvasNeutralStrong,
       child: Stack(

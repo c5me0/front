@@ -23,13 +23,13 @@ class MyCodeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
-    final label = this.label ?? labV6.partner.myCodeLabel;
+    final label = this.label ?? LabV6.of(context).partner.myCodeLabel;
     return PressScale(
       onPress: onCopy,
       pressedColor: c.backgroundFillScrimInteraction,
       pressedRadius: CameoLayout.partnerV6MyCodeRadius,
       accessibilityLabel:
-          '${appContent.v6.partner.copyLabel}, $label ${spokenDigits(code)}',
+          '${AppContent.of(context).v6.partner.copyLabel}, $label ${spokenDigits(code)}',
       child: ExcludeSemantics(
         child: SizedBox(
           key: cardKey,

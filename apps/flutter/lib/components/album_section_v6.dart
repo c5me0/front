@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -351,7 +352,14 @@ class AlbumSectionV6State extends State<AlbumSectionV6>
                 id: s.photos[i].id,
                 image: s.photos[i].thumbnailProvider,
                 tile: tiles[i],
-                label: '사진 ${i + 1}${s.photos[i].liked ? ', 좋아요' : ''}',
+                label:
+                    fillTemplate(
+                      AppContent.of(context).v6.accessibility.photo,
+                      {'index': i + 1},
+                    ) +
+                    (s.photos[i].liked
+                        ? AppContent.of(context).v6.accessibility.likedSuffix
+                        : ''),
               ),
           ],
           badge: gridBadgeOf(w.mode),
@@ -484,8 +492,15 @@ enum AlbumMetaToneV6 { hero, text }
   ),
 };
 
-String albumMetaAccessibilityLabel(String label, AlbumStatsContent stats) =>
-    '$label, 사진 ${stats.photos}장, 통화 ${stats.calls}건';
+String albumMetaAccessibilityLabel(
+  String label,
+  AlbumStatsContent stats, {
+  AppContent copy = appContent,
+}) => fillTemplate(copy.v6.accessibility.albumStats, {
+  'label': label,
+  'photos': stats.photos,
+  'calls': stats.calls,
+});
 
 class AlbumMetaRowV6 extends StatelessWidget {
   const AlbumMetaRowV6({
@@ -523,7 +538,11 @@ class AlbumMetaRowV6 extends StatelessWidget {
     );
     return Semantics(
       container: true,
-      label: albumMetaAccessibilityLabel(label, stats),
+      label: albumMetaAccessibilityLabel(
+        label,
+        stats,
+        copy: AppContent.of(context),
+      ),
       excludeSemantics: true,
       child: SizedBox(
         height: CameoLayout.albumV6MetaHeight,

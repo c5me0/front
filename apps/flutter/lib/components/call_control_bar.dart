@@ -4,6 +4,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 
@@ -141,24 +142,30 @@ _controlRoles(CameoPalette c) => (
   endIcon: c.foregroundNeutralInverseBase,
 );
 
-({CameoIconName icon, String label}) _control(CallControlKey key) =>
-    switch (key) {
-      CallControlKey.volume => (icon: CameoIconName.volume, label: '스피커'),
-      CallControlKey.microphone => (
-        icon: CameoIconName.microphone,
-        label: '마이크',
-      ),
-      CallControlKey.camera => (icon: CameoIconName.camera, label: '카메라'),
-      CallControlKey.rewind => (
-        icon: CameoIconName.rewindBackward15,
-        label: '15초 되감기',
-      ),
-    };
+({CameoIconName icon, String label}) _control(
+  CallControlKey key,
+  AppContent copy,
+) => switch (key) {
+  CallControlKey.volume => (
+    icon: CameoIconName.volume,
+    label: copy.v6.accessibility.speaker,
+  ),
+  CallControlKey.microphone => (
+    icon: CameoIconName.microphone,
+    label: copy.v6.accessibility.microphone,
+  ),
+  CallControlKey.camera => (
+    icon: CameoIconName.camera,
+    label: copy.v6.tabBar.cameraLabel,
+  ),
+  CallControlKey.rewind => (
+    icon: CameoIconName.rewindBackward15,
+    label: copy.v6.accessibility.rewind,
+  ),
+};
 
-const String _endLabel = '통화 종료';
-
-String _toggleLabel(CallControlKey key, bool on) =>
-    '${_control(key).label}, ${on ? '켜짐' : '꺼짐'}';
+String _toggleLabel(CallControlKey key, bool on, AppContent copy) =>
+    '${_control(key, copy).label}, ${on ? copy.v6.accessibility.on : copy.v6.accessibility.off}';
 
 double callControlBarContainerHeight({
   CallControlBarVariant variant = CallControlBarVariant.regular,
@@ -269,14 +276,18 @@ class _CallControlBarState extends State<CallControlBar> {
                     onPress: widget.onToggle == null
                         ? null
                         : () => widget.onToggle!(key),
-                    accessibilityLabel: _toggleLabel(key, widget.active[key]),
+                    accessibilityLabel: _toggleLabel(
+                      key,
+                      widget.active[key],
+                      AppContent.of(context),
+                    ),
                     child: SizedBox(
                       height: s.buttonHeight,
                       child: Padding(
                         padding: EdgeInsets.all(s.buttonPadding),
                         child: Center(
                           child: _ToggleIcon(
-                            icon: _control(key).icon,
+                            icon: _control(key, AppContent.of(context)).icon,
                             size: s.buttonIconSize,
                             active: widget.active[key],
                           ),
@@ -287,7 +298,9 @@ class _CallControlBarState extends State<CallControlBar> {
                 ),
               PressScale(
                 onPress: widget.onEndCall,
-                accessibilityLabel: _endLabel,
+                accessibilityLabel: AppContent.of(
+                  context,
+                ).v6.accessibility.endCall,
                 child: SizedBox(
                   width: s.endWidth,
                   height: s.endHeight,

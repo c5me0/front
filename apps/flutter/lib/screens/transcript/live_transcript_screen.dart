@@ -197,7 +197,8 @@ class _LiveTranscriptScreenState extends State<LiveTranscriptScreen>
 
   @override
   Widget build(BuildContext context) {
-    final c = CameoTheme.colorsOf(context), copy = appContent.v6.backend;
+    final c = CameoTheme.colorsOf(context),
+        copy = AppContent.of(context).v6.backend;
     final detail = _detail, playback = _playback;
     final seconds = playback?.seconds ?? 0;
     final owner = SessionScope.read(context).userId;
@@ -253,7 +254,8 @@ class _LiveTranscriptScreenState extends State<LiveTranscriptScreen>
               children: [
                 if (_error != null)
                   BackendNotice(
-                    message: '${apiErrorCodeText(_error!)} ${copy.retry}',
+                    message:
+                        '${apiErrorCodeText(_error!, copy: AppContent.of(context))} ${copy.retry}',
                     onRetry: _load,
                   ),
                 if (detail == null && _error == null)
@@ -261,7 +263,12 @@ class _LiveTranscriptScreenState extends State<LiveTranscriptScreen>
                 if (detail != null) ...[
                   TranscriptTitleV6(
                     title: detail.call.title ?? copy.callRecord,
-                    date: formatAlbumDate(detail.call.createdAt.toLocal()),
+                    date: formatAlbumDate(
+                      detail.call.createdAt.toLocal(),
+                      languageCode: Localizations.localeOf(
+                        context,
+                      ).languageCode,
+                    ),
                   ),
                   if (detail.call.summary?.isNotEmpty == true)
                     Padding(
@@ -305,7 +312,9 @@ class _LiveTranscriptScreenState extends State<LiveTranscriptScreen>
                       child: Image.network(
                         photo.url,
                         fit: BoxFit.contain,
-                        semanticLabel: appContent.v6.album.shareLabel,
+                        semanticLabel: AppContent.of(
+                          context,
+                        ).v6.album.shareLabel,
                       ),
                     ),
                   if (detail.recordingUrl == null)

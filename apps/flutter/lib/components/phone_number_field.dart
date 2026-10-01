@@ -46,20 +46,20 @@ class PhoneNumberField extends StatefulWidget {
     this.focused = true,
     this.placeholder,
     this.prefix,
-    this.accessibilityLabel = '전화번호',
+    this.accessibilityLabel,
   });
 
   final String value;
 
   final bool focused;
 
-  /// null → labV6.phone.placeholder ('010-0000-0000')
+  /// null → LabV6.of(context).phone.placeholder ('010-0000-0000')
   final String? placeholder;
 
-  /// null → labV6.phone.prefix ('+82')
+  /// null → LabV6.of(context).phone.prefix ('+82')
   final String? prefix;
 
-  final String accessibilityLabel;
+  final String? accessibilityLabel;
 
   static const Key numberKey = ValueKey('phoneNumberField.number');
   static const Key placeholderKey = ValueKey('phoneNumberField.placeholder');
@@ -111,8 +111,9 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
   @override
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
-    final prefix = widget.prefix ?? labV6.phone.prefix;
-    final placeholder = widget.placeholder ?? labV6.phone.placeholder;
+    final prefix = widget.prefix ?? LabV6.of(context).phone.prefix;
+    final placeholder =
+        widget.placeholder ?? LabV6.of(context).phone.placeholder;
     final empty = _formatted.isEmpty;
     final number = Row(
       key: PhoneNumberField.numberKey,
@@ -137,7 +138,9 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
     return Semantics(
       textField: true,
       focused: widget.focused,
-      label: widget.accessibilityLabel,
+      label:
+          widget.accessibilityLabel ??
+          AppContent.of(context).v6.accessibility.phone,
       value: '$prefix ${empty ? placeholder : _formatted}',
       excludeSemantics: true,
       child: TextFieldV6(

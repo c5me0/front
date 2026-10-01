@@ -33,8 +33,8 @@ class TranscriptNavV6 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = labV6.transcript;
-    final labels = appContent.v6;
+    final content = LabV6.of(context).transcript;
+    final labels = AppContent.of(context).v6;
 
     final callIcon = _iconOf(content.navActions[0]);
     final heartIcon = _iconOf(content.navActions[1]);

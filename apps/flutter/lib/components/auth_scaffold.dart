@@ -336,7 +336,8 @@ class AuthScaffold extends StatelessWidget {
                       variant: SolidButtonVariant.gray,
                       icon: CameoIconName.chevronLeft,
                       onPress: onBack,
-                      semanticLabel: backLabel ?? appContent.common.back,
+                      semanticLabel:
+                          backLabel ?? AppContent.of(context).common.back,
                     )
                   else
                     const SizedBox.shrink(),

@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 import '../navigation/spring_timing.dart';
@@ -649,7 +650,11 @@ class _PhotoCellV6State extends State<_PhotoCellV6>
           onTap: onTap,
           customSemanticsActions: onDoubleTap == null
               ? null
-              : {const CustomSemanticsAction(label: '좋아요'): onDoubleTap},
+              : {
+                  CustomSemanticsAction(
+                    label: AppContent.of(context).v6.album.likeLabel,
+                  ): onDoubleTap,
+                },
           excludeSemantics: true,
           child: Listener(
             onPointerDown: exiting ? null : _pointerDown,

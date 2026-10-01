@@ -111,7 +111,7 @@ class WelcomeTilesState extends State<WelcomeTiles>
 
   Widget _column(int col, double width, double height, Color color) {
     final heights = welcomeTileHeights(col, width);
-    final photos = appContent.v6.welcome.photos;
+    final photos = AppContent.of(context).v6.welcome.photos;
     final count = welcomeTileCount(col, width, height);
     final loop = welcomeLoopLength(col, width);
     final direction = welcomeDirection(col);

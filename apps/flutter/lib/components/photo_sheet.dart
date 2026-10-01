@@ -274,7 +274,7 @@ class PhotoSheetState extends State<PhotoSheet>
               child: Semantics(
                 header: true,
                 child: CameoText(
-                  labInCallV5.photoSheet.title,
+                  LabSamples.of(context).labInCallV5.photoSheet.title,
                   style: CameoTextStyles.headingSmStrong,
                   color: c.foregroundNeutralBase,
                   textAlign: TextAlign.center,
@@ -289,7 +289,7 @@ class PhotoSheetState extends State<PhotoSheet>
                 size: SolidButtonSize.md,
                 variant: SolidButtonVariant.gray,
                 icon: CameoIconName.x,
-                semanticLabel: appContent.photoSheetV5.closeLabel,
+                semanticLabel: AppContent.of(context).photoSheetV5.closeLabel,
                 onPress: widget.onClose,
               ),
             ),
@@ -324,7 +324,7 @@ class PhotoSheetState extends State<PhotoSheet>
             height: live.height,
             child: Semantics(
               button: true,
-              label: appContent.photoSheetV5.liveCameraLabel,
+              label: AppContent.of(context).photoSheetV5.liveCameraLabel,
               excludeSemantics: true,
               child: GestureDetector(
                 key: PhotoSheet.liveKey,
@@ -385,10 +385,16 @@ class PhotoSheetState extends State<PhotoSheet>
     final n = index + 1;
     final multi = widget.variant == PhotoSheetVariant.multi;
     final label = multi
-        ? '사진 $n'
+        ? fillTemplate(AppContent.of(context).v6.accessibility.photo, {
+            'index': n,
+          })
         : item.checked
-        ? '보낸 사진 $n, 다시 보내기'
-        : '사진 $n 보내기';
+        ? fillTemplate(AppContent.of(context).v6.accessibility.resendPhoto, {
+            'index': n,
+          })
+        : fillTemplate(AppContent.of(context).v6.accessibility.sendPhoto, {
+            'index': n,
+          });
     return Positioned(
       key: ValueKey('photoSheet.slot.${item.id}'),
       left: frame.x,
@@ -501,9 +507,12 @@ class _ShareButtonState extends State<_ShareButton>
           child: SolidButton(
             key: PhotoSheet.shareKey,
             size: SolidButtonSize.md,
-            label: fillTemplate(appContent.photoSheetV5.share, vars),
+            label: fillTemplate(
+              AppContent.of(context).photoSheetV5.share,
+              vars,
+            ),
             semanticLabel: fillTemplate(
-              appContent.photoSheetV5.shareAccessibilityLabel,
+              AppContent.of(context).photoSheetV5.shareAccessibilityLabel,
               vars,
             ),
             onPress: widget.onPress,

@@ -11,6 +11,7 @@ import 'dart:ui' show FontFeature, ImageFilter, lerpDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -246,7 +247,7 @@ class _PlayerBarV6State extends State<PlayerBarV6>
         return Semantics(
           container: true,
           slider: true,
-          label: '재생 위치',
+          label: AppContent.of(context).v6.accessibility.playbackPosition,
           value: '$current / $total',
           increasedValue: '${at(playback.seconds + _a11yStepSec)} / $total',
           decreasedValue: '${at(playback.seconds - _a11yStepSec)} / $total',
@@ -254,7 +255,12 @@ class _PlayerBarV6State extends State<PlayerBarV6>
           onDecrease: () => _stepBy(-_a11yStepSec),
           customSemanticsActions: {
             for (var i = 0; i < markers.length; i++)
-              CustomSemanticsAction(label: '하이라이트 구간 ${i + 1} 위치로 이동'): () =>
+              CustomSemanticsAction(
+                label: fillTemplate(
+                  AppContent.of(context).v6.accessibility.jumpHighlight,
+                  {'index': i + 1},
+                ),
+              ): () =>
                   playback.seekTo(markers[i].start),
           },
           excludeSemantics: true,
@@ -335,7 +341,9 @@ class _PlayerBarV6State extends State<PlayerBarV6>
       onPress: playback.toggle,
       pressedColor: CameoPalette.light.backgroundFillScrimInteraction,
       pressedRadius: CameoLayout.transcriptV6PlayerRadius,
-      accessibilityLabel: _playing ? '일시정지' : '재생',
+      accessibilityLabel: _playing
+          ? AppContent.of(context).v6.accessibility.pause
+          : AppContent.of(context).v6.accessibility.play,
       child: SizedBox(
         key: PlayerBarV6.buttonKey,
         width: CameoLayout.transcriptV6PlayerPauseWidth,

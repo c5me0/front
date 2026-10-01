@@ -4,6 +4,7 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -18,13 +19,17 @@ CameoIconName _iconOf(String name) => CameoIconName.values.firstWhere(
 );
 
 final List<({CallBarSlot slot, CameoIconName icon, String label})>
-callBarV6Slots = [
-  for (final (i, s) in const [
-    (CallBarSlot.volume, '볼륨'),
-    (CallBarSlot.microphone, '마이크'),
-    (CallBarSlot.camera, '사진 보내기'),
-    (CallBarSlot.highlight, '전후 15초 하이라이트 저장'),
-    (CallBarSlot.end, '통화 종료'),
+callBarV6Slots = callBarSlots(appContent);
+
+List<({CallBarSlot slot, CameoIconName icon, String label})> callBarSlots(
+  AppContent copy,
+) => [
+  for (final (i, s) in [
+    (CallBarSlot.volume, copy.v6.accessibility.volume),
+    (CallBarSlot.microphone, copy.v6.accessibility.microphone),
+    (CallBarSlot.camera, copy.v6.accessibility.sendPhotos),
+    (CallBarSlot.highlight, copy.v6.accessibility.highlight),
+    (CallBarSlot.end, copy.v6.accessibility.endCall),
   ].indexed)
     (slot: s.$1, icon: _iconOf(labV6.call.barIcons[i]), label: s.$2),
 ];
@@ -90,7 +95,7 @@ class CallBarV6 extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    for (final s in callBarV6Slots)
+                    for (final s in callBarSlots(AppContent.of(context)))
                       Expanded(
                         child: _CallBarItem(
                           key: slotKey(s.slot),
@@ -99,7 +104,7 @@ class CallBarV6 extends StatelessWidget {
                           label:
                               s.slot == CallBarSlot.microphone &&
                                   selected.contains(CallBarSlot.microphone)
-                              ? '마이크 켜기'
+                              ? AppContent.of(context).v6.accessibility.unmute
                               : s.label,
                           selected:
                               s.slot != CallBarSlot.end &&

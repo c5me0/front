@@ -120,7 +120,10 @@ class _PartnerScreenState extends State<PartnerScreen> {
         _phase = _Phase.idle;
         _code = '';
       });
-      _toast.show(apiErrorText(error), CameoIconName.x);
+      _toast.show(
+        apiErrorText(error, copy: AppContent.of(context)),
+        CameoIconName.x,
+      );
       return;
     }
     if (!mounted) return;
@@ -167,13 +170,13 @@ class _PartnerScreenState extends State<PartnerScreen> {
     Clipboard.setData(
       ClipboardData(text: SessionScope.read(context).pairingCode),
     );
-    _toast.show(appContent.v6.partner.copied, CameoIconName.check);
+    _toast.show(AppContent.of(context).v6.partner.copied, CameoIconName.check);
   }
 
   bool _typeDemo() {
     if (!mounted || _typing != null || _phase != _Phase.idle) return false;
     if (!CameoNav.isTop(context) || !_keypad.isAttached) return false;
-    final target = appContent.demo.partnerCode;
+    final target = AppContent.of(context).demo.partnerCode;
     if (_code.isNotEmpty) setState(() => _code = '');
     var i = 0;
     void typeNext() {
@@ -187,7 +190,7 @@ class _PartnerScreenState extends State<PartnerScreen> {
     }
 
     _typing = Timer.periodic(
-      Duration(milliseconds: appContent.demo.keyIntervalMs),
+      Duration(milliseconds: AppContent.of(context).demo.keyIntervalMs),
       (_) => typeNext(),
     );
     typeNext();
@@ -202,14 +205,16 @@ class _PartnerScreenState extends State<PartnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final content = labV6.partner;
+    final content = LabV6.of(context).partner;
     final session = SessionScope.of(context).session;
     final partner = _partner;
     return AuthScaffold(
       title: content.title,
       subtitle: content.subtitle,
       onBack: () => CameoNav.pop(context),
-      trailingLabel: _onboarding ? appContent.v6.partner.skip : null,
+      trailingLabel: _onboarding
+          ? AppContent.of(context).v6.partner.skip
+          : null,
       onTrailing: _skip,
       keypad: Keypad(
         onKey: _onKey,
@@ -241,11 +246,11 @@ class _PartnerScreenState extends State<PartnerScreen> {
               ? const SizedBox.shrink()
               : ConnectDoneV6(
                   visible: _phase == _Phase.done,
-                  myName: session.name ?? appContent.demo.name,
+                  myName: session.name ?? AppContent.of(context).demo.name,
                   partnerName: partner.name,
                   partnerImage: SessionScope.read(context).usesBackend
                       ? ''
-                      : labV6.connected.partnerPhoto,
+                      : LabV6.of(context).connected.partnerPhoto,
                   onDone: _preset ? null : _onDone,
                 ),
         ),

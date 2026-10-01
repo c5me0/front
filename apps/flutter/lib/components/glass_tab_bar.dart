@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -253,12 +254,20 @@ class _GlassTabBarState extends State<GlassTabBar>
       role: SemanticsRole.tab,
       selected: index == widget.selectedIndex,
       enabled: onPress != null,
-      label: glassTabBarLabels[index],
+      label: [
+        AppContent.of(context).v6.tabBar.historyLabel,
+        AppContent.of(context).v6.accessibility.call,
+        AppContent.of(context).v6.tabBar.settingsLabel,
+      ][index],
       onTap: onPress,
       excludeSemantics: true,
       child: GlassPressable(
         onPress: onPress,
-        accessibilityLabel: glassTabBarLabels[index],
+        accessibilityLabel: [
+          AppContent.of(context).v6.tabBar.historyLabel,
+          AppContent.of(context).v6.accessibility.call,
+          AppContent.of(context).v6.tabBar.settingsLabel,
+        ][index],
         child: SizedBox(
           key: ValueKey('glassTabBar.tab.$index'),
           height: CameoLayout.tabBarTabHeight,

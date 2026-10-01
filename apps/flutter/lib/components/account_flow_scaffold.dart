@@ -51,7 +51,7 @@ class AccountFlowScaffold extends StatelessWidget {
                       size: SolidButtonSize.md,
                       variant: SolidButtonVariant.gray,
                       icon: CameoIconName.chevronLeft,
-                      semanticLabel: appContent.common.back,
+                      semanticLabel: AppContent.of(context).common.back,
                       disabled: busy,
                       onPress: onBack,
                     ),

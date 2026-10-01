@@ -129,7 +129,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
   @override
   Widget build(BuildContext context) {
     final session = SessionScope.of(context).session;
-    final content = labV6.permissions;
+    final content = LabV6.of(context).permissions;
     return AuthScaffold(
       title: content.title,
       subtitle: content.subtitle,
@@ -139,7 +139,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       footer: SolidCta(
         key: PermissionsScreen.ctaKey,
         label: _run == _Run.done
-            ? appContent.v6.permissions.ctaDone
+            ? AppContent.of(context).v6.permissions.ctaDone
             : content.cta,
         busy: _run == _Run.requesting,
         onPress: _run == _Run.done ? _enterApp : _allow,

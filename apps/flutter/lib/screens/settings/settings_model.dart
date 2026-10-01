@@ -31,9 +31,10 @@ typedef SettingsSheetCopy = ({
 
 SettingsSheetCopy settingsSheetCopy(
   SettingsSheetKind kind,
-  String? partnerName,
-) {
-  final v6 = appContent.v6.settings;
+  String? partnerName, {
+  AppContent content = appContent,
+}) {
+  final v6 = content.v6.settings;
   if (kind == SettingsSheetKind.logout) {
     final s = v6.logoutSheet;
     return (title: s.title, body: s.body, confirm: s.confirm, cancel: s.cancel);
@@ -47,10 +48,12 @@ SettingsSheetCopy settingsSheetCopy(
   );
 }
 
-String photoSheetVariantLabel(PhotoSheetVariant variant) =>
-    variant == PhotoSheetVariant.multi
-    ? appContent.v6.settings.sheetMulti
-    : appContent.v6.settings.sheetInstant;
+String photoSheetVariantLabel(
+  PhotoSheetVariant variant, {
+  AppContent content = appContent,
+}) => variant == PhotoSheetVariant.multi
+    ? content.v6.settings.sheetMulti
+    : content.v6.settings.sheetInstant;
 
 PhotoSheetVariant nextPhotoSheetVariant(PhotoSheetVariant variant) =>
     variant == PhotoSheetVariant.multi
@@ -66,6 +69,7 @@ List<SettingsV6Block> settingsV6Blocks(
   required int devRows,
   required int accountRows,
   bool billing = false,
+  bool language = false,
 }) {
   const label =
       CameoLayout.settingsV6SectionLabelHeight +
@@ -90,6 +94,9 @@ List<SettingsV6Block> settingsV6Blocks(
   );
   push('notifications', label + 2 * CameoLayout.settingsV6ToggleRowHeight);
   if (billing) push('billing', label + CameoLayout.settingsV6ChevronRowHeight);
+  if (language) {
+    push('language', label + CameoLayout.settingsV6ChevronRowHeight);
+  }
   push('developer', label + devRows * CameoLayout.settingsV6ChevronRowHeight);
   push('account', accountRows * CameoLayout.settingsV6ActionRowHeight);
   return blocks;

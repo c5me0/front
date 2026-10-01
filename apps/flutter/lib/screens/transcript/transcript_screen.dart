@@ -4,6 +4,7 @@
 //
 
 import 'package:flutter/widgets.dart';
+import '../../content/app.g.dart';
 
 import '../../components/highlight_card_v6.dart';
 import '../../components/inline_photo_v6.dart';
@@ -69,9 +70,11 @@ class TranscriptScreen extends StatefulWidget {
 
 class _TranscriptScreenState extends State<TranscriptScreen>
     with TickerProviderStateMixin {
-  late final TranscriptV5Content _content = widget.content;
+  TranscriptV5Content get _content => identical(widget.content, labTranscriptV5)
+      ? LabSamples.of(context).labTranscriptV5
+      : widget.content;
   late final PlaybackOptions _options = playbackOptionsOf(
-    timelinePlayerOfV5(_content.player),
+    timelinePlayerOfV5(widget.content.player),
   );
   late final PlaybackController _playback = PlaybackController(
     vsync: this,
@@ -80,8 +83,8 @@ class _TranscriptScreenState extends State<TranscriptScreen>
     playing: _options.playing,
   );
   late final TranscriptTimeline _timeline = buildTranscriptTimelineV5(
-    _content.lines,
-    _content.player,
+    widget.content.lines,
+    widget.content.player,
     anchorFraction: _lineStartFraction,
   );
 
@@ -265,7 +268,9 @@ class _TranscriptScreenState extends State<TranscriptScreen>
                   image: photo.image,
 
                   onPress: () {},
-                  semanticLabel: transcriptInlinePhotoLabel,
+                  semanticLabel: AppContent.of(
+                    context,
+                  ).v6.accessibility.inlinePhoto,
                 ),
               ),
             ),

@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -369,7 +370,7 @@ class _CameraViewfinderState extends State<CameraViewfinder>
     );
     return Semantics(
       image: true,
-      label: '카메라 미리보기',
+      label: AppContent.of(context).v6.accessibility.cameraPreview,
       excludeSemantics: true,
       child: AnimatedBuilder(
         animation: _turns,

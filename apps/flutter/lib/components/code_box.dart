@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -20,8 +21,6 @@ double codeBoxBreatheScale(double phase, double amplitude) {
   final s = (1 - math.cos(2 * math.pi * phase)) / 2;
   return 1 - (1 - CameoMotion.codeInputBreatheScale) * amplitude * s;
 }
-
-const String _defaultLabel = '코드';
 
 class _Glyph {
   _Glyph(this.id, this.char, {required this.animateIn});
@@ -43,14 +42,14 @@ class CodeBox extends StatefulWidget {
     required this.value,
     this.state = CodeBoxState.active,
     this.onComplete,
-    this.accessibilityLabel = _defaultLabel,
+    this.accessibilityLabel,
     this.placeholder,
   });
 
   final String value;
   final CodeBoxState state;
   final ValueChanged<String>? onComplete;
-  final String accessibilityLabel;
+  final String? accessibilityLabel;
 
   final String? placeholder;
 
@@ -384,9 +383,10 @@ class CodeBoxWidgetState extends State<CodeBox> with TickerProviderStateMixin {
     final c = CameoTheme.colorsOf(context);
     final n = _digits.length;
     final label =
-        '${widget.accessibilityLabel}, $_length자리 중 $n자리 입력'
+        '${widget.accessibilityLabel ?? AppContent.of(context).v6.accessibility.code}, ${fillTemplate(AppContent.of(context).v6.accessibility.enteredCode, {'count': n})}'
         '${n > 0 ? ': ${spokenDigits(_digits)}' : ''}';
-    final placeholder = widget.placeholder ?? labV6.verify.codePlaceholder;
+    final placeholder =
+        widget.placeholder ?? LabV6.of(context).verify.codePlaceholder;
     return Semantics(
       container: true,
       label: label,

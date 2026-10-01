@@ -8,6 +8,7 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 
@@ -135,12 +136,12 @@ class HeartControl extends StatelessWidget {
     super.key,
     required this.active,
     this.onPress,
-    this.semanticLabel = '좋아요',
+    this.semanticLabel,
   });
 
   final bool active;
   final VoidCallback? onPress;
-  final String semanticLabel;
+  final String? semanticLabel;
 
   static const Key shadowKey = ValueKey('heartControl.shadow');
 
@@ -180,7 +181,11 @@ class HeartControl extends StatelessWidget {
         ],
       ),
     );
-    final label = toggleAccessibilityLabel(semanticLabel, active);
+    final label = toggleAccessibilityLabel(
+      semanticLabel ?? AppContent.of(context).v6.album.likeLabel,
+      active,
+      copy: AppContent.of(context),
+    );
     final onPress = this.onPress;
     if (onPress == null) {
       return Semantics(label: label, excludeSemantics: true, child: heart);

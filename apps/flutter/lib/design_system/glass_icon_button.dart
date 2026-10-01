@@ -4,6 +4,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import 'cameo_icon.dart';
 import 'cameo_theme.dart';
@@ -172,9 +173,13 @@ SpringImpulse springImpulse(SpringDescription spring, double peak) {
   );
 }
 
-String? toggleAccessibilityLabel(String? label, bool? active) {
+String? toggleAccessibilityLabel(
+  String? label,
+  bool? active, {
+  AppContent copy = appContent,
+}) {
   if (label == null || active == null) return label;
-  return '$label, ${active ? '켜짐' : '꺼짐'}';
+  return '$label, ${active ? copy.v6.accessibility.on : copy.v6.accessibility.off}';
 }
 
 class ToggleIcon extends StatefulWidget {
@@ -304,7 +309,11 @@ class GlassIconButton extends StatelessWidget {
     final roles = _rolesFor(CameoTheme.colorsOf(context), variant, tone);
     return GlassPressable(
       onPress: onPress,
-      accessibilityLabel: toggleAccessibilityLabel(accessibilityLabel, active),
+      accessibilityLabel: toggleAccessibilityLabel(
+        accessibilityLabel,
+        active,
+        copy: AppContent.of(context),
+      ),
       child: SizedBox.square(
         dimension: spec.size,
         child: GlassSurface(
@@ -391,6 +400,7 @@ class GlassIconButtonGroup extends StatelessWidget {
                 accessibilityLabel: toggleAccessibilityLabel(
                   item.accessibilityLabel,
                   item.active,
+                  copy: AppContent.of(context),
                 ),
                 child: SizedBox.square(
                   dimension: pill.itemSize,

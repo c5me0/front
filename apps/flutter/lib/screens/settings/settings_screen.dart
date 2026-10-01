@@ -16,6 +16,8 @@ import '../../navigation/navigation.dart';
 import '../../state/notification_prefs.dart';
 import '../../state/session.dart';
 import 'settings_model.dart';
+import 'language_screen.dart';
+import '../../state/app_language.dart';
 import '../../api/api_error_text.dart';
 
 final GlassBackdropTone _backdrop = GlassBackdropTone.fromToken(
@@ -133,7 +135,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (error) {
       if (mounted) {
         _closeSheet();
-        setState(() => _serverError = apiErrorText(error));
+        setState(
+          () =>
+              _serverError = apiErrorText(error, copy: AppContent.of(context)),
+        );
       }
     } finally {
       _loggingOut = false;
@@ -171,8 +176,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (live.status == SessionStatus.member) _member = live;
     final session = _member ?? live;
     final prefs = NotificationPrefs.of(context);
-    final content = labV6.settings;
-    final v6 = appContent.v6.settings;
+    final content = LabV6.of(context).settings;
+    final v6 = AppContent.of(context).v6.settings;
     final partner = session.partner;
     final sheetVariant = session.prefs.photoSheetVariant;
     final safeTop = MediaQuery.paddingOf(context).top;
@@ -250,7 +255,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       liveRegion: true,
                       child: CameoText(
                         _serverError ??
-                            apiErrorCodeText(controller.backendError!),
+                            apiErrorCodeText(
+                              controller.backendError!,
+                              copy: AppContent.of(context),
+                            ),
                         style: CameoTextStyles.bodyMd,
                         color: c.systemRed,
                       ),
@@ -264,7 +272,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           name: settingsName(session.name, content.me.name),
                           phone: settingsPhoneLine(
                             session.phone,
-                            labV6.phone.prefix,
+                            LabV6.of(context).phone.prefix,
                             content.me.phone,
                           ),
                         ),
@@ -318,11 +326,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   SettingsSectionV6(
                     key: SettingsScreen.billingKey,
-                    title: appContent.v6.billing.section,
+                    title: AppContent.of(context).v6.billing.section,
                     children: [
                       SettingsRowV6(
                         key: SettingsScreen.paymentKey,
-                        label: appContent.v6.billing.settingsLabel,
+                        label: AppContent.of(context).v6.billing.settingsLabel,
                         trailing: const SettingsRowV6Trailing.chevron(),
                         onPress: () => CameoNav.openPayment(context),
                       ),
@@ -330,13 +338,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           when couple.canRestore)
                         SettingsRowV6(
                           key: const ValueKey('settings.recovery'),
-                          label: appContent.v6.billing.recoveryTitle,
+                          label: AppContent.of(
+                            context,
+                          ).v6.billing.recoveryTitle,
                           trailing: const SettingsRowV6Trailing.chevron(),
                           onPress: () => CameoNav.openPayment(
                             context,
                             archiveId: couple.id,
                           ),
                         ),
+                    ],
+                  ),
+                  SettingsSectionV6(
+                    key: const ValueKey('settings.languageSection'),
+                    title: v6.languageSection,
+                    children: [
+                      SettingsRowV6(
+                        key: const ValueKey('settings.language'),
+                        label: v6.language,
+                        trailing: SettingsRowV6Trailing.value(
+                          AppLanguageScope.maybeOf(context)?.language.label ??
+                              AppLanguage.korean.label,
+                        ),
+                        onPress: () => CameoNav.pushPage(
+                          context,
+                          (_) => const LanguageScreen(),
+                        ),
+                      ),
                     ],
                   ),
                   if (!controller.usesBackend)
@@ -361,7 +389,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           key: SettingsScreen.sheetVariantKey,
                           label: v6.developerSheetMode,
                           trailing: SettingsRowV6Trailing.value(
-                            photoSheetVariantLabel(sheetVariant),
+                            photoSheetVariantLabel(
+                              sheetVariant,
+                              content: AppContent.of(context),
+                            ),
                           ),
                           onPress: () => controller.setPhotoSheetVariant(
                             nextPhotoSheetVariant(sheetVariant),
@@ -376,7 +407,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         visible: partner != null,
                         child: SettingsRowV6(
                           key: SettingsScreen.disconnectKey,
-                          label: appContent.v6.breakup.settingsLabel,
+                          label: AppContent.of(
+                            context,
+                          ).v6.breakup.settingsLabel,
                           icon: _iconOf(content.disconnect.icon),
                           tone: SettingsRowV6Tone.destructive,
                           onPress: _openDisconnect,
@@ -400,7 +433,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSheet(BuildContext context) {
-    final copy = settingsSheetCopy(SettingsSheetKind.logout, null);
+    final copy = settingsSheetCopy(
+      SettingsSheetKind.logout,
+      null,
+      content: AppContent.of(context),
+    );
     return KeyedSubtree(
       key: SettingsScreen.sheetKey,
       child: ConfirmSheet(

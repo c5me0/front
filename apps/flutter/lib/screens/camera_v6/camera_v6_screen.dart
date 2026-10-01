@@ -196,7 +196,9 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
       _deepLinkShown = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _openReview(CapturedPhoto.placeholder(labV6.camera.viewfinder));
+          _openReview(
+            CapturedPhoto.placeholder(LabV6.of(context).camera.viewfinder),
+          );
         }
       });
     }
@@ -223,7 +225,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
     _partnerTimer = Timer(CameoMotion.instantPartnerDelay, () {
       _partnerTimer = null;
       if (!mounted) return;
-      final t = labV6.camera.partnerToast;
+      final t = LabV6.of(context).camera.partnerToast;
       _toast.show(t.text, toastIconOf(t.icon));
       setState(() {
         _toastShown = true;
@@ -304,13 +306,19 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
     final album = AlbumScope.maybeRead(context);
     if (album?.usesBackend == true) {
       _uploading = true;
-      _toast.show(appContent.v6.backend.uploading, CameoIconName.arrowUp);
+      _toast.show(
+        AppContent.of(context).v6.backend.uploading,
+        CameoIconName.arrowUp,
+      );
       album!.savePhotos([review.photo]).then((photos) {
         if (!mounted || _review?.key != review.key) return;
         _uploading = false;
         if (photos.isEmpty) {
           _toast.show(
-            apiErrorCodeText(album.remote.error ?? 'upload_failed'),
+            apiErrorCodeText(
+              album.remote.error ?? 'upload_failed',
+              copy: AppContent.of(context),
+            ),
             CameoIconName.x,
           );
           return;
@@ -406,13 +414,15 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
         onPopSettled: _onThumbPopSettled,
         onPress: thumb == null ? null : _openThumbnail,
         semanticLabel: thumb == null
-            ? appContent.v6.backend.cameraEmptyThumbnail
+            ? AppContent.of(context).v6.backend.cameraEmptyThumbnail
             : thumb.video
-            ? '마지막 동영상 보기'
-            : '마지막 사진 보기',
+            ? AppContent.of(context).v6.accessibility.lastVideo
+            : AppContent.of(context).v6.accessibility.lastPhoto,
       ),
       onFlip: _onFlip,
-      flipLabel: _facing == CameraFacing.back ? '전면 카메라로 전환' : '후면 카메라로 전환',
+      flipLabel: _facing == CameraFacing.back
+          ? AppContent.of(context).v6.accessibility.frontCamera
+          : AppContent.of(context).v6.accessibility.backCamera,
       flipDisabled: _reviewing,
     );
   }
@@ -451,7 +461,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
             fit: StackFit.expand,
             children: [
               Image.asset(
-                labV6.camera.viewfinder,
+                LabV6.of(context).camera.viewfinder,
                 fit: BoxFit.cover,
                 excludeFromSemantics: true,
                 gaplessPlayback: true,
@@ -468,7 +478,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
             facing: _facing,
             active: _entered && _focused,
             controller: _viewfinder,
-            placeholder: labV6.camera.viewfinder,
+            placeholder: LabV6.of(context).camera.viewfinder,
             radius: CameoLayout.cameraV6ViewfinderRadius,
             flashColor: c.staticWhiteBase,
             shadeColor: c.staticBlackBase,

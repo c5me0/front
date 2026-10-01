@@ -290,7 +290,9 @@ class ReviewOverlayState extends State<ReviewOverlay>
                   },
                   child: Semantics(
                     image: true,
-                    label: '찍은 사진',
+                    label: AppContent.of(
+                      context,
+                    ).v6.accessibility.capturedPhoto,
                     child: ClipRSuperellipse(
                       key: ReviewOverlay.photoKey,
                       borderRadius: BorderRadius.circular(
@@ -335,8 +337,10 @@ class ReviewOverlayState extends State<ReviewOverlay>
                           key: ReviewOverlay.discardKey,
                           size: ScrimButtonSize.md,
                           tone: ScrimButtonTone.light,
-                          icon: _iconOf(labV6.review.discardIcon),
-                          semanticLabel: appContent.v6.review.discardLabel,
+                          icon: _iconOf(LabV6.of(context).review.discardIcon),
+                          semanticLabel: AppContent.of(
+                            context,
+                          ).v6.review.discardLabel,
                           onPress: interactive ? widget.onDiscard : null,
                         ),
                       ),
@@ -377,7 +381,7 @@ class _SendButton extends StatelessWidget {
     final c = CameoTheme.colorsOf(context);
     return PressScale(
       onPress: onPress,
-      accessibilityLabel: appContent.v6.review.sendLabel,
+      accessibilityLabel: AppContent.of(context).v6.review.sendLabel,
       pressedColor: CameoPalette.light.backgroundFillScrimInteraction,
       pressedRadius: CameoLayout.scrimButtonV6Radius,
       child: SizedBox.square(
@@ -393,7 +397,7 @@ class _SendButton extends StatelessWidget {
                   CameoLayout.reviewV6SendInnerPadding,
             ),
             child: CameoIcon(
-              _iconOf(labV6.review.sendIcon),
+              _iconOf(LabV6.of(context).review.sendIcon),
               size: CameoLayout.reviewV6SendIconSize,
               color: c.staticBlackBase,
             ),

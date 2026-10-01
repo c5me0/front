@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 
@@ -116,7 +117,10 @@ class _CallerBlockState extends State<CallerBlock> {
     };
     return Semantics(
       container: true,
-      label: '${widget.name}, 통화 시간 $timer',
+      label: fillTemplate(
+        AppContent.of(context).v6.accessibility.callDuration,
+        {'name': widget.name, 'time': timer},
+      ),
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(

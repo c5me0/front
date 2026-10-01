@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "Allow camera access to take photos and share them with your partner during calls.";
+"NSPhotoLibraryUsageDescription" = "Allow photo library access to import photos into your album.";
+"NSPhotoLibraryAddUsageDescription" = "Save photos to your photo library when you choose Save Image in the share sheet.";
+"NSMicrophoneUsageDescription" = "Allow microphone access to make and record calls and capture audio in videos.";

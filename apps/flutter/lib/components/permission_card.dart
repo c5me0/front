@@ -11,14 +11,15 @@ import '../design_system/design_system.dart';
 
 enum PermissionCardStatus { pending, requesting, granted, denied }
 
-String permissionCardStatusLabel(PermissionCardStatus status) =>
-    switch (status) {
-      PermissionCardStatus.pending => appContent.permissions.status.pending,
-      PermissionCardStatus.requesting =>
-        appContent.permissions.status.requesting,
-      PermissionCardStatus.granted => appContent.permissions.status.granted,
-      PermissionCardStatus.denied => appContent.permissions.status.denied,
-    };
+String permissionCardStatusLabel(
+  PermissionCardStatus status, {
+  AppContent copy = appContent,
+}) => switch (status) {
+  PermissionCardStatus.pending => copy.permissions.status.pending,
+  PermissionCardStatus.requesting => copy.permissions.status.requesting,
+  PermissionCardStatus.granted => copy.permissions.status.granted,
+  PermissionCardStatus.denied => copy.permissions.status.denied,
+};
 
 ///
 
@@ -166,14 +167,14 @@ class PermissionCardState extends State<PermissionCard>
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
     final status = widget.status;
-    final denied = appContent.v6.permissions.denied;
+    final denied = AppContent.of(context).v6.permissions.denied;
     final description = status == PermissionCardStatus.denied
         ? denied
         : widget.description;
     return Semantics(
       container: true,
       label:
-          '${widget.title}, $description, ${permissionCardStatusLabel(status)}',
+          '${widget.title}, $description, ${permissionCardStatusLabel(status, copy: AppContent.of(context))}',
       excludeSemantics: true,
       child: AnimatedBuilder(
         animation: Listenable.merge([_grant, _pop, _denied]),

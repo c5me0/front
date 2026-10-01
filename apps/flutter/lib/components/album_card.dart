@@ -40,16 +40,19 @@ class AlbumCardData {
   final AlbumHeroGradient gradient;
 }
 
-AlbumCardData albumCardDataFor(AppContentHomeAlbum album) {
+AlbumCardData albumCardDataFor(
+  AppContentHomeAlbum album, {
+  LabSamples samples = labSamples,
+}) {
   final source = album.source;
   if (source == 'albumGangneung') {
-    return AlbumCardData.fromGangneung(labAlbumGangneung);
+    return AlbumCardData.fromGangneung(samples.labAlbumGangneung);
   }
   const sectionPrefix = 'albumDay.sections.';
   if (source.startsWith(sectionPrefix)) {
     final i = int.tryParse(source.substring(sectionPrefix.length));
-    if (i != null && i >= 0 && i < labAlbumDay.sections.length) {
-      return AlbumCardData.fromSection(labAlbumDay.sections[i]);
+    if (i != null && i >= 0 && i < samples.labAlbumDay.sections.length) {
+      return AlbumCardData.fromSection(samples.labAlbumDay.sections[i]);
     }
   }
   throw ArgumentError.value(source, 'album.source', '알 수 없는 앨범 source');
@@ -118,7 +121,7 @@ class AlbumCardState extends State<AlbumCard> {
             onPress: onPress == null ? null : () => onPress(drawnRect),
             accessibilityLabel:
                 widget.accessibilityLabel ??
-                fillTemplate(appContent.home.openAlbumLabel, {
+                fillTemplate(AppContent.of(context).home.openAlbumLabel, {
                   'title': data.title,
                 }),
             child: DecoratedBox(

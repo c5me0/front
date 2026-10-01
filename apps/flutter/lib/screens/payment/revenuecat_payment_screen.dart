@@ -42,11 +42,17 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
           uri.userInfo.isNotEmpty ||
           !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         if (mounted) {
-          setState(() => _notice = appContent.v6.backend.billingError);
+          setState(
+            () => _notice = AppContent.of(context).v6.backend.billingError,
+          );
         }
       }
     } catch (_) {
-      if (mounted) setState(() => _notice = appContent.v6.backend.billingError);
+      if (mounted) {
+        setState(
+          () => _notice = AppContent.of(context).v6.backend.billingError,
+        );
+      }
     }
   }
 
@@ -65,7 +71,7 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
     setState(() {
       _recovered = recovery && result == CheckoutOutcome.completed;
       _notice = result == CheckoutOutcome.cancelled
-          ? appContent.v6.billing.cancelled
+          ? AppContent.of(context).v6.billing.cancelled
           : null;
     });
   }
@@ -74,7 +80,8 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
   Widget build(BuildContext context) {
     final billing = BillingScope.of(context),
         session = SessionScope.of(context);
-    final copy = appContent.v6.billing, messages = appContent.v6.backend;
+    final copy = AppContent.of(context).v6.billing,
+        messages = AppContent.of(context).v6.backend;
     final c = CameoTheme.colorsOf(context);
     final recovery = widget.archiveId != null;
     final couple = session.remoteCouple;
@@ -128,7 +135,9 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
         ? copy.processing
         : product == null
         ? messages.billingPreparing
-        : fillTemplate(copy.payLabel, {'amount': amount});
+        : fillTemplate(recovering ? copy.payLabel : copy.subscribeLabel, {
+            'amount': amount,
+          });
     return PopScope(
       canPop: !billing.purchasing,
       child: Stack(
@@ -146,9 +155,7 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
               spacing: CameoSpace.s12,
               children: [
                 CameoText(
-                  billing.config.testStore
-                      ? messages.sandboxNote
-                      : copy.monthlyRecoveryNote,
+                  recovering ? copy.recoveryPeriod : copy.previewNote,
                   style: CameoTextStyles.bodySm,
                   color: c.foregroundNeutralMuted,
                   textAlign: TextAlign.center,
@@ -284,7 +291,10 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                   Semantics(
                     liveRegion: true,
                     child: CameoText(
-                      apiErrorCodeText(billing.error!),
+                      apiErrorCodeText(
+                        billing.error!,
+                        copy: AppContent.of(context),
+                      ),
                       key: const ValueKey('billing.error'),
                       style: CameoTextStyles.bodyMd,
                       color: c.systemRed,
@@ -326,7 +336,8 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = CameoTheme.colorsOf(context), copy = appContent.v6.billing;
+    final c = CameoTheme.colorsOf(context),
+        copy = AppContent.of(context).v6.billing;
     return SettingsCard(
       children: [
         Padding(

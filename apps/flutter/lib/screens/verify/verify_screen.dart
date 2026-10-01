@@ -51,7 +51,7 @@ class VerifyScreen extends StatefulWidget {
 
 class _VerifyScreenState extends State<VerifyScreen> {
   late final bool _preset = widget.state == VerifyRouteState.success;
-  late String _code = _preset ? appContent.verify.mockCode : '';
+  late String _code = _preset ? AppContent.of(context).verify.mockCode : '';
   late _Phase _phase = _preset ? _Phase.success : _Phase.idle;
   bool _bannerVisible = false;
 
@@ -105,7 +105,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
   void _startCountdown() {
     _countdown?.cancel();
-    setState(() => _remaining = appContent.verify.timerSeconds);
+    setState(() => _remaining = AppContent.of(context).verify.timerSeconds);
     _countdown = Timer.periodic(verifyTimerTick, (t) {
       if (!mounted) return;
       setState(() => _remaining = _remaining > 0 ? _remaining - 1 : 0);
@@ -128,7 +128,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
   bool _autofill() {
     if (!mounted || !_bannerVisible || _phase != _Phase.idle) return false;
-    final code = appContent.verify.mockCode;
+    final code = AppContent.of(context).verify.mockCode;
     var i = 1;
     setState(() {
       _bannerVisible = false;
@@ -163,8 +163,9 @@ class _VerifyScreenState extends State<VerifyScreen> {
       ok = await session.verifyCode(code, phone: widget.phone);
       _serverError = null;
     } catch (error) {
+      if (!mounted) return;
       ok = false;
-      _serverError = apiErrorText(error);
+      _serverError = apiErrorText(error, copy: AppContent.of(context));
     }
     if (!mounted) return;
     if (ok) {
@@ -206,7 +207,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _serverError = apiErrorText(error);
+          _serverError = apiErrorText(error, copy: AppContent.of(context));
           _errorVisible = true;
         });
       }
@@ -233,8 +234,8 @@ class _VerifyScreenState extends State<VerifyScreen> {
   @override
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
-    final verify = labV6.verify;
-    final v4 = appContent.verify;
+    final verify = LabV6.of(context).verify;
+    final v4 = AppContent.of(context).verify;
     final code = v4.mockCode;
     return AuthScaffold(
       title: verify.title,
@@ -257,7 +258,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
               visible: _errorVisible,
               live: true,
               child: CameoText(
-                _serverError ?? appContent.v6.verify.error,
+                _serverError ?? AppContent.of(context).v6.verify.error,
                 key: VerifyScreen.errorKey,
                 style: CameoTextStyles.bodyMd,
                 color: c.systemRed,

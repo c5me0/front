@@ -4,6 +4,7 @@ import 'dart:async' show unawaited;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import '../../content/app.g.dart';
 
 import '../../components/camera_glass_button.dart';
 import '../../components/camera_viewfinder.dart';
@@ -23,24 +24,34 @@ abstract final class CameraDemo {
   static const Duration shutter = Duration(milliseconds: 5500);
 }
 
-final List<SegmentedControlItem<CameraModeId>> cameraModeItems = [
-  for (final m in labCamera.modes)
+final List<SegmentedControlItem<CameraModeId>> cameraModeItems =
+    localizedCameraModes(labCamera, appContent);
+
+List<SegmentedControlItem<CameraModeId>> localizedCameraModes(
+  CameraContent camera,
+  AppContent copy,
+) => [
+  for (final m in camera.modes)
     SegmentedControlItem(
       id: m.id,
       label: m.label,
-      accessibilityLabel: '${m.label} 모드',
+      accessibilityLabel: fillTemplate(copy.v6.accessibility.cameraMode, {
+        'mode': m.label,
+      }),
     ),
 ];
 
-String cameraShutterLabel(CameraModeId mode) => switch (mode) {
-  CameraModeId.photo => '사진 촬영',
-  CameraModeId.video => '동영상 촬영',
-};
+String cameraShutterLabel(CameraModeId mode, {AppContent copy = appContent}) =>
+    switch (mode) {
+      CameraModeId.photo => copy.v6.accessibility.photoCapture,
+      CameraModeId.video => copy.v6.accessibility.videoCapture,
+    };
 
-String cameraFlipLabel(CameraFacing facing) => switch (facing) {
-  CameraFacing.back => '전면 카메라로 전환',
-  CameraFacing.front => '후면 카메라로 전환',
-};
+String cameraFlipLabel(CameraFacing facing, {AppContent copy = appContent}) =>
+    switch (facing) {
+      CameraFacing.back => copy.v6.accessibility.frontCamera,
+      CameraFacing.front => copy.v6.accessibility.backCamera,
+    };
 
 ///
 
@@ -223,7 +234,9 @@ class CameraScreenState extends State<CameraScreen> {
                         key: CameraScreen.closeKey,
                         icon: CameoIconName.x,
                         onPress: close,
-                        accessibilityLabel: '닫기',
+                        accessibilityLabel: AppContent.of(
+                          context,
+                        ).v6.album.closeLabel,
                       ),
                     ],
                   ),
@@ -239,7 +252,10 @@ class CameraScreenState extends State<CameraScreen> {
                   child: ShutterButton(
                     onPress: onShutter,
                     feedbackKey: _shutterKey,
-                    accessibilityLabel: cameraShutterLabel(_mode),
+                    accessibilityLabel: cameraShutterLabel(
+                      _mode,
+                      copy: AppContent.of(context),
+                    ),
                   ),
                 ),
               ),
@@ -258,7 +274,10 @@ class CameraScreenState extends State<CameraScreen> {
                           CameoLayout.segmentedControlOffsetX -
                           CameoLayout.segmentedControlWidth / 2,
                       child: SegmentedControl<CameraModeId>(
-                        items: cameraModeItems,
+                        items: localizedCameraModes(
+                          LabSamples.of(context).labCamera,
+                          AppContent.of(context),
+                        ),
                         selected: _mode,
                         onChanged: onModeChange,
                       ),
@@ -271,7 +290,10 @@ class CameraScreenState extends State<CameraScreen> {
                         key: CameraScreen.flipKey,
                         icon: CameoIconName.refresh,
                         onPress: flip,
-                        accessibilityLabel: cameraFlipLabel(_facing),
+                        accessibilityLabel: cameraFlipLabel(
+                          _facing,
+                          copy: AppContent.of(context),
+                        ),
                       ),
                     ),
                   ],

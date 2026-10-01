@@ -85,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = apiErrorText(error);
+          _error = apiErrorText(error, copy: AppContent.of(context));
         });
       }
       return;
@@ -106,13 +106,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await SessionScope.read(context).signOutFromServer();
     } catch (error) {
-      if (mounted) setState(() => _error = apiErrorText(error));
+      if (mounted) {
+        setState(
+          () => _error = apiErrorText(error, copy: AppContent.of(context)),
+        );
+      }
     }
   }
 
   bool _typeDemo() {
     if (!mounted || _typing != null || !CameoNav.isTop(context)) return false;
-    final target = appContent.demo.name.characters.toList();
+    final target = AppContent.of(context).demo.name.characters.toList();
     var i = 0;
     void typeNext() {
       if (!mounted) return;
@@ -130,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     _typing = Timer.periodic(
-      Duration(milliseconds: appContent.demo.typeIntervalMs),
+      Duration(milliseconds: AppContent.of(context).demo.typeIntervalMs),
       (_) => typeNext(),
     );
     typeNext();
@@ -140,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
-    final profile = labV6.profile;
+    final profile = LabV6.of(context).profile;
     final empty = _controller.text.isEmpty;
     return AuthScaffold(
       title: profile.title,
@@ -206,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     autofillHints: const [AutofillHints.name],
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(
-                        appContent.profile.maxLength,
+                        AppContent.of(context).profile.maxLength,
                       ),
                     ],
                     style: CameoTextStyles.bodyLg.copyWith(

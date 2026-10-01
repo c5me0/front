@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 import '../navigation/rubber_band.dart';
@@ -330,10 +331,12 @@ class _MediaCardState extends State<MediaCard> with TickerProviderStateMixin {
                     excluding: !widget.visible,
                     child: Semantics(
                       container: true,
-                      label: '미디어 카드',
+                      label: AppContent.of(context).v6.accessibility.mediaCard,
                       hint: dismissible
-                          ? '위아래로 끌어 크기를 바꾸고, 아래로 끌어 닫습니다'
-                          : '위아래로 끌어 크기를 바꿉니다',
+                          ? AppContent.of(
+                              context,
+                            ).v6.accessibility.resizeDismissMedia
+                          : AppContent.of(context).v6.accessibility.resizeMedia,
                       value: _detentLabels[index],
                       increasedValue: index < _last
                           ? _detentLabels[index + 1]

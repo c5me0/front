@@ -215,8 +215,8 @@ class SmsBannerState extends State<SmsBanner> with TickerProviderStateMixin {
     if (_phase == _Phase.hidden) return const SizedBox.shrink();
     final palette = CameoTheme.colorsOf(context);
     final top = _top(context);
-    final app = widget.app ?? appContent.verify.sms.app;
-    final time = widget.time ?? appContent.verify.sms.time;
+    final app = widget.app ?? AppContent.of(context).verify.sms.app;
+    final time = widget.time ?? AppContent.of(context).verify.sms.time;
     final label = widget.accessibilityLabel ?? '$app, $time, ${widget.message}';
 
     final banner = GlassSurface(

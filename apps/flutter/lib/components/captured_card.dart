@@ -2,6 +2,7 @@
 // while dragging and use token-defined dismissal thresholds.
 
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 import 'call_camera_geometry.dart';
@@ -180,10 +181,13 @@ class CapturedCardState extends State<CapturedCard>
         ? null
         : items[_page.clamp(0, items.length - 1)];
     final cardLabel = multi
-        ? '보낸 사진 ${items.length}장 중 ${_page + 1}번째'
+        ? fillTemplate(
+            AppContent.of(context).v6.accessibility.sentPhotoPosition,
+            {'count': items.length, 'index': _page + 1},
+          )
         : current?.video != null
-        ? '찍은 동영상'
-        : '보낸 사진';
+        ? AppContent.of(context).v6.accessibility.capturedVideo
+        : AppContent.of(context).v6.accessibility.sentPhoto;
 
     const radius = CameoLayout.capturedCardV6Radius;
     final photo = AnimatedBuilder(
@@ -258,7 +262,7 @@ class CapturedCardState extends State<CapturedCard>
               size: ScrimButtonSize.md,
               tone: ScrimButtonTone.light,
               icon: CameoIconName.x,
-              semanticLabel: '사진 닫기',
+              semanticLabel: AppContent.of(context).v6.accessibility.closePhoto,
               onPress: widget.onClose,
             ),
           ),
@@ -353,7 +357,10 @@ class CapturedCardState extends State<CapturedCard>
     final text = recordingLabel(video);
     return Semantics(
       key: CapturedCard.badgeKey,
-      label: '동영상 $text',
+      label: fillTemplate(
+        AppContent.of(context).v6.accessibility.videoDuration,
+        {'time': text},
+      ),
       excludeSemantics: true,
       child: OutsideShadow(
         shadow: colors.shadow,

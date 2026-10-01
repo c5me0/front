@@ -2,6 +2,7 @@
 
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
+import '../../content/app.g.dart';
 
 import '../../components/album_hero.dart';
 import '../../components/album_section.dart';
@@ -152,7 +153,7 @@ class _AlbumScreenState extends State<AlbumScreen> {
               leading: NavLeading(
                 icon: CameoIconName.chevronLeft,
                 onPress: () => CameoNav.pop(context),
-                accessibilityLabel: '뒤로',
+                accessibilityLabel: AppContent.of(context).common.back,
               ),
               actions: [
                 NavAction(
@@ -160,12 +161,14 @@ class _AlbumScreenState extends State<AlbumScreen> {
                   activeIcon: CameoIconName.heartFilled,
                   active: _liked,
                   onPress: () => setState(() => _liked = !_liked),
-                  accessibilityLabel: '좋아요',
+                  accessibilityLabel: AppContent.of(context).v6.album.likeLabel,
                 ),
 
-                const NavAction(
+                NavAction(
                   icon: CameoIconName.history,
-                  accessibilityLabel: '기록',
+                  accessibilityLabel: AppContent.of(
+                    context,
+                  ).v6.accessibility.history,
                 ),
               ],
             ),
@@ -236,14 +239,20 @@ class _AlbumContent extends StatelessWidget {
             children: [
               AlbumHero(
                 cover: _sungsu.cover!,
-                title: _sungsu.title,
-                subtitle: _sungsu.subtitle,
+                title: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'sungsu')
+                    .title,
+                subtitle: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'sungsu')
+                    .subtitle,
                 stats: _sungsu.stats,
                 gradient: AlbumHeroGradient.albumHero,
                 scrollOffset: scrollOffset,
               ),
               CallHistoryList(
-                cards: _sungsu.callCards,
+                cards: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'sungsu')
+                    .callCards,
                 tone: CallHistoryListTone.onPhoto,
                 onPress: (_) => onOpenTranscript(_sungsu.tone),
                 appearIndex: 0,
@@ -257,7 +266,10 @@ class _AlbumContent extends StatelessWidget {
                   liked: liked,
                   onToggleLike: onToggleSungsuLike,
                   animateIn: true,
-                  appearIndex: _sungsu.callCards.length,
+                  appearIndex: LabSamples.of(context).labAlbumDay.sections
+                      .firstWhere((s) => s.id == 'sungsu')
+                      .callCards
+                      .length,
                 ),
               ),
             ],
@@ -270,12 +282,18 @@ class _AlbumContent extends StatelessWidget {
             background: AlbumSectionBackground.canvasMuted,
             children: [
               TextHeader(
-                title: _emptyPhoto.title,
-                subtitle: _emptyPhoto.subtitle,
+                title: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'empty-photo')
+                    .title,
+                subtitle: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'empty-photo')
+                    .subtitle,
                 stats: _emptyPhoto.stats,
               ),
               CallHistoryList(
-                cards: _emptyPhoto.callCards,
+                cards: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'empty-photo')
+                    .callCards,
                 tone: CallHistoryListTone.light,
                 onPress: (_) => onOpenTranscript(_emptyPhoto.tone),
               ),
@@ -290,8 +308,12 @@ class _AlbumContent extends StatelessWidget {
             children: [
               AlbumHero(
                 cover: _section3.cover!,
-                title: _section3.title,
-                subtitle: _section3.subtitle,
+                title: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'section-3')
+                    .title,
+                subtitle: LabSamples.of(context).labAlbumDay.sections
+                    .firstWhere((s) => s.id == 'section-3')
+                    .subtitle,
                 stats: _section3.stats,
                 gradient: AlbumHeroGradient.albumHeroSection3,
               ),

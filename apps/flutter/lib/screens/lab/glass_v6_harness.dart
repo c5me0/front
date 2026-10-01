@@ -121,7 +121,7 @@ class _AlbumScene extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = V6Layout.of(context);
     final items = [
-      for (final icon in labV6.album.navActions)
+      for (final icon in LabV6.of(context).album.navActions)
         ScrimPillItem(icon: _icon(icon), semanticLabel: icon, onPress: () {}),
     ];
     return CameoTheme(
@@ -139,7 +139,7 @@ class _AlbumScene extends StatelessWidget {
               top: CameoLayout.topNavV6Top,
               child: ScrimButton(
                 size: ScrimButtonSize.md,
-                label: labV6.album.selectLabel,
+                label: LabV6.of(context).album.selectLabel,
                 onPress: () {},
               ),
             ),
@@ -190,7 +190,7 @@ class _CallScene extends StatelessWidget {
     final light = CameoPalette.light;
     final dark = CameoPalette.dark;
     final l = V6Layout.of(context);
-    final barIcons = labV6.call.barIcons;
+    final barIcons = LabV6.of(context).call.barIcons;
     const barRadius = CameoLayout.callV6BottomNavBarRadius;
     return CameoTheme(
       mode: CameoColorMode.light,
@@ -224,7 +224,7 @@ class _CallScene extends StatelessWidget {
                 top: CameoLayout.topNavV6Top,
                 child: ScrimButton(
                   size: ScrimButtonSize.md,
-                  icon: _icon(labV6.call.navIcons[0]),
+                  icon: _icon(LabV6.of(context).call.navIcons[0]),
                   semanticLabel: 'chevron',
                   onPress: () {},
                 ),
@@ -234,7 +234,7 @@ class _CallScene extends StatelessWidget {
                 top: CameoLayout.topNavV6Top,
                 child: ScrimButton(
                   size: ScrimButtonSize.md,
-                  icon: _icon(labV6.call.navIcons[1]),
+                  icon: _icon(LabV6.of(context).call.navIcons[1]),
                   semanticLabel: 'moon',
                   onPress: () {},
                 ),

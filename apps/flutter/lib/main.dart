@@ -4,6 +4,9 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'content/lab.g.dart';
+import 'state/app_language.dart';
 
 import 'design_system/design_system.dart';
 import 'navigation/navigation.dart';
@@ -20,11 +23,12 @@ import 'state/revenuecat_billing.dart';
 import 'components/confirm_sheet.dart';
 import 'content/app.g.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(CameoStatusBarStyle.darkContent.overlay);
-  runApp(CameoApp(initialRoute: resolveInitialRoute()));
+  final language = await AppLanguageController.load();
+  runApp(CameoApp(initialRoute: resolveInitialRoute(), language: language));
 }
 
 const CameoColorMode kCameoRootColorMode = CameoColorMode.light;
@@ -37,6 +41,7 @@ class CameoApp extends StatefulWidget {
     this.permissions = const SystemPermissionService(),
     this.album,
     this.services,
+    this.language,
   });
 
   final String initialRoute;
@@ -48,6 +53,7 @@ class CameoApp extends StatefulWidget {
   final AlbumStore? album;
 
   final DeviceServices? services;
+  final AppLanguageController? language;
 
   @override
   State<CameoApp> createState() => _CameoAppState();
@@ -55,6 +61,14 @@ class CameoApp extends StatefulWidget {
 
 class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
   Timer? _refreshTimer;
+  late final AppLanguageController _language =
+      widget.language ?? AppLanguageController();
+
+  void _languageChanged() {
+    _album.setLanguage(_language.language.code);
+    setState(() {});
+  }
+
   late final LiveCallController _calls = LiveCallController(
     permissions: widget.permissions,
   );
@@ -89,6 +103,8 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _album.setLanguage(_language.language.code);
+    _language.addListener(_languageChanged);
     _session.bindAlbum(_album);
     _session.addListener(_syncCalls);
     _calls.addListener(_syncSystemCall);
@@ -117,7 +133,11 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
 
   void _syncSystemCall() => _systemCalls.sync(
     _calls,
-    _session.session.partner?.name ?? appContent.v6.backend.partnerName,
+    _session.session.partner?.name ??
+        (_language.language == AppLanguage.english ? appContentEn : appContent)
+            .v6
+            .backend
+            .partnerName,
   );
 
   Future<void> _onSystemCall(Map<String, dynamic> event) async {
@@ -190,6 +210,8 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
     _refreshTimer?.cancel();
     _session.removeListener(_syncCalls);
     _calls.removeListener(_syncSystemCall);
+    _language.removeListener(_languageChanged);
+    if (widget.language == null) _language.dispose();
     _systemCalls.dispose();
     _billing.dispose();
     _calls.dispose();
@@ -201,96 +223,109 @@ class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final palette = CameoPalette.of(kCameoRootColorMode);
-    return WidgetsApp(
-      title: 'cameo',
-      color: palette.backgroundCanvasBase,
-      debugShowCheckedModeBanner: false,
-      textStyle: CameoTextStyles.bodyLg.copyWith(
-        color: palette.foregroundNeutralBase,
-      ),
-      navigatorKey: _navigator,
-      initialRoute: _launch.location.toString(),
+    return AppLanguageScope(
+      controller: _language,
+      child: WidgetsApp(
+        locale: _language.language.locale,
+        supportedLocales: AppLanguageController.supportedLocales,
+        localizationsDelegates: const [
+          AppContent.delegate,
+          LabV6.delegate,
+          LabSamples.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+        ],
+        title: 'cameo',
+        color: palette.backgroundCanvasBase,
+        debugShowCheckedModeBanner: false,
+        textStyle: CameoTextStyles.bodyLg.copyWith(
+          color: palette.foregroundNeutralBase,
+        ),
+        navigatorKey: _navigator,
+        initialRoute: _launch.location.toString(),
 
-      onGenerateInitialRoutes: (_) =>
-          cameoInitialRoutes(_launch.location, _session.session),
-      onGenerateRoute: onGenerateCameoRoute,
+        onGenerateInitialRoutes: (_) =>
+            cameoInitialRoutes(_launch.location, _session.session),
+        onGenerateRoute: onGenerateCameoRoute,
 
-      builder: (context, navigator) => SessionScope(
-        controller: _session,
-        child: BillingScope(
-          billing: _billing,
-          child: LiveCallScope(
-            controller: _calls,
-            child: AlbumScope(
-              store: _album,
-              child: DeviceServicesScope(
-                services: _services,
-                child: CameoReducedMotionScope(
-                  child: CameoTheme(
-                    mode: kCameoRootColorMode,
-                    child: ColoredBox(
-                      color: palette.backgroundCanvasBase,
-                      child: ListenableBuilder(
-                        listenable: _session,
+        builder: (context, navigator) => SessionScope(
+          controller: _session,
+          child: BillingScope(
+            billing: _billing,
+            child: LiveCallScope(
+              controller: _calls,
+              child: AlbumScope(
+                store: _album,
+                child: DeviceServicesScope(
+                  services: _services,
+                  child: CameoReducedMotionScope(
+                    child: CameoTheme(
+                      mode: kCameoRootColorMode,
+                      child: ColoredBox(
+                        color: palette.backgroundCanvasBase,
+                        child: ListenableBuilder(
+                          listenable: _session,
 
-                        builder: (context, _) => _session.isLoaded
-                            ? CameoAppRoot(
-                                session: _session,
-                                album: _album,
-                                navigatorKey: _navigator,
-                                startFlowDemo: _launch.flowDemo,
-                                permissions: widget.permissions,
-                                child: ListenableBuilder(
-                                  listenable: _calls,
-                                  child: navigator!,
-                                  builder: (context, child) => Stack(
-                                    children: [
-                                      Positioned.fill(
-                                        key: const ValueKey('app.navigator'),
-                                        child: child!,
-                                      ),
-                                      if (_calls.incoming != null &&
-                                          !_calls.hasCall)
+                          builder: (context, _) => _session.isLoaded
+                              ? CameoAppRoot(
+                                  session: _session,
+                                  album: _album,
+                                  navigatorKey: _navigator,
+                                  startFlowDemo: _launch.flowDemo,
+                                  permissions: widget.permissions,
+                                  child: ListenableBuilder(
+                                    listenable: _calls,
+                                    child: navigator!,
+                                    builder: (context, child) => Stack(
+                                      children: [
                                         Positioned.fill(
-                                          key: const ValueKey(
-                                            'app.incomingCall',
-                                          ),
-                                          child: ConfirmSheet(
-                                            visible: true,
-                                            title: appContent
-                                                .v6
-                                                .backend
-                                                .callIncoming,
-                                            body:
-                                                _session
-                                                    .session
-                                                    .partner
-                                                    ?.name ??
-                                                appContent
-                                                    .v6
-                                                    .backend
-                                                    .partnerName,
-                                            confirmLabel:
-                                                appContent.v6.backend.answer,
-                                            cancelLabel:
-                                                appContent.v6.backend.decline,
-                                            onConfirm: () {
-                                              final id = _calls.incoming?.id;
-                                              if (id == null) return;
-                                              unawaited(_calls.start(id: id));
-                                              _navigator.currentState?.pushNamed(
-                                                '/call?id=${Uri.encodeQueryComponent(id)}',
-                                              );
-                                            },
-                                            onCancel: () =>
-                                                unawaited(_calls.decline()),
-                                          ),
+                                          key: const ValueKey('app.navigator'),
+                                          child: child!,
                                         ),
-                                    ],
+                                        if (_calls.incoming != null &&
+                                            !_calls.hasCall)
+                                          Positioned.fill(
+                                            key: const ValueKey(
+                                              'app.incomingCall',
+                                            ),
+                                            child: ConfirmSheet(
+                                              visible: true,
+                                              title: AppContent.of(
+                                                context,
+                                              ).v6.backend.callIncoming,
+                                              body:
+                                                  _session
+                                                      .session
+                                                      .partner
+                                                      ?.name ??
+                                                  AppContent.of(
+                                                    context,
+                                                  ).v6.backend.partnerName,
+                                              confirmLabel: AppContent.of(
+                                                context,
+                                              ).v6.backend.answer,
+                                              cancelLabel: AppContent.of(
+                                                context,
+                                              ).v6.backend.decline,
+                                              onConfirm: () {
+                                                final id = _calls.incoming?.id;
+                                                if (id == null) return;
+                                                unawaited(_calls.start(id: id));
+                                                _navigator.currentState?.pushNamed(
+                                                  '/call?id=${Uri.encodeQueryComponent(id)}',
+                                                );
+                                              },
+                                              onCancel: () =>
+                                                  unawaited(_calls.decline()),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              )
-                            : const SizedBox.expand(),
+                                )
+                              : const SizedBox.expand(),
+                        ),
                       ),
                     ),
                   ),

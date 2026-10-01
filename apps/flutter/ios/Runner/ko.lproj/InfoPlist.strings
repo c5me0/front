@@ -1,0 +1,4 @@
+"NSCameraUsageDescription" = "통화 중 사진을 찍어 상대에게 보여 주려면 카메라 접근 권한이 필요합니다.";
+"NSPhotoLibraryUsageDescription" = "앨범에 사진을 불러오려면 사진 보관함 접근 권한이 필요합니다.";
+"NSPhotoLibraryAddUsageDescription" = "공유 시트에서 '이미지 저장'을 고르면 사진을 사진 보관함에 저장합니다.";
+"NSMicrophoneUsageDescription" = "통화를 녹음해 기록으로 정리하고, 동영상을 찍을 때 소리를 함께 담으려면 마이크 접근 권한이 필요합니다.";

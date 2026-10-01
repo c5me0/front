@@ -52,7 +52,7 @@ double primaryButtonDotOffset(int index, Duration t) {
 
 ///
 
-///   appContent.common.loading).
+///   AppContent.of(context).common.loading).
 class PrimaryButton extends StatefulWidget {
   const PrimaryButton({
     super.key,
@@ -240,7 +240,9 @@ class _PrimaryButtonState extends State<PrimaryButton>
       container: true,
       button: true,
       enabled: !widget.disabled,
-      label: widget.loading ? '$label, ${appContent.common.loading}' : label,
+      label: widget.loading
+          ? '$label, ${AppContent.of(context).common.loading}'
+          : label,
       onTap: interactive ? widget.onPress : null,
       excludeSemantics: true,
       child: IgnorePointer(

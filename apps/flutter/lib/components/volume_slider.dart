@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 import '../state/volume_service.dart';
@@ -283,7 +284,7 @@ class VolumeSliderState extends State<VolumeSlider>
           ignoring: !widget.visible,
           child: Semantics(
             slider: true,
-            label: '볼륨',
+            label: AppContent.of(context).v6.accessibility.volume,
             value: '$percent%',
             increasedValue:
                 '${((_level.value + step).clamp(0.0, 1.0) * 100).round()}%',

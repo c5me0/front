@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -579,7 +580,13 @@ class _PhotoCellState extends State<_PhotoCell> with TickerProviderStateMixin {
         container: true,
         button: enabled,
         selected: widget.liked,
-        label: '사진 ${widget.index + 1}${widget.liked ? ', 좋아요' : ''}',
+        label:
+            fillTemplate(AppContent.of(context).v6.accessibility.photo, {
+              'index': widget.index + 1,
+            }) +
+            (widget.liked
+                ? AppContent.of(context).v6.accessibility.likedSuffix
+                : ''),
         onTap: enabled ? _toggle : null,
         excludeSemantics: true,
         child: Listener(

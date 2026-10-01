@@ -90,7 +90,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
       if (mounted) {
         setState(() {
           _sending = false;
-          _error = apiErrorText(error);
+          _error = apiErrorText(error, copy: AppContent.of(context));
         });
       }
       return;
@@ -117,7 +117,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
       return false;
     }
     if (!_keypad.isAttached) return false;
-    final target = appContent.demo.phone;
+    final target = AppContent.of(context).demo.phone;
     if (_digits.isNotEmpty) setState(() => _digits = '');
     var i = 0;
     void typeNext() {
@@ -132,7 +132,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
     }
 
     _typing = Timer.periodic(
-      Duration(milliseconds: appContent.demo.keyIntervalMs),
+      Duration(milliseconds: AppContent.of(context).demo.keyIntervalMs),
       (_) => typeNext(),
     );
     typeNext();
@@ -141,7 +141,7 @@ class _PhoneScreenState extends State<PhoneScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final c = labV6.phone;
+    final c = LabV6.of(context).phone;
     return AuthScaffold(
       title: c.title,
       subtitle: c.subtitle,

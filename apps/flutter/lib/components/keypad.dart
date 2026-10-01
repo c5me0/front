@@ -195,7 +195,7 @@ class _KeypadState extends State<Keypad> with TickerProviderStateMixin {
     final palette = CameoTheme.colorsOf(context);
     final disabled = widget.disabled;
     final isDelete = key == keypadDeleteKey;
-    final label = isDelete ? appContent.common.delete : key;
+    final label = isDelete ? AppContent.of(context).common.delete : key;
     final c = _controllerFor(key);
     final glyph = isDelete
         ? CameoIcon(

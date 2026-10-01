@@ -100,8 +100,8 @@ class AlbumNavV6State extends State<AlbumNavV6> {
     final w = widget;
     final layout = V6Layout.of(context);
     final c = CameoTheme.colorsOf(context);
-    final lab = labV6.album;
-    final copy = appContent.v6.album;
+    final lab = LabV6.of(context).album;
+    final copy = AppContent.of(context).v6.album;
     final a = w.actions;
     final timeline = w.mode == AlbumMode.timeline;
     final other = _lastOther;
@@ -161,7 +161,7 @@ class AlbumNavV6State extends State<AlbumNavV6> {
                   ? item(key, copy.deletedLabel, a.onDeleted)
                   : item(
                       'refresh',
-                      appContent.v6.backend.refresh,
+                      AppContent.of(context).v6.backend.refresh,
                       w.onRefresh!,
                     ),
           },

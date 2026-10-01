@@ -1,6 +1,7 @@
 // Legacy photo-backed or dark transcript preview with karaoke highlighting.
 
 import 'package:flutter/widgets.dart';
+import '../../content/app.g.dart';
 
 import '../../components/highlight_card.dart';
 import '../../components/nav_bar.dart';
@@ -71,14 +72,16 @@ class TranscriptV3Screen extends StatefulWidget {
 
 class _TranscriptV3ScreenState extends State<TranscriptV3Screen>
     with TickerProviderStateMixin {
-  late final TranscriptContent _content = widget.content;
+  TranscriptContent get _content => identical(widget.content, labTranscript)
+      ? LabSamples.of(context).labTranscript
+      : widget.content;
   late final PlaybackController _playback = PlaybackController.fromContent(
-    _content.player,
+    widget.content.player,
     vsync: this,
   );
   late final TranscriptTimeline _timeline = buildTranscriptTimeline(
-    _content.lines,
-    _content.player,
+    widget.content.lines,
+    widget.content.player,
   );
 
   late int _current;
@@ -284,7 +287,7 @@ class _TranscriptV3ScreenState extends State<TranscriptV3Screen>
             leading: NavLeading(
               icon: CameoIconName.chevronLeft,
               onPress: () => CameoNav.pop(context),
-              accessibilityLabel: '뒤로',
+              accessibilityLabel: AppContent.of(context).common.back,
             ),
             actions: [
               NavAction(
@@ -292,11 +295,13 @@ class _TranscriptV3ScreenState extends State<TranscriptV3Screen>
                 activeIcon: CameoIconName.heartFilled,
                 active: _liked,
                 onPress: () => setState(() => _liked = !_liked),
-                accessibilityLabel: '좋아요',
+                accessibilityLabel: AppContent.of(context).v6.album.likeLabel,
               ),
-              const NavAction(
+              NavAction(
                 icon: CameoIconName.history,
-                accessibilityLabel: '기록',
+                accessibilityLabel: AppContent.of(
+                  context,
+                ).v6.accessibility.history,
               ),
             ],
           ),

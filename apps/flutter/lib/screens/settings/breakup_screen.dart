@@ -28,7 +28,7 @@ class _BreakupScreenState extends State<BreakupScreen> {
   bool _busy = false;
   bool _failed = false;
   Partner? _partner;
-  bool get _last => _step == appContent.v6.breakup.steps.length - 1;
+  bool get _last => _step == AppContent.of(context).v6.breakup.steps.length - 1;
 
   @override
   void didChangeDependencies() {
@@ -92,12 +92,14 @@ class _BreakupScreenState extends State<BreakupScreen> {
   @override
   Widget build(BuildContext context) {
     final c = CameoTheme.colorsOf(context);
-    final copy = appContent.v6.breakup;
+    final copy = AppContent.of(context).v6.breakup;
     final step = copy.steps[_step];
     final partner = _partner;
     final session = SessionScope.of(context);
     final unavailable = session.usesBackend && session.premium == null;
-    final amount = formatUsd(appContent.v6.billing.recoveryPriceCents);
+    final amount = formatUsd(
+      AppContent.of(context).v6.billing.recoveryPriceCents,
+    );
     String text(String value) =>
         fillTemplate(value, {'partner': partner?.name ?? '', 'amount': amount});
     return PopScope(
@@ -166,7 +168,7 @@ class _BreakupScreenState extends State<BreakupScreen> {
                 AvatarPair(
                   myName:
                       SessionScope.read(context).session.name ??
-                      appContent.demo.name,
+                      AppContent.of(context).demo.name,
                   partnerImage: partner.avatar,
                 ),
               Semantics(
@@ -180,7 +182,7 @@ class _BreakupScreenState extends State<BreakupScreen> {
               ),
               CameoText(
                 unavailable
-                    ? appContent.v6.backend.breakupUnavailable
+                    ? AppContent.of(context).v6.backend.breakupUnavailable
                     : text(step.body),
                 style: CameoTextStyles.bodyLg,
                 color: c.foregroundNeutralMuted,
@@ -195,7 +197,7 @@ class _BreakupScreenState extends State<BreakupScreen> {
                       children: [
                         if (_step > 0)
                           CameoText(
-                            '$amount ${appContent.v6.billing.currency} · ${appContent.v6.billing.recoveryPeriod}',
+                            '$amount ${AppContent.of(context).v6.billing.currency} · ${AppContent.of(context).v6.billing.recoveryPeriod}',
                             style: CameoTextStyles.headingMdStrong,
                             color: c.foregroundNeutralBase,
                           ),

@@ -1121,17 +1121,17 @@
         {
           "id": "history",
           "icon": "history",
-          "label": "history"
+          "label": "앨범"
         },
         {
           "id": "camera",
           "icon": "camera",
-          "label": "camera"
+          "label": "카메라"
         },
         {
           "id": "settings",
           "icon": "settings",
-          "label": "settings"
+          "label": "설정"
         }
       ],
       "callIcon": "phone-call"

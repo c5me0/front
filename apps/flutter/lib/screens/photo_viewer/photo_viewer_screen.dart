@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import '../../components/confirm_sheet.dart';
 import '../../components/scrim_button.dart';
@@ -523,7 +524,9 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
       index = _knownIndex;
       _photos = photos;
       if (photo == null) {
-        pages = [(key: 'content', image: AssetImage(labV6.viewer.image))];
+        pages = [
+          (key: 'content', image: AssetImage(LabV6.of(context).viewer.image)),
+        ];
         _count = 1;
       } else if (liveIndex < 0) {
         pages = [(key: photo.id, image: photo.provider)];
@@ -539,7 +542,7 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
       pages = [
         (
           key: 'subject',
-          image: subject?.image ?? AssetImage(labV6.viewer.image),
+          image: subject?.image ?? AssetImage(LabV6.of(context).viewer.image),
         ),
       ];
     }
@@ -573,9 +576,18 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
     }
 
     final window = single ? const [0] : viewerPageWindow(index, pages.length);
-    final copy = appContent.v6.album;
+    final capturedAt = photo?.remote?.takenAt ?? photo?.remote?.createdAt;
+    final languageCode =
+        Localizations.maybeLocaleOf(context)?.languageCode ?? 'ko';
+    final dateLabel = capturedAt == null
+        ? LabV6.of(context).viewer.date
+        : DateFormat(
+            languageCode == 'ko' ? 'yyyy년 M월 d일, H시 mm분' : 'MMM d, y · h:mm a',
+            languageCode,
+          ).format(capturedAt.toLocal());
+    final copy = AppContent.of(context).v6.album;
     final pillItems = <ScrimPillItem>[
-      for (final key in labV6.viewer.actions)
+      for (final key in LabV6.of(context).viewer.actions)
         if (key == 'share-2')
           ScrimPillItem(
             icon: toastIconOf(key),
@@ -668,7 +680,7 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
                       child: ScrimButton(
                         key: PhotoViewerScreen.closeKey,
                         size: ScrimButtonSize.md,
-                        icon: toastIconOf(labV6.viewer.closeIcon),
+                        icon: toastIconOf(LabV6.of(context).viewer.closeIcon),
                         semanticLabel: copy.closeLabel,
                         onPress: _close,
                       ),
@@ -721,7 +733,7 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
               child: _ChromePush(
                 push: _chromeK,
                 distance: travel.date,
-                child: Center(child: _DatePill(label: labV6.viewer.date)),
+                child: Center(child: _DatePill(label: dateLabel)),
               ),
             ),
           ),
@@ -731,7 +743,9 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
               child: ConfirmSheet(
                 visible: _sheetOpen,
                 title: fillTemplate(copy.deleteSheet.title, {'count': 1}),
-                body: AlbumScope.read(context).usesBackend ? appContent.v6.backend.permanentDelete : copy.deleteSheet.body,
+                body: AlbumScope.read(context).usesBackend
+                    ? AppContent.of(context).v6.backend.permanentDelete
+                    : copy.deleteSheet.body,
                 confirmLabel: copy.deleteSheet.confirm,
                 cancelLabel: copy.deleteSheet.cancel,
                 destructive: true,

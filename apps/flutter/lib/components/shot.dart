@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../design_system/design_system.dart';
 import 'call_camera_geometry.dart';
@@ -264,8 +265,8 @@ class ShotState extends State<Shot> with TickerProviderStateMixin {
       child: Semantics(
         button: true,
         enabled: !widget.disabled,
-        label: '촬영',
-        hint: '누르면 사진, 길게 누르면 동영상을 찍어요',
+        label: AppContent.of(context).v6.accessibility.shutter,
+        hint: AppContent.of(context).v6.accessibility.shutterHint,
         onTap: widget.disabled ? null : widget.onPhoto,
         onLongPress: widget.disabled ? null : _toggleRecordingForA11y,
         excludeSemantics: true,

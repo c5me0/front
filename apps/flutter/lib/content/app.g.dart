@@ -2,12 +2,17 @@
 // dart format off
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:flutter/widgets.dart';
+import 'content_locale.dart';
 import 'lab.g.dart';
 
 String fillTemplate(String template, Map<String, Object> vars) =>
     template.replaceAllMapped(RegExp(r'\{(\w+)\}'), (m) => vars.containsKey(m[1]) ? '${vars[m[1]]}' : m[0]!);
 
 class AppContent {
+  static AppContent of(BuildContext context) => Localizations.of<AppContent>(context, AppContent) ?? appContent;
+  static const delegate = ContentLocaleDelegate<AppContent>(ko: appContent, en: appContentEn);
+
   const AppContent({required this.welcome, required this.phone, required this.verify, required this.profile, required this.partner, required this.permissions, required this.home, required this.settings, required this.common, required this.demo, required this.emptyAlbum, required this.photoSheetV5, required this.selectMode, required this.settingsV5, required this.aod, required this.devLabels, required this.v6});
   final AppContentWelcome welcome;
   final AppContentPhone phone;
@@ -29,7 +34,7 @@ class AppContent {
 }
 
 class AppContentV6 {
-  const AppContentV6({required this.backend, required this.billing, required this.breakup, required this.welcome, required this.partner, required this.verify, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.viewer, required this.review, required this.emptyAlbum});
+  const AppContentV6({required this.backend, required this.billing, required this.breakup, required this.welcome, required this.partner, required this.verify, required this.permissions, required this.settings, required this.tabBar, required this.album, required this.viewer, required this.review, required this.emptyAlbum, required this.accessibility});
   final AppContentV6Backend backend;
   final AppContentV6Billing billing;
   final AppContentV6Breakup breakup;
@@ -43,6 +48,64 @@ class AppContentV6 {
   final AppContentV6Viewer viewer;
   final AppContentV6Review review;
   final AppContentV6EmptyAlbum emptyAlbum;
+  final AppContentV6Accessibility accessibility;
+}
+
+class AppContentV6Accessibility {
+  const AppContentV6Accessibility({required this.phone, required this.code, required this.on, required this.off, required this.likedSuffix, required this.photo, required this.sentPhoto, required this.sentPhotoPosition, required this.capturedVideo, required this.capturedPhoto, required this.closePhoto, required this.videoDuration, required this.resendPhoto, required this.sendPhoto, required this.shutter, required this.shutterHint, required this.lastPhoto, required this.lastVideo, required this.frontCamera, required this.backCamera, required this.cameraPreview, required this.volume, required this.speaker, required this.microphone, required this.unmute, required this.sendPhotos, required this.highlight, required this.endCall, required this.closeCall, required this.sleepMode, required this.callDuration, required this.playbackPosition, required this.jumpHighlight, required this.pause, required this.play, required this.mediaCard, required this.resizeMedia, required this.resizeDismissMedia, required this.albumStats, required this.seekTranscript, required this.rewind, required this.enteredCode, required this.dateAlbum, required this.backLab, required this.favorite, required this.more, required this.history, required this.focus, required this.cameraMode, required this.photoCapture, required this.videoCapture, required this.call, required this.inlinePhoto});
+  final String phone;
+  final String code;
+  final String on;
+  final String off;
+  final String likedSuffix;
+  final String photo;
+  final String sentPhoto;
+  final String sentPhotoPosition;
+  final String capturedVideo;
+  final String capturedPhoto;
+  final String closePhoto;
+  final String videoDuration;
+  final String resendPhoto;
+  final String sendPhoto;
+  final String shutter;
+  final String shutterHint;
+  final String lastPhoto;
+  final String lastVideo;
+  final String frontCamera;
+  final String backCamera;
+  final String cameraPreview;
+  final String volume;
+  final String speaker;
+  final String microphone;
+  final String unmute;
+  final String sendPhotos;
+  final String highlight;
+  final String endCall;
+  final String closeCall;
+  final String sleepMode;
+  final String callDuration;
+  final String playbackPosition;
+  final String jumpHighlight;
+  final String pause;
+  final String play;
+  final String mediaCard;
+  final String resizeMedia;
+  final String resizeDismissMedia;
+  final String albumStats;
+  final String seekTranscript;
+  final String rewind;
+  final String enteredCode;
+  final String dateAlbum;
+  final String backLab;
+  final String favorite;
+  final String more;
+  final String history;
+  final String focus;
+  final String cameraMode;
+  final String photoCapture;
+  final String videoCapture;
+  final String call;
+  final String inlinePhoto;
 }
 
 class AppContentV6EmptyAlbum {
@@ -93,7 +156,7 @@ class AppContentV6TabBar {
 }
 
 class AppContentV6Settings {
-  const AppContentV6Settings({required this.connectPartner, required this.connectPartnerIcon, required this.logout, required this.logoutIcon, required this.logoutSheet, required this.disconnectSheet, required this.developerSheetMode, required this.sheetInstant, required this.sheetMulti});
+  const AppContentV6Settings({required this.connectPartner, required this.connectPartnerIcon, required this.logout, required this.logoutIcon, required this.logoutSheet, required this.disconnectSheet, required this.developerSheetMode, required this.sheetInstant, required this.sheetMulti, required this.languageSection, required this.language, required this.languageDescription, required this.languageSaveError});
   final String connectPartner;
   final String connectPartnerIcon;
   final String logout;
@@ -103,6 +166,10 @@ class AppContentV6Settings {
   final String developerSheetMode;
   final String sheetInstant;
   final String sheetMulti;
+  final String languageSection;
+  final String language;
+  final String languageDescription;
+  final String languageSaveError;
 }
 
 class AppContentV6SettingsDisconnectSheet {
@@ -166,7 +233,7 @@ class AppContentV6BreakupStep {
 }
 
 class AppContentV6Billing {
-  const AppContentV6Billing({required this.section, required this.settingsLabel, required this.title, required this.brand, required this.headline, required this.subtitle, required this.currency, required this.monthlyPriceCents, required this.recoveryPriceCents, required this.monthlyLabel, required this.monthlyPeriod, required this.monthlyDetail, required this.monthlySummary, required this.monthlyBenefit, required this.monthlyRecoveryNote, required this.selected, required this.selectPlan, required this.continueLabel, required this.payLabel, required this.processing, required this.previewNote, required this.priceNote, required this.confirmTitle, required this.monthlyConfirm, required this.cancel, required this.successTitle, required this.successBody, required this.done, required this.active, required this.activeBody, required this.failure, required this.cancelled, required this.recoveryTitle, required this.recoverySubtitle, required this.recoveryLabel, required this.recoveryPeriod, required this.recoveryDetail, required this.recoverySummary, required this.recoveryNote, required this.recoveryConfirm, required this.recoverySuccessTitle, required this.recoverySuccessBody, required this.recoveryDone, required this.unavailableTitle, required this.unavailableBody, required this.photoCount, required this.callCount});
+  const AppContentV6Billing({required this.section, required this.settingsLabel, required this.title, required this.brand, required this.headline, required this.subtitle, required this.currency, required this.monthlyPriceCents, required this.recoveryPriceCents, required this.monthlyLabel, required this.monthlyPeriod, required this.monthlyDetail, required this.monthlySummary, required this.monthlyBenefit, required this.monthlyRecoveryNote, required this.selected, required this.selectPlan, required this.continueLabel, required this.payLabel, required this.processing, required this.previewNote, required this.priceNote, required this.confirmTitle, required this.monthlyConfirm, required this.cancel, required this.successTitle, required this.successBody, required this.done, required this.active, required this.activeBody, required this.failure, required this.cancelled, required this.recoveryTitle, required this.recoverySubtitle, required this.recoveryLabel, required this.recoveryPeriod, required this.recoveryDetail, required this.recoverySummary, required this.recoveryNote, required this.recoveryConfirm, required this.recoverySuccessTitle, required this.recoverySuccessBody, required this.recoveryDone, required this.unavailableTitle, required this.unavailableBody, required this.photoCount, required this.callCount, required this.subscribeLabel});
   final String section;
   final String settingsLabel;
   final String title;
@@ -214,10 +281,11 @@ class AppContentV6Billing {
   final String unavailableBody;
   final String photoCount;
   final String callCount;
+  final String subscribeLabel;
 }
 
 class AppContentV6Backend {
-  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.cameraEmptyThumbnail, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.sandboxNote, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumTitle, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.freeAccess, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
+  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.cameraEmptyThumbnail, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumTitle, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.freeAccess, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
   final String partnerName;
   final String networkError;
   final String rateLimit;
@@ -265,7 +333,6 @@ class AppContentV6Backend {
   final String transcriptPending;
   final String transcriptUnavailable;
   final String playbackFailed;
-  final String sandboxNote;
   final String restorePurchases;
   final String manageSubscription;
   final String billingPreparing;
@@ -803,7 +870,6 @@ const AppContent appContent = AppContent(
       transcriptPending: '통화 내용을 정리하고 있어요.',
       transcriptUnavailable: '아직 작성된 통화 내용이 없어요.',
       playbackFailed: '녹음을 재생하지 못했어요. 다시 시도해 주세요.',
-      sandboxNote: '샌드박스 결제입니다. 실제 요금은 청구되지 않아요.',
       restorePurchases: '구매 복원',
       manageSubscription: '구독 관리',
       billingPreparing: '결제를 준비하고 있어요. 잠시 후 다시 시도해 주세요.',
@@ -850,15 +916,15 @@ const AppContent appContent = AppContent(
       selected: '선택됨',
       selectPlan: '월간 요금제 선택',
       continueLabel: '결제 내용 확인',
-      payLabel: '{amount} 테스트 결제',
+      payLabel: '{amount} 결제하기',
       processing: '결제 확인 중…',
-      previewNote: '테스트 결제 · 실제 청구 없음',
+      previewNote: '매월 자동 갱신 · 구독 설정에서 해지 가능',
       priceNote: '가격은 미국 달러(USD) 기준입니다.',
       confirmTitle: '결제 내용을 확인해 주세요',
-      monthlyConfirm: '월간 구독 · {amount} USD / 월\n\n지금은 실제 청구 없이 결제 흐름을 체험합니다.',
+      monthlyConfirm: '월간 구독 · {amount} USD / 월\n\n매월 자동 갱신되며, 스토어의 구독 설정에서 관리하거나 해지할 수 있어요.',
       cancel: '취소',
       successTitle: '멤버십이 준비됐어요',
-      successBody: '월간 구독 테스트 결제를 완료했어요.',
+      successBody: '월간 구독이 시작됐어요. 두 사람의 사진과 통화 기록을 함께 남겨 보세요.',
       done: '설정으로 돌아가기',
       active: '월간 구독 이용 중',
       activeBody: '월간 멤버십이 활성화되어 있어요.',
@@ -870,8 +936,8 @@ const AppContent appContent = AppContent(
       recoveryPeriod: '일회성',
       recoveryDetail: '보관된 사진과 통화 기록을 복구해요.',
       recoverySummary: '한 번만 {amount} USD',
-      recoveryNote: '월간 구독과 별도인 복구 비용입니다. 결제가 완료되면 이전 상대와 연결하고 기록을 되돌립니다.',
-      recoveryConfirm: '{partner}님과 재연결\n기록 복구 · {amount} USD, 일회성\n\n월간 구독과 별도입니다. 지금은 테스트 결제로 진행해요.',
+      recoveryNote: '월간 구독과 별도인 일회성 복구 비용이에요. 같은 상대와 다시 연결한 뒤 보관된 기록을 되돌릴 수 있어요.',
+      recoveryConfirm: '{partner}님과의 기록 복구 · {amount} USD, 일회성\n\n월간 구독과 별도인 복구 구매예요.',
       recoverySuccessTitle: '함께한 기록이 돌아왔어요',
       recoverySuccessBody: '{partner}님과 다시 연결됐어요. 사진과 통화 기록을 이어서 볼 수 있어요.',
       recoveryDone: '앨범으로 돌아가기',
@@ -879,6 +945,7 @@ const AppContent appContent = AppContent(
       unavailableBody: '이 계정과 상대의 보관 기록을 다시 확인해 주세요.',
       photoCount: '사진 {count}장',
       callCount: '통화 기록 {count}개',
+      subscribeLabel: '{amount}에 구독하기',
     ),
     breakup: AppContentV6Breakup(
       settingsLabel: '헤어지기',
@@ -904,7 +971,7 @@ const AppContent appContent = AppContent(
         AppContentV6BreakupStep(
           title: '마지막으로 확인해 주세요',
           body: '확인하면 {partner}님과의 연결을 해제하고 로그아웃해요.',
-          detail: '새로 연결된 관계의 이전 기록을 복구할 때 복구 구매 1회가 사용돼요. 이미 구매한 미사용 복구권도 사용할 수 있어요. 지금은 실제 청구가 없는 테스트 결제입니다.',
+          detail: '새로 연결된 관계의 이전 기록을 복구할 때 복구 구매 1회가 사용돼요. 이미 구매한 미사용 복구권도 사용할 수 있어요.',
         ),
       ],
     ),
@@ -962,6 +1029,10 @@ const AppContent appContent = AppContent(
       developerSheetMode: '사진 시트 방식',
       sheetInstant: 'A · 바로 공유',
       sheetMulti: 'B · 여러 장 골라 공유',
+      languageSection: '앱 언어',
+      language: '언어',
+      languageDescription: '앱에서 사용할 언어를 선택해 주세요.',
+      languageSaveError: '언어를 저장하지 못했어요. 다시 시도해 주세요.',
     ),
     tabBar: AppContentV6TabBar(
       historyLabel: '앨범',
@@ -996,6 +1067,594 @@ const AppContent appContent = AppContent(
     ),
     emptyAlbum: AppContentV6EmptyAlbum(
       ctaNoPartner: '상대 연결하기',
+    ),
+    accessibility: AppContentV6Accessibility(
+      phone: '전화번호',
+      code: '코드',
+      on: '켜짐',
+      off: '꺼짐',
+      likedSuffix: ', 좋아요',
+      photo: '사진 {index}',
+      sentPhoto: '보낸 사진',
+      sentPhotoPosition: '보낸 사진 {count}장 중 {index}번째',
+      capturedVideo: '찍은 동영상',
+      capturedPhoto: '찍은 사진',
+      closePhoto: '사진 닫기',
+      videoDuration: '동영상 {time}',
+      resendPhoto: '보낸 사진 {index}, 다시 보내기',
+      sendPhoto: '사진 {index} 보내기',
+      shutter: '촬영',
+      shutterHint: '누르면 사진, 길게 누르면 동영상을 찍어요',
+      lastPhoto: '마지막 사진 보기',
+      lastVideo: '마지막 동영상 보기',
+      frontCamera: '전면 카메라로 전환',
+      backCamera: '후면 카메라로 전환',
+      cameraPreview: '카메라 미리보기',
+      volume: '볼륨',
+      speaker: '스피커',
+      microphone: '마이크',
+      unmute: '마이크 켜기',
+      sendPhotos: '사진 보내기',
+      highlight: '전후 15초 하이라이트 저장',
+      endCall: '통화 종료',
+      closeCall: '통화 화면 닫기',
+      sleepMode: '취침 모드',
+      callDuration: '{name}, 통화 시간 {time}',
+      playbackPosition: '재생 위치',
+      jumpHighlight: '하이라이트 구간 {index} 위치로 이동',
+      pause: '일시정지',
+      play: '재생',
+      mediaCard: '미디어 카드',
+      resizeMedia: '위아래로 끌어 크기를 바꿉니다',
+      resizeDismissMedia: '위아래로 끌어 크기를 바꾸고, 아래로 끌어 닫습니다',
+      albumStats: '{label}, 사진 {photos}장, 통화 {calls}건',
+      seekTranscript: '{text}, 이 위치로 이동',
+      rewind: '15초 되감기',
+      enteredCode: '{count}자리 입력됨',
+      dateAlbum: '{title}, 날짜별 앨범 열기',
+      backLab: '뒤로, 개발용 목록',
+      favorite: '즐겨찾기',
+      more: '더보기',
+      history: '기록',
+      focus: '포커스',
+      cameraMode: '{mode} 모드',
+      photoCapture: '사진 촬영',
+      videoCapture: '동영상 촬영',
+      call: '통화',
+      inlinePhoto: '통화 중 공유한 사진',
+    ),
+  ),
+);
+const AppContent appContentEn = AppContent(
+  welcome: AppContentWelcome(
+    wordmark: 'cameo',
+    tagline: 'Call, capture, and keep\nyour moments together',
+    terms: 'By continuing, you agree to the Terms of Service and Privacy Policy',
+    cta: 'Continue with phone number',
+    mosaic: <String>[
+      LabImages.albumSungsuGridR1c1,
+      LabImages.albumSungsuGridR1c2,
+      LabImages.albumSungsuGridR1c3,
+      LabImages.albumSungsuGridR1c4,
+      LabImages.albumSungsuGridR1c5,
+      LabImages.albumSungsuGridR2c1,
+      LabImages.albumSungsuGridR2c2,
+      LabImages.albumSungsuGridR2c3,
+      LabImages.albumSungsuGridR2c4,
+      LabImages.albumSungsuGridR2c5,
+      LabImages.albumSungsuGridR3c1,
+      LabImages.albumSungsuGridR3c2,
+      LabImages.albumSungsuGridR3c3,
+      LabImages.albumSungsuGridR3c4,
+      LabImages.albumSungsuGridR3c5,
+      LabImages.albumSungsuGridR4c1,
+      LabImages.albumSungsuGridR4c2,
+      LabImages.albumSungsuGridR4c3,
+      LabImages.albumSungsuGridR4c4,
+      LabImages.albumSungsuGridR4c5,
+      LabImages.albumSungsuGridR5c1,
+      LabImages.albumSungsuGridR5c2,
+      LabImages.albumSungsuGridR5c3,
+      LabImages.albumSungsuGridR5c4,
+      LabImages.albumSungsuGridR5c5,
+      LabImages.albumSungsuGridR6c1,
+      LabImages.albumSungsuGridR6c2,
+      LabImages.albumSungsuGridR6c3,
+      LabImages.albumSungsuGridR6c4,
+      LabImages.albumSungsuGridR6c5,
+    ],
+  ),
+  phone: AppContentPhone(
+    title: 'What\'s your phone number?',
+    subtitle: 'We\'ll text you a verification code',
+    prefix: '+82',
+    placeholder: '010-0000-0000',
+    cta: 'Send code',
+    maxDigits: 11,
+    validPrefix: '01',
+  ),
+  verify: AppContentVerify(
+    title: 'Enter your verification code',
+    subtitle: 'The 6-digit code sent to {phone}',
+    resend: 'Resend code',
+    timerSeconds: 180,
+    error: 'That code doesn\'t match',
+    mockCode: '482913',
+    codeLength: 6,
+    sms: AppContentVerifySms(
+      app: 'Messages',
+      time: 'Now',
+      body: '[cameo] Your verification code is {code}.',
+      accessibilityLabel: 'Message, verification code {code}. Tap to autofill',
+    ),
+  ),
+  profile: AppContentProfile(
+    title: 'What\'s your name?',
+    subtitle: 'This is how your partner will see you',
+    placeholder: 'Name',
+    cta: 'Continue',
+    maxLength: 12,
+  ),
+  partner: AppContentPartner(
+    title: 'Connect with your partner',
+    subtitle: 'Enter each other\'s code to keep\nyour calls and photos in one album',
+    myCodeLabel: 'My code',
+    myCode: '735102',
+    copyLabel: 'Copy code',
+    copied: 'Code copied',
+    inputLabel: 'Partner\'s 6-digit code',
+    skip: 'Later',
+    success: 'You\'re connected with {partner}',
+    partner: AppContentPartnerPartner(
+      name: 'Yurim',
+      avatar: LabImages.tabbarAvatar,
+    ),
+  ),
+  permissions: AppContentPermissions(
+    title: 'Allow permissions',
+    subtitle: 'These permissions help you\nsave your calls and photos',
+    cta: 'Allow',
+    ctaDone: 'Get started',
+    skip: 'Later',
+    denied: 'You can change this in Settings',
+    items: <AppContentPermissionsItem>[
+      AppContentPermissionsItem(
+        id: 'microphone',
+        icon: 'microphone',
+        title: 'Microphone',
+        description: 'Record calls and save your conversations',
+      ),
+      AppContentPermissionsItem(
+        id: 'camera',
+        icon: 'camera',
+        title: 'Camera',
+        description: 'Take photos together during calls',
+      ),
+      AppContentPermissionsItem(
+        id: 'notifications',
+        icon: 'bell',
+        title: 'Notifications',
+        description: 'Know when your partner calls',
+      ),
+    ],
+    status: AppContentPermissionsStatus(
+      pending: 'Pending',
+      requesting: 'Requesting',
+      granted: 'Allowed',
+      denied: 'Denied',
+    ),
+  ),
+  home: AppContentHome(
+    title: 'Album',
+    subtitle: 'Albums with {partner}: {count}',
+    subtitleEmpty: 'Connect with your partner',
+    albums: <AppContentHomeAlbum>[
+      AppContentHomeAlbum(
+        id: 'gangneung',
+        source: 'albumGangneung',
+        route: 'gangneung',
+      ),
+      AppContentHomeAlbum(
+        id: 'sungsu',
+        source: 'albumDay.sections.0',
+        route: 'album',
+      ),
+    ],
+    openAlbumLabel: 'Open {title} album',
+    empty: AppContentHomeEmpty(
+      title: 'No partner connected yet',
+      body: 'Connect with your partner to keep\nyour calls and photos in one album',
+      cta: 'Connect partner',
+    ),
+    phoneLocked: 'Connect with your partner to make a call',
+  ),
+  settings: AppContentSettings(
+    title: 'Settings',
+    partnerSection: 'Partner',
+    partnerConnected: 'Connected',
+    connectPartner: 'Connect partner',
+    notificationsSection: 'Notifications',
+    callAlerts: 'Call alerts',
+    highlightAlerts: 'Highlight summary alerts',
+    developerSection: 'Developer',
+    lab: 'Screen library (Lab)',
+    flowDemo: 'Play flow demo',
+    logout: 'Log out',
+    logoutSheet: AppContentSettingsLogoutSheet(
+      title: 'Log out?',
+      body: 'Your albums and call records will be here\nwhen you log back in',
+      confirm: 'Log out',
+      cancel: 'Cancel',
+    ),
+    version: 'cameo prototype · {platform}',
+    platformRn: 'React Native',
+    platformFlutter: 'Flutter',
+  ),
+  common: AppContentCommon(
+    back: 'Back',
+    step: 'Step {index} of {count}',
+    loading: 'Processing',
+    delete: 'Delete',
+  ),
+  demo: AppContentDemo(
+    phone: '01012345678',
+    name: 'Juyoung',
+    partnerCode: '240820',
+    keyIntervalMs: 110,
+    typeIntervalMs: 180,
+  ),
+  emptyAlbum: AppContentEmptyAlbum(
+    title: 'Ready for your first call?',
+    body: 'Photos you take together during calls will appear here by date',
+    cta: 'Call partner',
+    ctaNoPartner: 'Connect partner',
+    stack: <String>[
+      LabImages.albumSungsuGridR5c4,
+      LabImages.albumSungsuGridR3c2,
+      LabImages.albumSungsuGridR1c1,
+    ],
+  ),
+  photoSheetV5: AppContentPhotoSheetV5(
+    share: 'Share {count}',
+    shareAccessibilityLabel: 'Share photos: {count}',
+    liveCameraLabel: 'Open camera',
+    closeLabel: 'Close',
+  ),
+  selectMode: AppContentSelectMode(
+    closeLabel: 'Cancel selection',
+    shareLabel: 'Share',
+    deleteLabel: 'Delete',
+    deleteSheet: AppContentSelectModeDeleteSheet(
+      title: 'Delete photos: {count}?',
+      body: 'These photos will be removed from your album\nand can\'t be recovered',
+      confirm: 'Delete',
+      cancel: 'Cancel',
+    ),
+  ),
+  settingsV5: AppContentSettingsV5(
+    names: '{me}, {partner}',
+    dayCount: 'Day {days}',
+    daySuffix: ' together',
+    developerSheetMode: 'Photo sharing mode',
+    sheetInstant: 'A · Share instantly',
+    sheetMulti: 'B · Select multiple photos',
+    albumEmpty: 'View empty album',
+    disconnectSheet: AppContentSettingsV5DisconnectSheet(
+      title: 'Disconnect from {partner}?',
+      body: 'You won\'t be able to view your shared\ncalls and photos after disconnecting',
+      confirm: 'Disconnect',
+      cancel: 'Cancel',
+    ),
+  ),
+  aod: AppContentAod(
+    wakeHint: 'Tap to wake',
+  ),
+  devLabels: AppContentDevLabels(
+    sheetInstant: 'Call · Photo sheet A (instant sharing)',
+    sheetMulti: 'Call · Photo sheet B (multiple selection)',
+    albumEmpty: 'Album · Empty state (onboarding)',
+  ),
+  v6: AppContentV6(
+    backend: AppContentV6Backend(
+      partnerName: 'Partner',
+      networkError: 'Couldn\'t reach the server. Check your connection and try again.',
+      rateLimit: 'Too many requests. Please wait a moment and try again.',
+      expired: 'Your session has expired. Please log in again.',
+      codeNotFound: 'We couldn\'t find that partner code. Check the code and try again.',
+      selfCode: 'You can\'t enter your own code.',
+      alreadyConnected: 'You already have a connected partner.',
+      partnerUnavailable: 'Your partner is already connected to another account.',
+      invalidRequest: 'Please check the information you entered.',
+      genericError: 'We couldn\'t complete your request. Please try again.',
+      billingUnavailable: 'Payments and record recovery are being prepared.',
+      breakupUnavailable: 'Disconnecting will be available once record recovery is connected.',
+      emptyAlbum: 'Preparing the album for your connected account.',
+      callRecord: 'Call record',
+      callRinging: 'Connecting',
+      callActive: 'In call',
+      callMissed: 'Missed call',
+      callDeclined: 'Declined call',
+      callFailed: 'Call failed',
+      callEnded: 'Call ended',
+      loading: 'Loading…',
+      uploading: 'Sending photos…',
+      retry: 'Try again',
+      loadMore: 'Load earlier records',
+      refresh: 'Refresh',
+      permanentDelete: 'Permanently deletes these photos from both albums. Deleted photos can\'t be recovered.',
+      callDelete: 'Permanently delete this call record and its recording?',
+      delete: 'Delete',
+      cancel: 'Cancel',
+      notConnected: 'Connect with your partner to use this feature.',
+      photoTooLarge: 'Choose an original photo of 25 MB or less.',
+      photoUnsupported: 'Choose a JPEG, PNG, HEIC, or WebP photo.',
+      uploadFailed: 'Couldn\'t send your photos. Please try again.',
+      videoUnavailable: 'Video sharing isn\'t available yet.',
+      cameraUnavailable: 'Photos captured on this device are unavailable.',
+      cameraEmptyThumbnail: 'No photos taken yet.',
+      callBusy: 'A call is already in progress.',
+      callInvalidState: 'This call has ended or isn\'t connected.',
+      callReconnecting: 'Reconnecting…',
+      callIncoming: 'Incoming call',
+      answer: 'Answer',
+      decline: 'Decline',
+      microphoneRequired: 'Allow microphone access to make a call.',
+      recordingUnavailable: 'This call has no recording.',
+      transcriptPending: 'Preparing your call transcript.',
+      transcriptUnavailable: 'No transcript is available yet.',
+      playbackFailed: 'Couldn\'t play the recording. Please try again.',
+      restorePurchases: 'Restore purchases',
+      manageSubscription: 'Manage subscription',
+      billingPreparing: 'Preparing your purchase. Please try again in a moment.',
+      billingProductUnavailable: 'No products are available right now. Please try again later.',
+      billingVerificationFailed: 'Couldn\'t verify your purchase. Tap Restore purchases to check again.',
+      billingPending: 'Verifying your purchase. You can check its status without buying again.',
+      billingNothingToRestore: 'No monthly subscription was found for this account.',
+      billingError: 'Couldn\'t start your purchase. Please try again later.',
+      premiumRequired: 'One of you needs an active monthly subscription.',
+      premiumTitle: 'A monthly subscription is needed',
+      premiumAction: 'View monthly subscription',
+      billingServerPending: 'Your purchase is complete. Access will be available after server verification. We\'ll keep checking without charging you again.',
+      billingServerUnavailable: 'Couldn\'t verify your purchase with the server. Please check again later.',
+      recoveryContextChanged: 'Your connected partner has changed. Open recovery for your current partner and try again.',
+      recoveryCreditRequired: 'No unused recovery purchase was found. Please check your purchase status.',
+      partnerPremium: 'You\'re sharing your partner\'s monthly subscription.',
+      freeAccess: 'You currently have access.',
+      recoveryAvailable: 'You have memories together. Check which records can be recovered.',
+      useRecoveryCredit: 'Use existing recovery purchase',
+      recoveryCreditNote: 'You have an unused recovery purchase. Use it once at no extra cost.',
+      recoveryResume: 'Continue record recovery',
+      recoveryAction: 'Recover records',
+      recoveryConfirm: 'Recover past records with your current partner, {partner}. This is a one-time payment of {amount} USD, separate from your subscription.',
+      recoveryCreditConfirm: 'Recover past records with your current partner, {partner}, at no extra cost.',
+      recoveryNote: 'Reconnect with the same partner first. Recovery requires a monthly subscription and a separate recovery purchase. Deleted records can\'t be recovered.',
+      recoverySuccess: 'Your shared photos and call records are available again.',
+    ),
+    billing: AppContentV6Billing(
+      section: 'Membership',
+      settingsLabel: 'Plans and payments',
+      title: 'Payment',
+      brand: 'CAMEO membership',
+      headline: 'Together.\nEvery day.',
+      subtitle: 'Choose your monthly plan.',
+      currency: 'USD',
+      monthlyPriceCents: 499,
+      recoveryPriceCents: 2990,
+      monthlyLabel: 'Monthly plan',
+      monthlyPeriod: '/ mo',
+      monthlyDetail: 'Monthly access',
+      monthlySummary: '{amount} USD per month',
+      monthlyBenefit: 'One membership for both of you',
+      monthlyRecoveryNote: 'Recovering records with a previous partner is a separate one-time purchase.',
+      selected: 'Selected',
+      selectPlan: 'Select monthly plan',
+      continueLabel: 'Review purchase',
+      payLabel: 'Pay {amount}',
+      processing: 'Verifying purchase…',
+      previewNote: 'Renews monthly · Cancel anytime',
+      priceNote: 'Prices are in US dollars (USD).',
+      confirmTitle: 'Review your purchase',
+      monthlyConfirm: 'Monthly subscription · {amount} USD / month\n\nRenews automatically each month. Manage or cancel in your store subscription settings.',
+      cancel: 'Cancel',
+      successTitle: 'Your membership is ready',
+      successBody: 'Your monthly subscription is active. Keep your photos and call records together.',
+      done: 'Back to settings',
+      active: 'Monthly subscription active',
+      activeBody: 'Your monthly membership is active.',
+      failure: 'Couldn\'t complete your purchase. Please try again.',
+      cancelled: 'Purchase canceled. Nothing has changed.',
+      recoveryTitle: 'Recover your memories',
+      recoverySubtitle: 'You have shared memories with {partner}.',
+      recoveryLabel: 'Reconnect with the same partner',
+      recoveryPeriod: 'One-time',
+      recoveryDetail: 'Recover archived photos and calls.',
+      recoverySummary: 'One-time payment of {amount} USD',
+      recoveryNote: 'Recovery is a separate one-time purchase. Reconnect with the same partner to recover your archived records.',
+      recoveryConfirm: 'Recover records with {partner} · {amount} USD, one-time\n\nThis purchase is separate from your monthly subscription.',
+      recoverySuccessTitle: 'Your memories are back',
+      recoverySuccessBody: 'You\'re connected with {partner} again. Your photos and call records are ready to explore.',
+      recoveryDone: 'Back to album',
+      unavailableTitle: 'No records to recover',
+      unavailableBody: 'Check the archived records for this account and partner.',
+      photoCount: 'Photos: {count}',
+      callCount: 'Call records: {count}',
+      subscribeLabel: 'Subscribe for {amount}',
+    ),
+    breakup: AppContentV6Breakup(
+      settingsLabel: 'Disconnect partner',
+      title: 'Disconnect',
+      stepLabel: '{step} / 3',
+      cancel: 'Stay connected',
+      next: 'Continue',
+      confirm: 'Disconnect and log out',
+      saving: 'Archiving records…',
+      acknowledge: 'I understand that recovering records after reconnecting costs {amount} USD.',
+      failure: 'Couldn\'t archive your records. You\'re still connected. Please try again.',
+      steps: <AppContentV6BreakupStep>[
+        AppContentV6BreakupStep(
+          title: 'Disconnect from your partner?',
+          body: 'Please confirm before ending your connection with {partner}.',
+          detail: 'Go back now to keep your connection and records as they are.',
+        ),
+        AppContentV6BreakupStep(
+          title: 'Your memories stay archived',
+          body: 'Your shared photos and call records stay with this account and are hidden from the album after you disconnect.',
+          detail: 'Log back in and reconnect with the same partner. An active monthly subscription and a one-time {amount} USD recovery purchase let you recover your records.',
+        ),
+        AppContentV6BreakupStep(
+          title: 'One last check',
+          body: 'This will disconnect you from {partner} and log you out.',
+          detail: 'Recovering records in a new connection uses one recovery purchase. You can also use an existing unused recovery purchase.',
+        ),
+      ],
+    ),
+    welcome: AppContentV6Welcome(
+      photos: <String>[
+        LabImages.welcomeCouple01Cafe,
+        LabImages.welcomeCouple02Coast,
+        LabImages.welcomeCouple03Spring,
+        LabImages.welcomeCouple04Kitchen,
+        LabImages.welcomeCouple05Picnic,
+        LabImages.welcomeCouple06Rain,
+        LabImages.welcomeCouple07Autumn,
+        LabImages.welcomeCouple08Snow,
+        LabImages.welcomeCouple09PlayfulPortrait,
+        LabImages.welcomeCouple10Train,
+        LabImages.welcomeCouple11Rooftop,
+        LabImages.welcomeCouple12Bookstore,
+        LabImages.welcomeCouple13Riverside,
+        LabImages.welcomeCouple14FlowerMarket,
+        LabImages.welcomeCouple15SummerBeach,
+        LabImages.welcomeCouple16Hike,
+        LabImages.welcomeCouple17HomeSofa,
+        LabImages.welcomeCouple18EveningDate,
+      ],
+    ),
+    partner: AppContentV6Partner(
+      skip: 'Later',
+      copyLabel: 'Copy code',
+      copied: 'Code copied',
+    ),
+    verify: AppContentV6Verify(
+      error: 'That code doesn\'t match',
+    ),
+    permissions: AppContentV6Permissions(
+      ctaDone: 'Get started',
+      denied: 'You can change this in Settings',
+    ),
+    settings: AppContentV6Settings(
+      connectPartner: 'Connect partner',
+      connectPartnerIcon: 'users',
+      logout: 'Log out',
+      logoutIcon: 'logout',
+      logoutSheet: AppContentV6SettingsLogoutSheet(
+        title: 'Log out?',
+        body: 'Your albums and call records will be here\nwhen you log back in',
+        confirm: 'Log out',
+        cancel: 'Cancel',
+      ),
+      disconnectSheet: AppContentV6SettingsDisconnectSheet(
+        title: 'Disconnect from {partner}?',
+        body: 'You won\'t be able to view your shared\ncalls and photos after disconnecting',
+        confirm: 'Disconnect',
+        cancel: 'Cancel',
+      ),
+      developerSheetMode: 'Photo sharing mode',
+      sheetInstant: 'A · Share instantly',
+      sheetMulti: 'B · Select multiple photos',
+      languageSection: 'App language',
+      language: 'Language',
+      languageDescription: 'Choose the language used in the app.',
+      languageSaveError: 'Couldn’t save your language. Please try again.',
+    ),
+    tabBar: AppContentV6TabBar(
+      historyLabel: 'Album',
+      cameraLabel: 'Camera',
+      settingsLabel: 'Settings',
+      callLabel: 'Call partner',
+    ),
+    album: AppContentV6Album(
+      selectLabel: 'Select photos',
+      importLabel: 'Import photos',
+      likedLabel: 'Favorite photos',
+      deletedLabel: 'Recently deleted photos',
+      closeLabel: 'Close',
+      shareLabel: 'Share',
+      likeLabel: 'Like',
+      unlikeLabel: 'Unlike',
+      deleteLabel: 'Delete',
+      restoreLabel: 'Restore',
+      deleteSheet: AppContentV6AlbumDeleteSheet(
+        title: 'Delete photos: {count}?',
+        body: 'You can recover these photos\nfrom Recently deleted',
+        confirm: 'Delete',
+        cancel: 'Cancel',
+      ),
+    ),
+    viewer: AppContentV6Viewer(
+      thumbnailLabel: 'Photo {index}',
+    ),
+    review: AppContentV6Review(
+      sendLabel: 'Send',
+      discardLabel: 'Discard',
+    ),
+    emptyAlbum: AppContentV6EmptyAlbum(
+      ctaNoPartner: 'Connect partner',
+    ),
+    accessibility: AppContentV6Accessibility(
+      phone: 'Phone number',
+      code: 'Code',
+      on: 'On',
+      off: 'Off',
+      likedSuffix: ', liked',
+      photo: 'Photo {index}',
+      sentPhoto: 'Sent photo',
+      sentPhotoPosition: 'Sent photo {index} of {count}',
+      capturedVideo: 'Recorded video',
+      capturedPhoto: 'Captured photo',
+      closePhoto: 'Close photo',
+      videoDuration: 'Video {time}',
+      resendPhoto: 'Photo {index}, send again',
+      sendPhoto: 'Send photo {index}',
+      shutter: 'Capture',
+      shutterHint: 'Tap for a photo. Hold to record a video.',
+      lastPhoto: 'View latest photo',
+      lastVideo: 'View latest video',
+      frontCamera: 'Switch to front camera',
+      backCamera: 'Switch to back camera',
+      cameraPreview: 'Camera preview',
+      volume: 'Volume',
+      speaker: 'Speaker',
+      microphone: 'Microphone',
+      unmute: 'Unmute microphone',
+      sendPhotos: 'Send photos',
+      highlight: 'Save highlight with 15 seconds before and after',
+      endCall: 'End call',
+      closeCall: 'Minimize call',
+      sleepMode: 'Sleep mode',
+      callDuration: '{name}, call duration {time}',
+      playbackPosition: 'Playback position',
+      jumpHighlight: 'Jump to highlight {index}',
+      pause: 'Pause',
+      play: 'Play',
+      mediaCard: 'Media card',
+      resizeMedia: 'Drag up or down to resize',
+      resizeDismissMedia: 'Drag up or down to resize. Drag down to close.',
+      albumStats: '{label}, photos: {photos}, calls: {calls}',
+      seekTranscript: '{text}, jump to this point',
+      rewind: 'Rewind 15 seconds',
+      enteredCode: 'Digits entered: {count}',
+      dateAlbum: '{title}, open album by date',
+      backLab: 'Back to screen library',
+      favorite: 'Favorite',
+      more: 'More',
+      history: 'History',
+      focus: 'Focus',
+      cameraMode: '{mode} mode',
+      photoCapture: 'Take photo',
+      videoCapture: 'Record video',
+      call: 'Call',
+      inlinePhoto: 'Photo shared during the call',
     ),
   ),
 );

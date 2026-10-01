@@ -234,21 +234,23 @@ class SettingsRowV6State extends State<SettingsRowV6>
                     size: CameoLayout.settingsV6ChevronRowChevronSize,
                     color: c.foregroundNeutralSubtle,
                   ),
-                  SettingsRowV6Value(:final value) => AnimatedSwitcher(
-                    key: SettingsRowV6.valueKey,
-                    duration: CameoMotion.durationBase,
-                    switchInCurve: CameoMotion.easingStandard,
-                    switchOutCurve: CameoMotion.easingStandard,
-                    layoutBuilder: (current, previous) => Stack(
-                      alignment: Alignment.centerRight,
-                      children: [...previous, ?current],
-                    ),
-                    child: CameoText(
-                      value,
-                      key: ValueKey(value),
-                      style: CameoTextStyles.bodyMd,
-                      color: c.foregroundNeutralMuted,
-                      maxLines: 1,
+                  SettingsRowV6Value(:final value) => Flexible(
+                    child: AnimatedSwitcher(
+                      key: SettingsRowV6.valueKey,
+                      duration: CameoMotion.durationBase,
+                      switchInCurve: CameoMotion.easingStandard,
+                      switchOutCurve: CameoMotion.easingStandard,
+                      layoutBuilder: (current, previous) => Stack(
+                        alignment: Alignment.centerRight,
+                        children: [...previous, ?current],
+                      ),
+                      child: CameoText(
+                        value,
+                        key: ValueKey(value),
+                        style: CameoTextStyles.bodyMd,
+                        color: c.foregroundNeutralMuted,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                   null => null,

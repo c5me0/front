@@ -2,6 +2,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import '../content/app.g.dart';
 
 import '../content/lab.g.dart';
 import '../design_system/design_system.dart';
@@ -26,8 +27,10 @@ CameoKaraokeSpec transcriptKaraoke(CameoPalette c, TranscriptTone tone) =>
 
 final RegExp _hardBreak = RegExp(r'\s*\n\s*');
 
-String transcriptLineLabel(String text) =>
-    '${text.replaceAll(_hardBreak, ' ')}, 이 위치로 이동';
+String transcriptLineLabel(String text, {AppContent copy = appContent}) =>
+    fillTemplate(copy.v6.accessibility.seekTranscript, {
+      'text': text.replaceAll(_hardBreak, ' '),
+    });
 
 class TranscriptText extends StatelessWidget {
   const TranscriptText({
@@ -160,7 +163,8 @@ class TranscriptLine extends StatelessWidget {
           : PressScale(
               onPress: onPress,
               accessibilityLabel:
-                  accessibilityLabel ?? transcriptLineLabel(text),
+                  accessibilityLabel ??
+                  transcriptLineLabel(text, copy: AppContent.of(context)),
               child: row,
             ),
     );
