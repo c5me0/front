@@ -395,17 +395,21 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   void _onFlip() => setState(() => _facing = _facing.opposite);
 
   TabBarCameraSlots _slots() {
-    final thumb = _thumb!;
+    final thumb = _thumb;
     return TabBarCameraSlots(
       thumbnail: TabBarThumbnail(
         key: CameraV6Screen.thumbnailKey,
-        image: thumb.image,
-        video: thumb.video,
-        popKey: thumb.key,
+        image: thumb?.image,
+        video: thumb?.video ?? false,
+        popKey: thumb?.key,
         anchor: _thumbAnchor,
         onPopSettled: _onThumbPopSettled,
-        onPress: _openThumbnail,
-        semanticLabel: thumb.video ? '마지막 동영상 보기' : '마지막 사진 보기',
+        onPress: thumb == null ? null : _openThumbnail,
+        semanticLabel: thumb == null
+            ? appContent.v6.backend.cameraEmptyThumbnail
+            : thumb.video
+            ? '마지막 동영상 보기'
+            : '마지막 사진 보기',
       ),
       onFlip: _onFlip,
       flipLabel: _facing == CameraFacing.back ? '전면 카메라로 전환' : '후면 카메라로 전환',

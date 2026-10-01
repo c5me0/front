@@ -326,14 +326,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         trailing: const SettingsRowV6Trailing.chevron(),
                         onPress: () => CameoNav.openPayment(context),
                       ),
-                      if (controller.hasRestorable)
+                      if (controller.remoteCouple case final couple?
+                          when couple.canRestore)
                         SettingsRowV6(
                           key: const ValueKey('settings.recovery'),
                           label: appContent.v6.billing.recoveryTitle,
                           trailing: const SettingsRowV6Trailing.chevron(),
                           onPress: () => CameoNav.openPayment(
                             context,
-                            archiveId: controller.remoteCouple!.id,
+                            archiveId: couple.id,
                           ),
                         ),
                     ],

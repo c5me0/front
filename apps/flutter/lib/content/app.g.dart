@@ -217,7 +217,7 @@ class AppContentV6Billing {
 }
 
 class AppContentV6Backend {
-  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.sandboxNote, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.freeAccess, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
+  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.cameraEmptyThumbnail, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.sandboxNote, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumTitle, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.freeAccess, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
   final String partnerName;
   final String networkError;
   final String rateLimit;
@@ -253,6 +253,7 @@ class AppContentV6Backend {
   final String uploadFailed;
   final String videoUnavailable;
   final String cameraUnavailable;
+  final String cameraEmptyThumbnail;
   final String callBusy;
   final String callInvalidState;
   final String callReconnecting;
@@ -274,6 +275,7 @@ class AppContentV6Backend {
   final String billingNothingToRestore;
   final String billingError;
   final String premiumRequired;
+  final String premiumTitle;
   final String premiumAction;
   final String billingServerPending;
   final String billingServerUnavailable;
@@ -789,6 +791,7 @@ const AppContent appContent = AppContent(
       uploadFailed: '사진을 보내지 못했어요. 다시 시도해 주세요.',
       videoUnavailable: '동영상 전송은 아직 지원하지 않아요.',
       cameraUnavailable: '이 기기에서 촬영한 사진을 사용할 수 없어요.',
+      cameraEmptyThumbnail: '아직 촬영한 사진이 없어요.',
       callBusy: '이미 진행 중인 통화가 있어요.',
       callInvalidState: '이미 종료되었거나 연결되지 않은 통화예요.',
       callReconnecting: '다시 연결 중…',
@@ -810,6 +813,7 @@ const AppContent appContent = AppContent(
       billingNothingToRestore: '이 계정에서 복원할 월간 구독을 찾지 못했어요.',
       billingError: '결제를 진행하지 못했어요. 잠시 후 다시 시도해 주세요.',
       premiumRequired: '두 사람 중 한 명의 월간 구독이 필요해요.',
+      premiumTitle: '월간 구독이 필요해요',
       premiumAction: '월간 구독 확인하기',
       billingServerPending: '구매는 완료됐어요. 서버 확인 후 이용할 수 있어요. 다시 결제하지 않고 확인을 이어갈게요.',
       billingServerUnavailable: '서버에서 결제 상태를 확인하지 못했어요. 잠시 후 다시 확인해 주세요.',

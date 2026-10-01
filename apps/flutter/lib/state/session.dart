@@ -467,14 +467,21 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
   }
 
   @override
-  Future<ApiUser> syncPurchases() async {
+  Future<ApiUser> refreshPurchaseStatus() => _fetchPurchaseStatus();
+
+  @override
+  Future<ApiUser> syncPurchases() => _fetchPurchaseStatus(verifyReceipt: true);
+
+  Future<ApiUser> _fetchPurchaseStatus({bool verifyReceipt = false}) async {
     final api = backend;
     if (api == null || userId == null) {
       throw const ApiException('unauthenticated', status: 401);
     }
     final generation = _generation;
     _remoteRevision++;
-    final user = await _backendCall(api.syncPurchases());
+    final user = await _backendCall(
+      verifyReceipt ? api.syncPurchases() : api.me(),
+    );
     _remoteRevision++;
     if (_disposed || generation != _generation || user.id != userId) {
       throw const ApiException('request_cancelled');
@@ -531,7 +538,7 @@ class SessionController extends ChangeNotifier implements PurchaseAccount {
     if (after?.id != expectedCoupleId) {
       throw const ApiException('recovery_context_changed');
     }
-    await syncPurchases();
+    await refreshPurchaseStatus();
     await _album?.remote.refresh();
     return moved;
   }

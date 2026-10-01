@@ -9,6 +9,8 @@ import '../../design_system/design_system.dart';
 import '../../state/session.dart';
 
 String settingsPhoneLine(String? digits, String prefix, String sample) {
+  final phone = digits?.trim() ?? '';
+  if (phone.startsWith('+')) return phone;
   final formatted = formatPhoneIntl(digits ?? '', prefix, sample);
   return formatted.isEmpty ? sample : formatted;
 }

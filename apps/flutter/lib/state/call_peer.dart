@@ -16,6 +16,16 @@ typedef CallPeerFactory =
       void Function() onDisconnected,
     );
 
+/// Backend-provided STUN/TURN takes precedence. An empty configuration still
+/// needs STUN to discover a usable public candidate behind a router.
+List<JsonObject> callIceServers(List<JsonObject> servers) => servers.isNotEmpty
+    ? servers
+    : const [
+        {
+          'urls': ['stun:stun.l.google.com:19302'],
+        },
+      ];
+
 class WebRtcCallPeer implements CallPeer {
   WebRtcCallPeer._(this._connection, this._stream);
   final RTCPeerConnection _connection;
@@ -31,7 +41,10 @@ class WebRtcCallPeer implements CallPeer {
     RTCPeerConnection? connection;
     try {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({'audio': true, 'video': false});
+        stream = await navigator.mediaDevices.getUserMedia({
+          'audio': true,
+          'video': false,
+        });
       } catch (_) {
         throw const ApiException('microphone_required');
       }

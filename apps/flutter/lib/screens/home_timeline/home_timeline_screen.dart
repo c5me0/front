@@ -863,6 +863,10 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
     final album = AlbumScope.of(context);
     final controller = SessionScope.of(context);
     final session = controller.session;
+    final recoveryCouple = controller.remoteCouple;
+    final recoveryId = recoveryCouple != null && recoveryCouple.canRestore
+        ? recoveryCouple.id
+        : null;
     final hasPartner = session.partner != null;
     final liveEmpty = album.isEmptyFor(hasPartner: hasPartner);
     final _AlbumData live = (
@@ -925,6 +929,12 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                         EmptyAlbumV6(
                           hasPartner: data.hasPartner,
                           meName: session.name,
+                          title: controller.premiumRequired && hasPartner
+                              ? appContent.v6.backend.premiumTitle
+                              : null,
+                          actionLabel: controller.premiumRequired && hasPartner
+                              ? appContent.v6.backend.premiumAction
+                              : null,
                           onImport: _import,
                           onConnect: () => CameoNav.openConnect(context),
                         ),
@@ -952,23 +962,19 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                       : null,
                 ),
               ),
-              if (controller.hasRestorable ||
-                  (controller.premiumRequired && hasPartner))
+              if (recoveryId != null ||
+                  (controller.premiumRequired && hasPartner && !showEmpty))
                 Positioned(
                   key: const ValueKey('album.membershipNotice'),
                   top: CameoLayout.albumNavV6HeaderHeight,
                   left: 0,
                   right: 0,
                   child: BackendNotice(
-                    message: controller.hasRestorable
+                    message: recoveryId != null
                         ? appContent.v6.backend.recoveryAvailable
                         : appContent.v6.backend.premiumRequired,
-                    onRetry: () => CameoNav.openPayment(
-                      context,
-                      archiveId: controller.hasRestorable
-                          ? controller.remoteCouple!.id
-                          : null,
-                    ),
+                    onRetry: () =>
+                        CameoNav.openPayment(context, archiveId: recoveryId),
                   ),
                 )
               else if (album.usesBackend &&

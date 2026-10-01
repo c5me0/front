@@ -6,6 +6,7 @@ abstract interface class PurchaseAccount {
   ApiPremium? get premium;
   int get restoreCredits;
   ApiCouple? get remoteCouple;
+  Future<ApiUser> refreshPurchaseStatus();
   Future<ApiUser> syncPurchases();
   Future<ApiCouple?> refreshCouple();
   Future<ApiRestorable> restoreCouple(String expectedCoupleId);

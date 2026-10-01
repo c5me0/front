@@ -28,6 +28,8 @@ class EmptyAlbumV6 extends StatefulWidget {
     required this.meName,
     required this.onImport,
     required this.onConnect,
+    this.title,
+    this.actionLabel,
   });
 
   final bool hasPartner;
@@ -35,6 +37,7 @@ class EmptyAlbumV6 extends StatefulWidget {
   final String? meName;
   final VoidCallback onImport;
   final VoidCallback onConnect;
+  final String? title, actionLabel;
 
   static const Key columnKey = ValueKey('emptyAlbumV6.column');
   static const Key meKey = ValueKey('emptyAlbumV6.me');
@@ -232,7 +235,7 @@ class EmptyAlbumV6State extends State<EmptyAlbumV6>
             progress: _texts[0],
             rise: rise,
             child: CameoText(
-              lab.title,
+              widget.title ?? lab.title,
               key: EmptyAlbumV6.titleKey,
               style: CameoTextStyles.headingMdStrong,
               color: c.foregroundNeutralBase,
@@ -245,8 +248,10 @@ class EmptyAlbumV6State extends State<EmptyAlbumV6>
             child: widget.hasPartner
                 ? SolidButton(
                     key: EmptyAlbumV6.ctaKey,
-                    icon: toastIconOf(lab.ctaIcon),
-                    label: lab.cta,
+                    icon: widget.actionLabel == null
+                        ? toastIconOf(lab.ctaIcon)
+                        : null,
+                    label: widget.actionLabel ?? lab.cta,
                     variant: SolidButtonVariant.gray,
                     onPress: widget.onImport,
                   )

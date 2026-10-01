@@ -210,14 +210,14 @@ class _RevenueCatPaymentScreenState extends State<RevenueCatPaymentScreen> {
                   style: CameoTextStyles.bodyMd,
                   color: c.foregroundNeutralMuted,
                 ),
-                if (!recovery && billing.managementUrl != null)
+                if (billing.managementUrl case final url? when !recovery)
                   SolidButton(
                     stretch: true,
                     size: SolidButtonSize.md,
                     variant: SolidButtonVariant.gray,
                     label: messages.manageSubscription,
                     disabled: billing.busy,
-                    onPress: () => _manage(billing.managementUrl!),
+                    onPress: () => _manage(url),
                   ),
                 CameoText(
                   restored

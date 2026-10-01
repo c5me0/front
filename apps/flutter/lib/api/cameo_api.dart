@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show WebSocket;
+import 'dart:io' show SocketException, WebSocket;
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
@@ -105,6 +105,10 @@ class CameoApi {
       throw const ApiException('network_timeout');
     } on http.ClientException {
       throw const ApiException('network_unavailable');
+    } on SocketException {
+      throw ApiException(
+        generation == _generation ? 'network_unavailable' : 'request_cancelled',
+      );
     }
     if (generation != _generation) {
       throw const ApiException('request_cancelled');
@@ -359,6 +363,10 @@ class CameoApi {
       throw const ApiException('network_timeout');
     } on http.ClientException {
       throw const ApiException('network_unavailable');
+    } on SocketException {
+      throw ApiException(
+        generation == _generation ? 'network_unavailable' : 'request_cancelled',
+      );
     }
   }
 

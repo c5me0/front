@@ -33,6 +33,7 @@ class LiveCallController extends ChangeNotifier {
   bool _foreground = true;
   WebSocket? _socket;
   StreamSubscription<dynamic>? _subscription;
+  Future<void>? _socketDone;
   CallPeer? _peer;
   Timer? _pollTimer, _reconnectTimer;
   int _epoch = 0, _attempts = 0;
@@ -191,6 +192,8 @@ class LiveCallController extends ChangeNotifier {
       return;
     }
     _socket = socket;
+    final socketDone = Completer<void>();
+    _socketDone = socketDone.future;
     _subscription = socket.listen(
       (frame) {
         _messages = _messages
@@ -207,6 +210,7 @@ class LiveCallController extends ChangeNotifier {
             });
       },
       onDone: () {
+        if (!socketDone.isCompleted) socketDone.complete();
         if (!_current(epoch) || !hasCall) return;
         if (socket.closeCode == 4000 || socket.closeCode == 1008) {
           unawaited(_finish('failed'));
@@ -220,7 +224,7 @@ class LiveCallController extends ChangeNotifier {
     );
     final candidates = <JsonObject>[];
     var offered = false;
-    final peer = await _peerFactory(ice, (candidate) {
+    final peer = await _peerFactory(callIceServers(ice), (candidate) {
       if (!_current(epoch)) return;
       if (offered && _socket?.readyState == WebSocket.open) {
         _socket!.add(jsonEncode(candidate));
@@ -376,24 +380,37 @@ class LiveCallController extends ChangeNotifier {
   }
 
   Future<void> _finish(String terminalStatus) async {
-    _epoch++;
+    final epoch = ++_epoch;
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
     status = terminalStatus;
     connecting = false;
     await _release();
+    if (!_current(epoch)) return;
     _notify();
     unawaited(_album?.refresh());
   }
 
   Future<void> _release() async {
     final subscription = _subscription, socket = _socket, peer = _peer;
+    final socketDone = _socketDone;
     _subscription = null;
     _socket = null;
+    _socketDone = null;
     _peer = null;
-    await subscription?.cancel();
-    await socket?.close();
-    await peer?.close();
+    try {
+      await peer?.close();
+    } finally {
+      // Keep the stream's error handler attached while the TLS socket closes.
+      try {
+        await socket?.close();
+        // close() flushes the outgoing close frame; the incoming stream may
+        // still contain the peer's response. Drain it before cancelling reads.
+        await socketDone?.timeout(const Duration(seconds: 5), onTimeout: () {});
+      } finally {
+        await subscription?.cancel();
+      }
+    }
   }
 
   @override

@@ -69,6 +69,7 @@ class RevenueCatBilling extends ChangeNotifier {
   rc.StoreProduct? monthlyProduct;
   rc.StoreProduct? recoveryProduct;
   rc.CustomerInfo? _info;
+  String? _syncedReceipt;
   Future<void> _operations = Future.value();
   Timer? _expiryRefresh;
   bool get ready =>
@@ -128,6 +129,7 @@ class RevenueCatBilling extends ChangeNotifier {
     final epoch = ++_epoch;
     _expiryRefresh?.cancel();
     _info = null;
+    _syncedReceipt = null;
     monthlyProduct = null;
     recoveryProduct = null;
     error = config.configurationError;
@@ -181,7 +183,7 @@ class RevenueCatBilling extends ChangeNotifier {
     });
   }
 
-  Future<void> _load(int epoch) async {
+  Future<void> _load(int epoch, {bool forceSync = false}) async {
     final info = await rc.Purchases.getCustomerInfo();
     rc.StoreProduct? monthly;
     if (config.monthlyProductId.isNotEmpty) {
@@ -230,14 +232,46 @@ class RevenueCatBilling extends ChangeNotifier {
         : null;
     _accept(info);
     if (monthlyProduct == null) error ??= 'billing_product_unavailable';
-    await _syncAccount(epoch);
+    await _syncAccount(epoch, force: forceSync);
   }
 
-  Future<void> _syncAccount(int epoch) async {
+  String? get _receiptState {
+    final info = _info;
+    if (info == null) return null;
+    final subscription = info.entitlements.all[config.entitlementId];
+    final recoveries =
+        info.nonSubscriptionTransactions
+            .where(
+              (transaction) =>
+                  transaction.productIdentifier == config.recoveryProductId,
+            )
+            .map((transaction) => transaction.transactionIdentifier)
+            .toSet()
+            .toList()
+          ..sort();
+    return jsonEncode([
+      subscription?.isActive,
+      subscription?.productIdentifier,
+      subscription?.expirationDate,
+      subscription?.isSandbox,
+      recoveries,
+    ]);
+  }
+
+  Future<void> _syncAccount(int epoch, {bool force = false}) async {
     if (!_current(epoch) || account.userId != _ownerId) {
       throw const ApiException('request_cancelled');
     }
-    await account.syncPurchases();
+    // Only changed receipts and explicit purchase/restore actions need the
+    // rate-limited reconciliation endpoint. Normal navigation reads server state.
+    final receipt = _receiptState;
+    if (force || receipt != _syncedReceipt) {
+      await account.syncPurchases();
+      if (!_current(epoch)) return;
+      _syncedReceipt = receipt;
+    } else {
+      await account.refreshPurchaseStatus();
+    }
     if (!_current(epoch)) return;
     await account.refreshCouple();
     if (!_current(epoch)) return;
@@ -283,7 +317,7 @@ class RevenueCatBilling extends ChangeNotifier {
     _notify();
     return _serial(() async {
       try {
-        await _syncAccount(epoch);
+        await _syncAccount(epoch, force: recoveryPending);
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
         final couple = account.remoteCouple;
         if (couple?.id != expectedCoupleId) {
@@ -324,7 +358,7 @@ class RevenueCatBilling extends ChangeNotifier {
           if (error == 'billing_verification_failed') {
             return CheckoutOutcome.pending;
           }
-          await _syncAccount(epoch);
+          await _syncAccount(epoch, force: true);
           if (!_current(epoch)) return CheckoutOutcome.cancelled;
           if (account.restoreCredits == 0) {
             throw const ApiException('billing_server_pending');
@@ -357,9 +391,10 @@ class RevenueCatBilling extends ChangeNotifier {
             : CheckoutOutcome.failed;
       } on ApiException catch (problem) {
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
-        error =
-            problem.code == 'purchase:required' &&
-                problem.meta['required'] == 'restore'
+        error = recoveryPending && problem.status == 429
+            ? 'billing_server_pending'
+            : problem.code == 'purchase:required' &&
+                  problem.meta['required'] == 'restore'
             ? 'recovery_credit_required'
             : problem.code;
         return recoveryPending
@@ -410,6 +445,7 @@ class RevenueCatBilling extends ChangeNotifier {
       return;
     }
     final epoch = _epoch;
+    final forceSync = pending || recoveryPending;
     loading = true;
     _notify();
     await _serial(() async {
@@ -418,7 +454,7 @@ class RevenueCatBilling extends ChangeNotifier {
           return;
         }
         await rc.Purchases.invalidateCustomerInfoCache();
-        await _load(epoch);
+        await _load(epoch, forceSync: forceSync);
       } on PlatformException catch (problem) {
         if (_current(epoch)) error = _errorCode(problem);
       } on ApiException catch (problem) {
@@ -461,6 +497,9 @@ class RevenueCatBilling extends ChangeNotifier {
           return CheckoutOutcome.failed;
         }
         if (storeSubscriptionActive) {
+          await _syncAccount(epoch, force: true);
+          if (!_current(epoch)) return CheckoutOutcome.cancelled;
+          if (active) return CheckoutOutcome.completed;
           pending = true;
           error = 'billing_server_pending';
           return CheckoutOutcome.pending;
@@ -478,7 +517,7 @@ class RevenueCatBilling extends ChangeNotifier {
           pending = true;
           return CheckoutOutcome.pending;
         }
-        await _syncAccount(epoch);
+        await _syncAccount(epoch, force: true);
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
         if (active) return CheckoutOutcome.completed;
         pending = true;
@@ -486,8 +525,10 @@ class RevenueCatBilling extends ChangeNotifier {
         return CheckoutOutcome.pending;
       } on ApiException catch (problem) {
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
-        error = problem.code;
         pending = storeSubscriptionActive;
+        error = pending && problem.status == 429
+            ? 'billing_server_pending'
+            : problem.code;
         return pending ? CheckoutOutcome.pending : CheckoutOutcome.failed;
       } on PlatformException catch (problem) {
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
@@ -525,7 +566,7 @@ class RevenueCatBilling extends ChangeNotifier {
         final info = await rc.Purchases.restorePurchases();
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
         _accept(info);
-        await _syncAccount(epoch);
+        await _syncAccount(epoch, force: true);
         if (!_current(epoch)) return CheckoutOutcome.cancelled;
         if (active) return CheckoutOutcome.completed;
         error ??= 'billing_nothing_to_restore';
