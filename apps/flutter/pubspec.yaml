@@ -47,7 +47,9 @@ dependencies:
   image_picker: ^1.2.2
   liquid_glass_renderer: 0.2.0-dev.4
   # Enable the matching permission macros in the iOS Podfile.
-  permission_handler: ^13.0.2
+  # Keep the Android implementation compatible with the project's AGP 8 toolchain.
+  permission_handler: 12.0.3
+  permission_handler_android: 13.0.1
   # Newer iOS implementations require Flutter 3.38 scene lifecycle support.
   screen_brightness: 2.1.7
   screen_brightness_ios: 2.1.2
