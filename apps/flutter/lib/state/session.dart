@@ -18,6 +18,7 @@ import '../api/api_models.dart';
 import 'account_history.dart';
 import 'album_store.dart';
 import 'payment_service.dart';
+import 'purchase_account.dart';
 
 export 'account_history.dart' show RelationshipArchive, RecoveryRequired;
 export 'payment_service.dart' show PaymentKind, PaymentResult;
@@ -355,7 +356,7 @@ Session devSessionOf(DevSessionKind kind, {bool partnerNone = false}) {
 
 ///
 
-class SessionController extends ChangeNotifier {
+class SessionController extends ChangeNotifier implements PurchaseAccount {
   SessionController({
     Session? initial,
     CameoApi? api,
@@ -377,12 +378,28 @@ class SessionController extends ChangeNotifier {
   bool _flowDemoSession = false;
   bool _demoOverride = false;
   final CameoApi? _api;
+  String? _remoteUserId;
+  @override
+  String? get userId => usesBackend ? _remoteUserId : null;
+  CameoApi? get backend => usesBackend ? _api : null;
   ApiSignIn? _verifiedRemote;
   String? _requestedPhone;
   String? _pairingCode;
   String? _partnerPhone;
   String? backendError;
+  ApiPremium? _premium;
+  int _restoreCredits = 0;
+  ApiCouple? _remoteCouple;
+  @override
+  ApiPremium? get premium => usesBackend ? _premium : null;
+  @override
+  int get restoreCredits => usesBackend ? _restoreCredits : 0;
+  @override
+  ApiCouple? get remoteCouple => usesBackend ? _remoteCouple : null;
+  bool get premiumRequired => usesBackend && _premium?.active != true;
+  bool get hasRestorable => remoteCouple?.canRestore == true;
   bool _updatingPreference = false;
+  int _remoteRevision = 0;
   bool get usesBackend => _api != null && !_demoOverride && !_flowDemoSession;
   String get pairingCode => usesBackend ? (_pairingCode ?? '') : labPairingCode;
   String get partnerPhone => _partnerPhone ?? '';
@@ -400,6 +417,123 @@ class SessionController extends ChangeNotifier {
   void bindAlbum(AlbumStore album) {
     _album = album;
     if (usesBackend) album.reset(empty: true);
+    _syncBackendAlbum();
+  }
+
+  void _syncBackendAlbum() {
+    _album?.remote.configure(
+      backend,
+      userId,
+      usesBackend && !premiumRequired ? _session.partner?.id : null,
+      onError: (error) {
+        if (error.status == 401) _recordBackendError(error);
+        if (error.status == 402) _recordBackendError(error);
+        if (error.code == 'couple:not_connected') unawaited(refreshBackend());
+      },
+    );
+  }
+
+  Future<void> refreshBackend() async {
+    if (!usesBackend) return;
+    if (_session.status == SessionStatus.signedOut) {
+      if (_api!.hasCredential) await _loadBackend();
+      return;
+    }
+    final generation = _generation;
+    final revision = _remoteRevision;
+    try {
+      final user = await _api!.me();
+      if (_disposed ||
+          generation != _generation ||
+          revision != _remoteRevision) {
+        return;
+      }
+      _applyRemoteUser(user);
+      if (user.partner != null) {
+        final couple = await _api.couple();
+        if (_disposed ||
+            generation != _generation ||
+            revision != _remoteRevision ||
+            couple.partner.id != _session.partner?.id) {
+          return;
+        }
+        _partnerPhone = couple.partner.phone;
+        _remoteCouple = couple;
+        notifyListeners();
+      }
+    } on ApiException catch (error) {
+      if (!_disposed && generation == _generation) _recordBackendError(error);
+    }
+  }
+
+  @override
+  Future<ApiUser> syncPurchases() async {
+    final api = backend;
+    if (api == null || userId == null) {
+      throw const ApiException('unauthenticated', status: 401);
+    }
+    final generation = _generation;
+    _remoteRevision++;
+    final user = await _backendCall(api.syncPurchases());
+    _remoteRevision++;
+    if (_disposed || generation != _generation || user.id != userId) {
+      throw const ApiException('request_cancelled');
+    }
+    if (user.premium == null) {
+      throw const ApiException('billing_server_unavailable');
+    }
+    if (user.partner?.id != _session.partner?.id) {
+      await refreshBackend();
+      throw const ApiException('request_cancelled');
+    }
+    _premium = user.premium;
+    _restoreCredits = user.restoreCredits;
+    backendError = null;
+    _syncBackendAlbum();
+    notifyListeners();
+    return user;
+  }
+
+  @override
+  Future<ApiCouple?> refreshCouple() async {
+    final api = backend;
+    if (api == null || _session.partner == null) return null;
+    final generation = _generation, partnerId = _session.partner!.id;
+    final couple = await _backendCall(api.couple());
+    if (_disposed ||
+        generation != _generation ||
+        partnerId != _session.partner?.id ||
+        couple.partner.id != partnerId) {
+      throw const ApiException('request_cancelled');
+    }
+    _remoteCouple = couple;
+    _partnerPhone = couple.partner.phone;
+    notifyListeners();
+    return couple;
+  }
+
+  @override
+  Future<ApiRestorable> restoreCouple(String expectedCoupleId) async {
+    final generation = _generation;
+    final current = await refreshCouple();
+    if (current?.id != expectedCoupleId) {
+      throw const ApiException('recovery_context_changed');
+    }
+    if (!current!.canRestore) {
+      await _album?.remote.refresh();
+      return const ApiRestorable(0, 0);
+    }
+    final moved = await _backendCall(_api!.restoreCouple());
+    if (_disposed || generation != _generation) {
+      throw const ApiException('request_cancelled');
+    }
+    final after = await refreshCouple();
+    if (after?.id != expectedCoupleId) {
+      throw const ApiException('recovery_context_changed');
+    }
+    await syncPurchases();
+    await _album?.remote.refresh();
+    return moved;
   }
 
   AccountRecord? get _account =>
@@ -533,6 +667,9 @@ class SessionController extends ChangeNotifier {
             ? SessionStatus.member
             : SessionStatus.onboarding,
       );
+      if (_session.partner != null) {
+        unawaited(refreshCouple().catchError((Object _) => null));
+      }
       return;
     }
     _generation++;
@@ -563,27 +700,37 @@ class SessionController extends ChangeNotifier {
       return;
     }
     final generation = _generation;
+    _remoteRevision++;
     final user = await _backendCall(_api!.updateMe(displayName: name));
+    _remoteRevision++;
     if (_disposed || generation != _generation) {
       throw const ApiException('request_cancelled');
     }
-    _applyRemoteUser(user);
+    _set(_session.copyWith(name: user.displayName));
   }
 
   Future<Partner> connectPartner(String code) async {
     final generation = _generation;
     if (usesBackend) {
+      _remoteRevision++;
       final couple = await _backendCall(_api!.connect(code));
+      _remoteRevision++;
       if (_disposed || generation != _generation) {
         throw const ApiException('request_cancelled');
       }
       final partner = _remotePartner(couple.partner);
+      _remoteCouple = couple;
       _partnerPhone = couple.partner.phone;
       _set(_session.copyWith(partner: partner, partnerSkipped: false));
       // The server rotates both invitation codes after pairing.
       try {
+        final revision = _remoteRevision;
         final user = await _api.me();
-        if (!_disposed && generation == _generation) _applyRemoteUser(user);
+        if (!_disposed &&
+            generation == _generation &&
+            revision == _remoteRevision) {
+          _applyRemoteUser(user);
+        }
       } on ApiException catch (error) {
         _recordBackendError(error);
         if (error.status == 401) rethrow;
@@ -624,6 +771,7 @@ class SessionController extends ChangeNotifier {
     }
     if (_updatingPreference) return;
     _updatingPreference = true;
+    _remoteRevision++;
     backendError = null;
     final generation = _generation;
     notifyListeners();
@@ -632,7 +780,19 @@ class SessionController extends ChangeNotifier {
         callAlert: key == SessionPref.callAlerts ? value : null,
         highlightAlert: key == SessionPref.highlightAlerts ? value : null,
       );
-      if (!_disposed && generation == _generation) _applyRemoteUser(user);
+      _remoteRevision++;
+      if (!_disposed && generation == _generation) {
+        _set(
+          _session.copyWith(
+            prefs: _session.prefs.copyWith(
+              key,
+              key == SessionPref.callAlerts
+                  ? user.callAlert
+                  : user.highlightAlert,
+            ),
+          ),
+        );
+      }
     } on ApiException catch (error) {
       if (!_disposed && generation == _generation) _recordBackendError(error);
     } finally {
@@ -744,6 +904,31 @@ class SessionController extends ChangeNotifier {
   }
 
   Future<bool> breakUp({required String expectedPartnerId}) async {
+    if (usesBackend) {
+      if (_transaction ||
+          _premium == null ||
+          _session.partner?.id != expectedPartnerId) {
+        return false;
+      }
+      _transaction = true;
+      final generation = _generation;
+      try {
+        _remoteRevision++;
+        await _backendCall(_api!.disconnectCouple());
+        _remoteRevision++;
+        if (_disposed || generation != _generation) return false;
+        _remoteCouple = null;
+        _set(_session.copyWith(partner: null));
+        try {
+          await signOutFromServer();
+        } on ApiException {
+          signOut();
+        }
+        return true;
+      } finally {
+        _transaction = false;
+      }
+    }
     final phone = _session.phone;
     final partner = _session.partner;
     final album = _album;
@@ -877,6 +1062,15 @@ class SessionController extends ChangeNotifier {
     if (_disposed) return;
     if (!force && next == _session) return;
     _session = next;
+    if (usesBackend && next.status == SessionStatus.signedOut) {
+      _remoteUserId = null;
+      _pairingCode = null;
+      _partnerPhone = null;
+      _premium = null;
+      _restoreCredits = 0;
+      _remoteCouple = null;
+    }
+    _syncBackendAlbum();
     _rememberAccount(next);
     notifyListeners();
     _persist(next);
@@ -917,6 +1111,14 @@ class SessionController extends ChangeNotifier {
   );
 
   void _applyRemoteUser(ApiUser user, {SessionStatus? status}) {
+    if (_session.partner?.id != user.partner?.id) {
+      _partnerPhone = null;
+      _remoteCouple = null;
+    }
+    _premium = user.premium;
+    _restoreCredits = user.restoreCredits;
+    backendError = null;
+    _remoteUserId = user.id;
     _pairingCode = user.pairingCode;
     _set(
       _session.copyWith(
@@ -941,6 +1143,14 @@ class SessionController extends ChangeNotifier {
       _generation++;
       _verifiedRemote = null;
       _set(Session.guest);
+    } else if (error.status == 402) {
+      if (error.meta['required'] == 'restore') {
+        _restoreCredits = 0;
+      } else {
+        _premium = const ApiPremium(active: false, source: 'none');
+      }
+      _syncBackendAlbum();
+      notifyListeners();
     } else {
       notifyListeners();
     }

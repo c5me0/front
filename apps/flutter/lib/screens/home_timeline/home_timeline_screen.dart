@@ -12,6 +12,9 @@ import '../../components/album_nav_v6.dart';
 import '../../components/album_section_v6.dart';
 import '../../components/confirm_sheet.dart';
 import '../../components/empty_album_v6.dart';
+import '../../components/backend_notice.dart';
+import '../../components/solid_button.dart';
+import '../../api/api_error_text.dart';
 import '../../components/photo_grid_v6.dart';
 import '../../content/app.g.dart';
 import '../../design_system/design_system.dart';
@@ -411,6 +414,9 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
     if (!mounted) return;
     final next = albumModeAfter(_mode, event);
     if (next == _mode) return;
+    if (next == AlbumMode.liked && AlbumScope.read(context).usesBackend) {
+      unawaited(AlbumScope.read(context).remote.refreshFavorites());
+    }
     _restoreBarScrollPosition();
     final enteringView = next == AlbumMode.liked || next == AlbumMode.deleted;
     setState(() {
@@ -483,13 +489,32 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
   }
 
   bool _openCallCard(String sectionId, int index) {
-    if (_mode != AlbumMode.timeline || !_isTop) return false;
+    if ((_mode != AlbumMode.timeline && _mode != AlbumMode.liked) || !_isTop) {
+      return false;
+    }
+    final album = AlbumScope.read(context);
+    if (album.usesBackend) {
+      final sections = _mode == AlbumMode.liked
+          ? album.likedSections
+          : album.sections;
+      final calls = sections.where((s) => s.id == sectionId).firstOrNull?.calls;
+      if (calls == null || index >= calls.length) return false;
+      CameoNav.push<void>(
+        context,
+        '${CameoRoutes.transcriptPath}?id=${Uri.encodeQueryComponent(calls[index].nodeId)}',
+      );
+      return true;
+    }
     CameoNav.push<void>(context, CameoRoutes.transcript());
     return true;
   }
 
   void _import() {
     if (!_isTop) return;
+    if (SessionScope.read(context).premiumRequired) {
+      unawaited(CameoNav.openPayment(context));
+      return;
+    }
     unawaited(importPhotosFrom(context));
   }
 
@@ -539,10 +564,11 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
     _sheetPortal.show();
   }
 
-  void _confirmDelete() {
-    AlbumScope.read(context).deletePhotos(_selectedInOrder());
+  Future<void> _confirmDelete() async {
+    final ok = await AlbumScope.read(context).removePhotos(_selectedInOrder());
+    if (!mounted) return;
     setState(() {
-      _selected = const {};
+      if (ok) _selected = const {};
       _sheetOpen = false;
     });
   }
@@ -835,7 +861,8 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
   @override
   Widget build(BuildContext context) {
     final album = AlbumScope.of(context);
-    final session = SessionScope.of(context).session;
+    final controller = SessionScope.of(context);
+    final session = controller.session;
     final hasPartner = session.partner != null;
     final liveEmpty = album.isEmptyFor(hasPartner: hasPartner);
     final _AlbumData live = (
@@ -919,8 +946,51 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                   backdrop: toneBackdropOf(_navToneShown),
                   actions: _actions,
                   selectDisabled: showEmpty,
+                  showDeleted: !album.usesBackend,
+                  onRefresh: album.usesBackend
+                      ? () => unawaited(album.remote.refresh(renewUrls: true))
+                      : null,
                 ),
               ),
+              if (controller.hasRestorable ||
+                  (controller.premiumRequired && hasPartner))
+                Positioned(
+                  key: const ValueKey('album.membershipNotice'),
+                  top: CameoLayout.albumNavV6HeaderHeight,
+                  left: 0,
+                  right: 0,
+                  child: BackendNotice(
+                    message: controller.hasRestorable
+                        ? appContent.v6.backend.recoveryAvailable
+                        : appContent.v6.backend.premiumRequired,
+                    onRetry: () => CameoNav.openPayment(
+                      context,
+                      archiveId: controller.hasRestorable
+                          ? controller.remoteCouple!.id
+                          : null,
+                    ),
+                  ),
+                )
+              else if (album.usesBackend &&
+                  (album.remote.error != null ||
+                      album.remote.uploading ||
+                      (album.remote.loading && album.isEmpty)))
+                Positioned(
+                  key: const ValueKey('album.backendNotice'),
+                  top: CameoLayout.albumNavV6HeaderHeight,
+                  left: 0,
+                  right: 0,
+                  child: BackendNotice(
+                    message: album.remote.error != null
+                        ? '${apiErrorCodeText(album.remote.error!)} ${appContent.v6.backend.retry}'
+                        : album.remote.uploading
+                        ? appContent.v6.backend.uploading
+                        : appContent.v6.backend.loading,
+                    onRetry: album.remote.error != null
+                        ? () => unawaited(album.remote.refresh())
+                        : null,
+                  ),
+                ),
             ],
           ),
         ),
@@ -1005,6 +1075,28 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
                         gridKey: _gridKey(sections[i].id),
                       ),
                     ),
+                  if (AlbumScope.read(context).usesBackend &&
+                      (_mode == AlbumMode.liked
+                          ? AlbumScope.read(context).remote.favoritesHaveMore
+                          : AlbumScope.read(context).remote.hasMore))
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: CameoLayout.albumNavV6RowPaddingX,
+                        right: CameoLayout.albumNavV6RowPaddingX,
+                        bottom: CameoLayout.tabBarV6FullContainerHeight,
+                      ),
+                      child: SolidButton(
+                        key: const ValueKey('album.loadMore'),
+                        label: appContent.v6.backend.loadMore,
+                        onPress: () => unawaited(
+                          _mode == AlbumMode.liked
+                              ? AlbumScope.read(
+                                  context,
+                                ).remote.refreshFavorites(more: true)
+                              : AlbumScope.read(context).remote.loadMore(),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -1021,7 +1113,9 @@ class HomeTimelineScreenState extends State<HomeTimelineScreen>
       child: ConfirmSheet(
         visible: _sheetOpen,
         title: fillTemplate(copy.title, {'count': _sheetCount}),
-        body: copy.body,
+        body: AlbumScope.read(context).usesBackend
+            ? appContent.v6.backend.permanentDelete
+            : copy.body,
         confirmLabel: copy.confirm,
         cancelLabel: copy.cancel,
         destructive: true,

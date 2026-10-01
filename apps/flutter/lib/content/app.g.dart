@@ -217,7 +217,7 @@ class AppContentV6Billing {
 }
 
 class AppContentV6Backend {
-  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum});
+  const AppContentV6Backend({required this.partnerName, required this.networkError, required this.rateLimit, required this.expired, required this.codeNotFound, required this.selfCode, required this.alreadyConnected, required this.partnerUnavailable, required this.invalidRequest, required this.genericError, required this.billingUnavailable, required this.breakupUnavailable, required this.emptyAlbum, required this.callRecord, required this.callRinging, required this.callActive, required this.callMissed, required this.callDeclined, required this.callFailed, required this.callEnded, required this.loading, required this.uploading, required this.retry, required this.loadMore, required this.refresh, required this.permanentDelete, required this.callDelete, required this.delete, required this.cancel, required this.notConnected, required this.photoTooLarge, required this.photoUnsupported, required this.uploadFailed, required this.videoUnavailable, required this.cameraUnavailable, required this.callBusy, required this.callInvalidState, required this.callReconnecting, required this.callIncoming, required this.answer, required this.decline, required this.microphoneRequired, required this.recordingUnavailable, required this.transcriptPending, required this.transcriptUnavailable, required this.playbackFailed, required this.sandboxNote, required this.restorePurchases, required this.manageSubscription, required this.billingPreparing, required this.billingProductUnavailable, required this.billingVerificationFailed, required this.billingPending, required this.billingNothingToRestore, required this.billingError, required this.premiumRequired, required this.premiumAction, required this.billingServerPending, required this.billingServerUnavailable, required this.recoveryContextChanged, required this.recoveryCreditRequired, required this.partnerPremium, required this.freeAccess, required this.recoveryAvailable, required this.useRecoveryCredit, required this.recoveryCreditNote, required this.recoveryResume, required this.recoveryAction, required this.recoveryConfirm, required this.recoveryCreditConfirm, required this.recoveryNote, required this.recoverySuccess});
   final String partnerName;
   final String networkError;
   final String rateLimit;
@@ -231,6 +231,65 @@ class AppContentV6Backend {
   final String billingUnavailable;
   final String breakupUnavailable;
   final String emptyAlbum;
+  final String callRecord;
+  final String callRinging;
+  final String callActive;
+  final String callMissed;
+  final String callDeclined;
+  final String callFailed;
+  final String callEnded;
+  final String loading;
+  final String uploading;
+  final String retry;
+  final String loadMore;
+  final String refresh;
+  final String permanentDelete;
+  final String callDelete;
+  final String delete;
+  final String cancel;
+  final String notConnected;
+  final String photoTooLarge;
+  final String photoUnsupported;
+  final String uploadFailed;
+  final String videoUnavailable;
+  final String cameraUnavailable;
+  final String callBusy;
+  final String callInvalidState;
+  final String callReconnecting;
+  final String callIncoming;
+  final String answer;
+  final String decline;
+  final String microphoneRequired;
+  final String recordingUnavailable;
+  final String transcriptPending;
+  final String transcriptUnavailable;
+  final String playbackFailed;
+  final String sandboxNote;
+  final String restorePurchases;
+  final String manageSubscription;
+  final String billingPreparing;
+  final String billingProductUnavailable;
+  final String billingVerificationFailed;
+  final String billingPending;
+  final String billingNothingToRestore;
+  final String billingError;
+  final String premiumRequired;
+  final String premiumAction;
+  final String billingServerPending;
+  final String billingServerUnavailable;
+  final String recoveryContextChanged;
+  final String recoveryCreditRequired;
+  final String partnerPremium;
+  final String freeAccess;
+  final String recoveryAvailable;
+  final String useRecoveryCredit;
+  final String recoveryCreditNote;
+  final String recoveryResume;
+  final String recoveryAction;
+  final String recoveryConfirm;
+  final String recoveryCreditConfirm;
+  final String recoveryNote;
+  final String recoverySuccess;
 }
 
 class AppContentDevLabels {
@@ -708,6 +767,65 @@ const AppContent appContent = AppContent(
       billingUnavailable: '서버 결제와 기록 복구 기능은 준비 중이에요.',
       breakupUnavailable: '기록 복구 기능이 연결되면 헤어지기를 이용할 수 있어요.',
       emptyAlbum: '연결된 계정의 앨범을 준비하고 있어요.',
+      callRecord: '통화 기록',
+      callRinging: '연결 중',
+      callActive: '통화 중',
+      callMissed: '부재중 통화',
+      callDeclined: '거절된 통화',
+      callFailed: '연결되지 않은 통화',
+      callEnded: '종료된 통화',
+      loading: '불러오는 중…',
+      uploading: '사진을 보내는 중…',
+      retry: '다시 시도',
+      loadMore: '이전 기록 더 보기',
+      refresh: '새로고침',
+      permanentDelete: '두 사람의 앨범에서 영구 삭제됩니다. 삭제한 사진은 복구할 수 없어요.',
+      callDelete: '이 통화 기록과 녹음을 영구 삭제할까요?',
+      delete: '삭제',
+      cancel: '취소',
+      notConnected: '상대와 연결한 뒤 이용할 수 있어요.',
+      photoTooLarge: '원본은 25MB 이하의 사진을 선택해 주세요.',
+      photoUnsupported: 'JPEG, PNG, HEIC, WebP 사진을 선택해 주세요.',
+      uploadFailed: '사진을 보내지 못했어요. 다시 시도해 주세요.',
+      videoUnavailable: '동영상 전송은 아직 지원하지 않아요.',
+      cameraUnavailable: '이 기기에서 촬영한 사진을 사용할 수 없어요.',
+      callBusy: '이미 진행 중인 통화가 있어요.',
+      callInvalidState: '이미 종료되었거나 연결되지 않은 통화예요.',
+      callReconnecting: '다시 연결 중…',
+      callIncoming: '전화가 왔어요',
+      answer: '받기',
+      decline: '거절',
+      microphoneRequired: '통화하려면 마이크 권한이 필요해요.',
+      recordingUnavailable: '이 통화에는 녹음이 없어요.',
+      transcriptPending: '통화 내용을 정리하고 있어요.',
+      transcriptUnavailable: '아직 작성된 통화 내용이 없어요.',
+      playbackFailed: '녹음을 재생하지 못했어요. 다시 시도해 주세요.',
+      sandboxNote: '샌드박스 결제입니다. 실제 요금은 청구되지 않아요.',
+      restorePurchases: '구매 복원',
+      manageSubscription: '구독 관리',
+      billingPreparing: '결제를 준비하고 있어요. 잠시 후 다시 시도해 주세요.',
+      billingProductUnavailable: '현재 구매할 수 있는 상품이 없어요. 잠시 후 다시 시도해 주세요.',
+      billingVerificationFailed: '결제 정보를 확인하지 못했어요. 구매 복원을 눌러 다시 확인해 주세요.',
+      billingPending: '결제 확인 중이에요. 다시 결제하지 않고 상태를 확인할 수 있어요.',
+      billingNothingToRestore: '이 계정에서 복원할 월간 구독을 찾지 못했어요.',
+      billingError: '결제를 진행하지 못했어요. 잠시 후 다시 시도해 주세요.',
+      premiumRequired: '두 사람 중 한 명의 월간 구독이 필요해요.',
+      premiumAction: '월간 구독 확인하기',
+      billingServerPending: '구매는 완료됐어요. 서버 확인 후 이용할 수 있어요. 다시 결제하지 않고 확인을 이어갈게요.',
+      billingServerUnavailable: '서버에서 결제 상태를 확인하지 못했어요. 잠시 후 다시 확인해 주세요.',
+      recoveryContextChanged: '연결된 상대가 변경됐어요. 현재 상대의 복구 화면에서 다시 확인해 주세요.',
+      recoveryCreditRequired: '사용할 수 있는 복구 구매를 찾지 못했어요. 결제 상태를 다시 확인해 주세요.',
+      partnerPremium: '상대의 월간 구독으로 함께 이용 중이에요.',
+      freeAccess: '현재 이용 가능한 상태예요.',
+      recoveryAvailable: '이전에 함께한 기록이 있어요. 복구할 기록을 확인해 보세요.',
+      useRecoveryCredit: '기존 구매로 기록 복구',
+      recoveryCreditNote: '사용하지 않은 복구 구매가 있어요. 추가 결제 없이 한 번 사용할 수 있어요.',
+      recoveryResume: '기록 복구 이어서 확인',
+      recoveryAction: '기록 복구하기',
+      recoveryConfirm: '현재 연결된 {partner}님과의 이전 기록을 복구해요. 월간 구독과 별도로 {amount} USD가 한 번 결제돼요.',
+      recoveryCreditConfirm: '현재 연결된 {partner}님과의 이전 기록을 복구해요. 추가 요금은 청구되지 않아요.',
+      recoveryNote: '같은 상대와 다시 연결한 상태에서 월간 구독과 별도의 복구 구매가 필요해요. 이미 삭제한 기록은 복구되지 않아요.',
+      recoverySuccess: '함께했던 사진과 통화 기록을 다시 볼 수 있어요.',
     ),
     billing: AppContentV6Billing(
       section: '멤버십',
@@ -777,12 +895,12 @@ const AppContent appContent = AppContent(
         AppContentV6BreakupStep(
           title: '기록은 따로 보관해요',
           body: '함께한 사진과 통화 기록은 이 계정에 보관되고, 연결 해제 후에는 앨범에서 숨겨져요.',
-          detail: '다시 로그인해 같은 상대에게 연결을 요청하면 {amount} USD를 한 번 결제하고 복구할 수 있어요. 월 구독과 별도예요.',
+          detail: '다시 로그인해 같은 상대와 연결한 뒤, 월간 구독과 {amount} USD의 일회성 복구 구매가 있으면 기록을 복구할 수 있어요.',
         ),
         AppContentV6BreakupStep(
           title: '마지막으로 확인해 주세요',
           body: '확인하면 {partner}님과의 연결을 해제하고 로그아웃해요.',
-          detail: '다시 연결할 때마다 복구 결제가 필요해요. 지금은 실제 청구가 없는 테스트 결제입니다.',
+          detail: '새로 연결된 관계의 이전 기록을 복구할 때 복구 구매 1회가 사용돼요. 이미 구매한 미사용 복구권도 사용할 수 있어요. 지금은 실제 청구가 없는 테스트 결제입니다.',
         ),
       ],
     ),

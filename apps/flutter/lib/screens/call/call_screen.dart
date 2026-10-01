@@ -24,6 +24,9 @@ import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/album_store.dart';
 import '../../state/captured_photo.dart';
+import '../../state/live_call.dart';
+import '../../api/api_error_text.dart';
+import '../../content/app.g.dart';
 import '../../state/device_services.dart';
 import '../../state/session.dart';
 import 'call_entrance.dart';
@@ -62,6 +65,9 @@ CameoIconName _iconOf(String name) => CameoIconName.values.firstWhere(
 );
 
 Size _sizeOf(AlbumPhoto photo) {
+  if (photo.remote case final remote?) {
+    return Size((remote.width ?? 1).toDouble(), (remote.height ?? 1).toDouble());
+  }
   final capture = photo.capture;
   if (capture != null) return Size(capture.width, capture.height);
   final s = LabImages.sizes[photo.image];
@@ -111,7 +117,10 @@ class CallScreen extends StatefulWidget {
     this.state = CallState.base,
     this.demo = false,
     this.sheet,
+    this.callId,
   });
+
+  final String? callId;
 
   final CallState state;
 
@@ -143,6 +152,9 @@ class CallScreen extends StatefulWidget {
 }
 
 class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
+  LiveCallController? _live;
+  String? _receivedPhotoId, _lastCallError;
+  int _lastHighlight = 0;
   final ToastController _toast = ToastController();
   bool _toastPinned = false;
 
@@ -234,7 +246,7 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
         if (!mounted) return;
         final base = _elapsed.value;
         _ticker = Timer.periodic(const Duration(seconds: 1), (t) {
-          if (mounted) _elapsed.value = base + t.tick;
+          if (mounted) _elapsed.value = _live?.elapsed ?? base + t.tick;
         });
       }, debugLabel: 'CallScreen.timer')
       ..ensureVisualUpdate();
@@ -261,6 +273,15 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_live == null &&
+        SessionScope.read(context).usesBackend &&
+        !widget.demo) {
+      _live = LiveCallScope.read(context);
+      _live?.addListener(_onLiveState);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_live?.start(id: widget.callId));
+      });
+    }
     _volume = VolumeService.of(context);
     _brightness = BrightnessService.of(context);
     if (_initial == null) {
@@ -275,6 +296,35 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
       _enter();
     } else {
       _routeAnimation = animation..addStatusListener(_onRouteStatus);
+    }
+  }
+
+  void _onLiveState() {
+    if (!mounted) return;
+    final live = _live!;
+    _elapsed.value = live.elapsed;
+    setState(() => _muted = live.muted);
+    if (live.receivedPhoto case final photo?
+        when photo.id != _receivedPhotoId) {
+      _receivedPhotoId = photo.id;
+      _showCard([
+        CapturedCardItem(
+          key: photo.id,
+          image: NetworkImage(photo.url),
+          width: (photo.width ?? 1).toDouble(),
+          height: (photo.height ?? 1).toDouble(),
+        ),
+      ]);
+    }
+    if (live.highlightEvents != _lastHighlight) {
+      _lastHighlight = live.highlightEvents;
+      _showHighlight();
+    }
+    if (live.error != null &&
+        live.error != _lastCallError &&
+        live.error != 'call_reconnecting') {
+      _lastCallError = live.error;
+      _toast.show(apiErrorCodeText(live.error!), CameoIconName.x);
     }
   }
 
@@ -404,6 +454,16 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
   }
 
   void _onHighlight({bool pinned = false}) {
+    if (_live != null) {
+      _live!.addHighlight().then((ok) {
+        if (mounted && ok) _showHighlight();
+      });
+      return;
+    }
+    _showHighlight(pinned: pinned);
+  }
+
+  void _showHighlight({bool pinned = false}) {
     _closeSheet();
     _hideSlider();
     setState(() => _toastPinned = pinned);
@@ -482,6 +542,10 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
     final photo = sheetPhotosOf(album).where((p) => p.id == id).firstOrNull;
     if (photo == null) return;
     if (_variant == PhotoSheetVariant.instant) {
+      if (_live != null) {
+        unawaited(_shareRemote([photo]));
+        return;
+      }
       _markShared(album, [photo.id]);
       _closeSheet();
       _showCard([cardItemOfPhoto(photo)]);
@@ -501,16 +565,48 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
         if (_picked.contains(p.id)) p,
     ];
     if (chosen.isEmpty) return;
+    if (_live != null) {
+      unawaited(_shareRemote(chosen));
+      return;
+    }
     _markShared(album, [for (final p in chosen) p.id]);
     _closeSheet();
     _showCard([for (final p in chosen) cardItemOfPhoto(p)]);
   }
 
+  Future<void> _shareRemote(List<AlbumPhoto> photos) async {
+    final album = AlbumScope.read(context);
+    final sent = <AlbumPhoto>[];
+    for (final photo in photos) {
+      if (await _live!.sharePhoto(photo.id) != null) sent.add(photo);
+      if (!mounted) return;
+    }
+    if (sent.isEmpty) return;
+    _markShared(album, sent.map((p) => p.id).toList());
+    _closeSheet();
+    _showCard(sent.map(cardItemOfPhoto).toList());
+  }
+
   bool _onLive() {
     if (!_isTop) return false;
     _closeSheet();
-    CameoNav.openCameraFromCall(context).then((photo) {
-      if (photo != null && mounted) _showCard([cardItemOfCapture(photo)]);
+    final album = AlbumScope.read(context);
+    CameoNav.openCameraFromCall(context).then((photo) async {
+      if (photo == null || !mounted) return;
+      if (_live != null) {
+        final saved = await album.savePhotos([photo]);
+        if (!mounted) return;
+        if (saved.isEmpty) {
+          _toast.show(
+            apiErrorCodeText(album.remote.error ?? 'upload_failed'),
+            CameoIconName.x,
+          );
+        } else {
+          await _shareRemote(saved);
+        }
+      } else {
+        _showCard([cardItemOfCapture(photo)]);
+      }
     });
     return true;
   }
@@ -565,6 +661,12 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
 
   bool _onEnd() {
     if (!_isTop) return false;
+    if (_live?.hasCall == true) {
+      _live!.end().then((_) {
+        if (mounted && _isTop) CameoNav.pop(context);
+      });
+      return true;
+    }
     return CameoNav.pop(context);
   }
 
@@ -582,7 +684,11 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
           _showSlider();
         }
       case CallBarSlot.microphone:
-        setState(() => _muted = !_muted);
+        if (_live != null) {
+          _live!.setMuted(!_live!.muted);
+        } else {
+          setState(() => _muted = !_muted);
+        }
       case CallBarSlot.camera:
         if (_sheetOpen) {
           _closeSheet();
@@ -709,6 +815,7 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _live?.removeListener(_onLiveState);
     for (final unregister in _unregisterFlow) {
       unregister();
     }
@@ -752,9 +859,23 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
     return ValueListenableBuilder<int>(
       valueListenable: _elapsed,
       builder: (context, elapsed, _) {
-        final time = formatCallTime(_timerBase + elapsed);
+        final live = _live;
+        final name = live == null
+            ? labInCallV5.name
+            : SessionScope.read(context).session.partner?.name ??
+                  appContent.v6.backend.partnerName;
+        final copy = appContent.v6.backend;
+        final time = live == null
+            ? formatCallTime(_timerBase + elapsed)
+            : live.error == 'call_reconnecting'
+            ? copy.callReconnecting
+            : live.active
+            ? formatCallTime(live.elapsed)
+            : live.hasCall
+            ? copy.callRinging
+            : copy.callEnded;
         return Semantics(
-          label: '${labInCallV5.name}, 통화 시간 $time',
+          label: '$name, 통화 시간 $time',
           excludeSemantics: true,
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -765,7 +886,7 @@ class CallScreenState extends State<CallScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ExactLineBox(
-                  labInCallV5.name,
+                  name,
                   CameoTextStyles.display,
                   c.staticWhiteBase,
                   key: CallScreen.nameKey,

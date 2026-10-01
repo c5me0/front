@@ -17,6 +17,9 @@ import '../../design_system/design_system.dart';
 import '../../navigation/navigation.dart';
 import '../../state/album_store.dart';
 import '../../state/captured_photo.dart';
+import '../../api/api_error_text.dart';
+import '../../content/app.g.dart';
+import '../../state/session.dart';
 import '../instant_viewer/instant_subject.dart';
 
 enum CameraV6Mode { tab, call }
@@ -90,6 +93,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   CameraFacing _facing = CameraFacing.back;
   int _shotKey = 0;
   bool _busy = false;
+  bool _uploading = false;
   bool _closed = false;
 
   bool _toastShown = false;
@@ -161,7 +165,11 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
 
     if (_thumb == null) {
       final latest = AlbumScope.maybeRead(context)?.latestCapture;
-      _thumb = latest != null ? _captureThumb(latest) : _partnerThumb(0);
+      _thumb = latest != null
+          ? _captureThumb(latest)
+          : SessionScope.read(context).usesBackend
+          ? null
+          : _partnerThumb(0);
     }
     final scope = context.dependOnInheritedWidgetOfExactType<CameoTabScope>();
     _focused = scope?.active ?? true;
@@ -200,6 +208,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   }
 
   void _armPartnerTimer() {
+    if (SessionScope.read(context).usesBackend) return;
     if (!partnerToastArmed(
       tab: _tab,
       focused: _focused,
@@ -287,10 +296,31 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
 
   bool _onSend() {
     final review = _review;
-    if (review == null || reviewTransition(_stage, ReviewEvent.send) == null) {
+    if (review == null ||
+        _uploading ||
+        reviewTransition(_stage, ReviewEvent.send) == null) {
       return false;
     }
     final album = AlbumScope.maybeRead(context);
+    if (album?.usesBackend == true) {
+      _uploading = true;
+      _toast.show(appContent.v6.backend.uploading, CameoIconName.arrowUp);
+      album!.savePhotos([review.photo]).then((photos) {
+        if (!mounted || _review?.key != review.key) return;
+        _uploading = false;
+        if (photos.isEmpty) {
+          _toast.show(
+            apiErrorCodeText(album.remote.error ?? 'upload_failed'),
+            CameoIconName.x,
+          );
+          return;
+        }
+        _toast.hide();
+        _pendingThumb = _captureThumb(photos.first);
+        _setPhase(ReviewPhase.send);
+      });
+      return true;
+    }
     if (album != null) {
       _pendingThumb = _captureThumb(album.addCapture(review.photo));
     }
@@ -299,6 +329,7 @@ class CameraV6ScreenState extends State<CameraV6Screen> {
   }
 
   bool _onDiscard() {
+    if (_uploading) return false;
     if (reviewTransition(_stage, ReviewEvent.discard) == null) return false;
     _setPhase(ReviewPhase.discard);
     return true;

@@ -28,6 +28,8 @@ class ApiUser {
     required this.highlightAlert,
     this.displayName,
     this.partner,
+    this.premium,
+    this.restoreCredits = 0,
   });
   final String id;
   final String phone;
@@ -36,6 +38,8 @@ class ApiUser {
   final bool callAlert;
   final bool highlightAlert;
   final ApiPartner? partner;
+  final ApiPremium? premium;
+  final int restoreCredits;
   factory ApiUser.fromJson(JsonObject json) => ApiUser(
     id: json['id'] as String,
     phone: json['phone'] as String,
@@ -46,6 +50,10 @@ class ApiUser {
     partner: json['partner'] == null
         ? null
         : ApiPartner.fromJson(jsonObject(json['partner'])),
+    premium: json['premium'] == null
+        ? null
+        : ApiPremium.fromJson(jsonObject(json['premium'])),
+    restoreCredits: json['restore_credits'] as int? ?? 0,
   );
 }
 
@@ -54,15 +62,55 @@ class ApiCouple {
     required this.id,
     required this.partner,
     required this.connectedAt,
+    this.restorable = const ApiRestorable(0, 0),
+    this.restoredAt,
   });
   final String id;
   final ApiPartner partner;
   final DateTime connectedAt;
+  final ApiRestorable restorable;
+  final DateTime? restoredAt;
+  bool get canRestore => restoredAt == null && restorable.hasRecords;
   factory ApiCouple.fromJson(JsonObject json) => ApiCouple(
     id: json['id'] as String,
     partner: ApiPartner.fromJson(jsonObject(json['partner'])),
     connectedAt: DateTime.parse(json['connected_at'] as String),
+    restorable: json['restorable'] == null
+        ? const ApiRestorable(0, 0)
+        : ApiRestorable.fromJson(jsonObject(json['restorable'])),
+    restoredAt: json['restored_at'] == null
+        ? null
+        : DateTime.parse(json['restored_at'] as String),
   );
+}
+
+class ApiPremium {
+  const ApiPremium({required this.active, required this.source, this.until});
+  final bool active;
+  final String source;
+  final DateTime? until;
+  bool get paid => active && source != 'none';
+  factory ApiPremium.fromJson(JsonObject json) {
+    final source = json['source'] as String;
+    if (!{'self', 'partner', 'none'}.contains(source)) {
+      throw const FormatException('Invalid premium source');
+    }
+    return ApiPremium(
+      active: json['active'] as bool,
+      source: source,
+      until: json['until'] == null
+          ? null
+          : DateTime.parse(json['until'] as String),
+    );
+  }
+}
+
+class ApiRestorable {
+  const ApiRestorable(this.calls, this.photos);
+  final int calls, photos;
+  bool get hasRecords => calls > 0 || photos > 0;
+  factory ApiRestorable.fromJson(JsonObject json) =>
+      ApiRestorable(json['calls'] as int, json['photos'] as int);
 }
 
 class ApiCredential {

@@ -50,10 +50,12 @@ dependencies:
   screen_brightness_ios: 2.1.2
   share_plus: ^12.0.2
   shared_preferences: ^2.5.5
+  flutter_webrtc: 1.6.2+hotfix.3
+  just_audio: 0.10.6
+  purchases_flutter: ^10.13.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
-  integration_test:
-    sdk: flutter
   flutter_test:
     sdk: flutter
 

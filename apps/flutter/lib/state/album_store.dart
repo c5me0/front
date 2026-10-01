@@ -4,10 +4,14 @@
 
 //
 
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../content/lab.g.dart';
 import 'captured_photo.dart';
+import '../api/media_models.dart';
+import 'remote_album.dart';
+import '../content/app.g.dart';
 
 @immutable
 class AlbumPhoto {
@@ -18,6 +22,7 @@ class AlbumPhoto {
     this.deleted = false,
     this.shared = false,
     this.capture,
+    this.remote,
   });
 
   final String id;
@@ -31,6 +36,7 @@ class AlbumPhoto {
   final bool shared;
 
   final CapturedPhoto? capture;
+  final ApiPhoto? remote;
 
   Map<String, Object?> toJson() => {
     'id': id,
@@ -52,7 +58,11 @@ class AlbumPhoto {
         : CapturedPhoto.fromJson(json['capture'] as Map<String, dynamic>),
   );
 
-  ImageProvider get provider => capture?.image ?? AssetImage(image);
+  ImageProvider get provider => remote != null
+      ? NetworkImage(remote!.url)
+      : capture?.image ?? AssetImage(image);
+  ImageProvider get thumbnailProvider =>
+      remote != null ? NetworkImage(remote!.thumbnailUrl) : provider;
 
   AlbumPhoto copyWith({bool? liked, bool? deleted, bool? shared}) => AlbumPhoto(
     id: id,
@@ -61,6 +71,7 @@ class AlbumPhoto {
     deleted: deleted ?? this.deleted,
     shared: shared ?? this.shared,
     capture: capture,
+    remote: remote,
   );
 
   @override
@@ -108,9 +119,8 @@ class AlbumSection {
   ImageProvider? get heroImage {
     final cover = content.cover;
     if (cover != null) return AssetImage(cover);
-    if (isToday) {
-      return _hero ?? (photos.isEmpty ? null : photos.first.provider);
-    }
+    if (_hero != null) return _hero;
+    if (isToday) return photos.isEmpty ? null : photos.first.provider;
     return null;
   }
 
@@ -225,6 +235,136 @@ class AlbumStore extends ChangeNotifier {
     : _content = content ?? labAlbumV5.sections,
       _empty = empty {
     _load();
+    remote.addListener(notifyListeners);
+  }
+
+  final RemoteAlbum remote = RemoteAlbum();
+  bool get usesBackend => remote.enabled;
+  AlbumPhoto _remotePhoto(ApiPhoto p) =>
+      AlbumPhoto(id: p.id, image: p.url, liked: p.favorite, remote: p);
+
+  List<AlbumSection> _serverSections({bool favorites = false}) {
+    final days = <String, DateTime>{};
+    String day(DateTime at) {
+      final d = at.toLocal();
+      final key =
+          'remote-${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      days[key] = DateTime(d.year, d.month, d.day);
+      return key;
+    }
+
+    final photos = <String, List<ApiPhoto>>{},
+        calls = <String, List<ApiCall>>{};
+    for (final p
+        in (favorites ? remote.favoritePhotos : remote.photos).values) {
+      if (!favorites || p.favorite) {
+        (photos[day(p.takenAt ?? p.createdAt)] ??= []).add(p);
+      }
+    }
+    for (final c in (favorites ? remote.favoriteCalls : remote.calls).values) {
+      if (!favorites || c.favorite) (calls[day(c.createdAt)] ??= []).add(c);
+    }
+    final keys = days.keys.toList()
+      ..sort((a, b) => days[b]!.compareTo(days[a]!));
+    return [
+      for (final key in keys)
+        _serverSection(key, days[key]!, photos[key] ?? [], calls[key] ?? []),
+    ];
+  }
+
+  AlbumSection _serverSection(
+    String key,
+    DateTime date,
+    List<ApiPhoto> photos,
+    List<ApiCall> calls,
+  ) {
+    photos.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    calls.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final copy = appContent.v6.backend;
+    final cards = [
+      for (final call in calls)
+        CallCardV5Content(
+          nodeId: call.id,
+          variant: call.summary == null ? 'base' : 'summary',
+          direction: call.status == 'missed'
+              ? CallDirection.missed
+              : call.callerId == remote.ownerId
+              ? CallDirection.outgoing
+              : CallDirection.incoming,
+          icon: call.callerId == remote.ownerId
+              ? 'arrow-up-right'
+              : 'arrow-down-left',
+          title: call.title ?? copy.callRecord,
+          subtitle: [
+            LabTextSpan(
+              '${_callLabel(call.status)} · ${_duration(call.duration)}',
+              LabTextWeight.regular,
+            ),
+          ],
+        ),
+    ];
+    return AlbumSection(
+      content: AlbumV5SectionContent(
+        id: key,
+        figmaName: '',
+        nodeId: '',
+        kind: photos.isEmpty
+            ? AlbumSectionKind.callsOnly
+            : calls.isEmpty
+            ? AlbumSectionKind.photosOnly
+            : AlbumSectionKind.photosCalls,
+        tint: photos.isEmpty
+            ? 'background/canvas/neutral/base'
+            : 'section/tint',
+        heroGradient: null,
+        cover: null,
+        title: formatAlbumDate(date),
+        subtitle: '',
+        stats: AlbumStatsContent(
+          photos: '${photos.length}',
+          calls: '${calls.length}',
+        ),
+        callCards: cards,
+        grid: null,
+        featured: const [],
+      ),
+      photos: photos.map(_remotePhoto).toList(),
+      hero: photos.isEmpty ? null : NetworkImage(photos.first.url),
+    );
+  }
+
+  String _duration(double seconds) =>
+      '${seconds ~/ 60}:${(seconds.toInt() % 60).toString().padLeft(2, '0')}';
+  String _callLabel(String status) {
+    final copy = appContent.v6.backend;
+    return switch (status) {
+      'ringing' => copy.callRinging,
+      'active' => copy.callActive,
+      'missed' => copy.callMissed,
+      'declined' => copy.callDeclined,
+      'failed' => copy.callFailed,
+      _ => copy.callEnded,
+    };
+  }
+
+  Future<List<AlbumPhoto>> savePhotos(List<CapturedPhoto> captures) async {
+    if (!usesBackend) return addPhotos(captures);
+    final added = await remote.upload(captures);
+    final result = added.map(_remotePhoto).toList();
+    if (result.isNotEmpty) _latestCapture = result.last;
+    return result;
+  }
+
+  Future<bool> removePhotos(Iterable<String> ids) async {
+    if (!usesBackend) {
+      deletePhotos(ids);
+      return true;
+    }
+    var ok = true;
+    for (final id in ids.toList()) {
+      if (!await remote.deletePhoto(id)) ok = false;
+    }
+    return ok;
   }
 
   final List<AlbumV5SectionContent> _content;
@@ -341,41 +481,55 @@ class AlbumStore extends ChangeNotifier {
     hero: content.id == todaySectionId ? _todayHero?.provider : null,
   );
 
-  List<AlbumSection> get sections => [
-    for (final r in _raw)
-      if (_sectionOf(r.content, [
-            for (final p in r.all)
-              if (!p.deleted) p,
-          ])
-          case final section when !section.isEmpty)
-        section,
-  ];
+  List<AlbumSection> get sections => usesBackend
+      ? _serverSections()
+      : [
+          for (final r in _raw)
+            if (_sectionOf(r.content, [
+                  for (final p in r.all)
+                    if (!p.deleted) p,
+                ])
+                case final section when !section.isEmpty)
+              section,
+        ];
 
-  List<AlbumSection> get likedSections => [
-    for (final r in _raw)
-      if ([
-            for (final p in r.all)
-              if (p.liked && !p.deleted) p,
-          ]
-          case final liked when liked.isNotEmpty)
-        _sectionOf(r.content, liked, includeCalls: false),
-  ];
+  List<AlbumSection> get likedSections => usesBackend
+      ? _serverSections(favorites: true)
+      : [
+          for (final r in _raw)
+            if ([
+                  for (final p in r.all)
+                    if (p.liked && !p.deleted) p,
+                ]
+                case final liked when liked.isNotEmpty)
+              _sectionOf(r.content, liked, includeCalls: false),
+        ];
 
-  List<AlbumSection> get deletedSections => [
-    for (final r in _raw)
-      if ([
-            for (final p in r.all)
-              if (p.deleted) p,
-          ]
-          case final gone when gone.isNotEmpty)
-        _sectionOf(r.content, gone, includeCalls: false),
-  ];
+  List<AlbumSection> get deletedSections => usesBackend
+      ? const []
+      : [
+          for (final r in _raw)
+            if ([
+                  for (final p in r.all)
+                    if (p.deleted) p,
+                ]
+                case final gone when gone.isNotEmpty)
+              _sectionOf(r.content, gone, includeCalls: false),
+        ];
 
   bool get isEmpty => sections.isEmpty;
 
   bool isEmptyFor({required bool hasPartner}) => !hasPartner || isEmpty;
 
-  AlbumPhoto? get latestCapture => _latestCapture;
+  AlbumPhoto? get latestCapture {
+    if (!usesBackend) return _latestCapture;
+    final own =
+        remote.photos.values
+            .where((p) => p.uploaderId == remote.ownerId)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return own.isEmpty ? null : _remotePhoto(own.first);
+  }
 
   AlbumSection? sectionOf(String sectionId) {
     for (final s in sections) {
@@ -393,6 +547,10 @@ class AlbumStore extends ChangeNotifier {
   AlbumPhoto? photoById(String id) => locate(id)?.photo;
 
   AlbumPhoto? anyPhotoById(String id) {
+    if (usesBackend) {
+      final photo = remote.photos[id] ?? remote.favoritePhotos[id];
+      return photo == null ? null : _remotePhoto(photo);
+    }
     for (final list in _photos.values) {
       for (final p in list) {
         if (p.id == id) return p;
@@ -449,20 +607,34 @@ class AlbumStore extends ChangeNotifier {
     final photo = photoById(photoId);
     if (photo == null) return false;
     final next = !photo.liked;
+    if (usesBackend) {
+      unawaited(remote.favoritePhoto(photoId, next));
+      return next;
+    }
     _update({photoId}, (p) => p.copyWith(liked: next));
     return next;
   }
 
-  void setLiked(String photoId, bool liked) =>
-      _update({photoId}, (p) => p.copyWith(liked: liked));
+  void setLiked(String photoId, bool liked) => setLikes([photoId], liked);
 
-  void setLikes(Iterable<String> photoIds, bool liked) =>
+  void setLikes(Iterable<String> photoIds, bool liked) {
+    if (usesBackend) {
+      for (final id in photoIds.toSet()) {
+        unawaited(remote.favoritePhoto(id, liked));
+      }
+    } else {
       _update(photoIds.toSet(), (p) => p.copyWith(liked: liked));
+    }
+  }
 
   void markShared(Iterable<String> photoIds) =>
       _update(photoIds.toSet(), (p) => p.copyWith(shared: true));
 
   int deletePhotos(Iterable<String> photoIds) {
+    if (usesBackend) {
+      unawaited(removePhotos(photoIds));
+      return 0;
+    }
     final ids = photoIds.toSet();
     var count = 0;
     for (final list in _photos.values) {
@@ -475,6 +647,7 @@ class AlbumStore extends ChangeNotifier {
   }
 
   int restorePhotos(Iterable<String> photoIds) {
+    if (usesBackend) return 0;
     final ids = photoIds.toSet();
     var count = 0;
     for (final list in _photos.values) {
@@ -502,6 +675,7 @@ class AlbumStore extends ChangeNotifier {
 
   /// RN `album.addCapture(photo, now?) → photoId`.
   AlbumPhoto addCapture(CapturedPhoto capture, {DateTime? now}) {
+    if (usesBackend) throw StateError('Use savePhotos for server uploads');
     final photo = _insertToday(capture, now ?? DateTime.now());
     notifyListeners();
     return photo;
@@ -509,6 +683,7 @@ class AlbumStore extends ChangeNotifier {
 
   /// RN `album.addPhotos(photos, now?) → photoIds`.
   List<AlbumPhoto> addPhotos(List<CapturedPhoto> photos, {DateTime? now}) {
+    if (usesBackend) throw StateError('Use savePhotos for server uploads');
     if (photos.isEmpty) return const [];
     final at = now ?? DateTime.now();
     final added = <AlbumPhoto>[];
@@ -531,6 +706,13 @@ class AlbumStore extends ChangeNotifier {
     _captureCount = 0;
     _latestCapture = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    remote.removeListener(notifyListeners);
+    remote.dispose();
+    super.dispose();
   }
 }
 

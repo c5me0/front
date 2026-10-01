@@ -32,8 +32,16 @@ __pycache__/
 .vscode/
 .flutter-sdk
 
-# Only source, required assets, tests, and build inputs are published.
-# Personal work records and generated previews stay local.
+# Test code, harnesses, verification tools, and their output stay local.
+/apps/flutter/test/
+/apps/flutter/integration_test/
+/apps/flutter/test_driver/
+/apps/flutter/ios/RunnerTests/
+/apps/flutter/tool/test.sh
+/design-system/tests/
+/design-system/scripts/verify/
+
+# Only application source, required assets, and build inputs are published.
 
 # Local credentials and machine-specific settings
 .env

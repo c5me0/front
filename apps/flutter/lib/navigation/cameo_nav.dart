@@ -4,7 +4,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../state/album_store.dart';
-import '../state/session.dart' show PhotoSheetVariant;
+import '../state/session.dart' show PhotoSheetVariant, SessionScope;
 import '../state/captured_photo.dart';
 import 'app_tabs.dart';
 import 'cameo_location.dart';
@@ -194,6 +194,11 @@ abstract final class CameoNav {
     PhotoSheetVariant? sheet,
   }) {
     if (!isTop(context)) return Future<void>.value();
+    final session = SessionScope.maybeRead(context);
+    if (session?.usesBackend == true && session!.session.partner == null) {
+      return openConnect(context);
+    }
+    if (session?.premiumRequired == true) return openPayment(context);
     return _root(context).pushNamed<void>(CameoRoutes.call(sheet: sheet));
   }
 

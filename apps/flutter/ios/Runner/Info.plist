@@ -29,6 +29,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>voip</string>
+		<string>remote-notification</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>통화 중 사진을 찍어 상대에게 보여 주려면 카메라 접근 권한이 필요합니다.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

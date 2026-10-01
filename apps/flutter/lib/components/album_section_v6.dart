@@ -349,7 +349,7 @@ class AlbumSectionV6State extends State<AlbumSectionV6>
             for (var i = 0; i < s.photos.length; i++)
               PhotoGridV6Item(
                 id: s.photos[i].id,
-                image: s.photos[i].provider,
+                image: s.photos[i].thumbnailProvider,
                 tile: tiles[i],
                 label: '사진 ${i + 1}${s.photos[i].liked ? ', 좋아요' : ''}',
               ),

@@ -1,5 +1,5 @@
-// Pairing-code entry for onboarding and settings. A former partner's archive requires
-// recovery checkout before restoring the connection.
+// Pairing-code entry for onboarding and settings. After reconnection the backend
+// offers any archived records separately from the new shared album.
 
 import 'dart:async';
 
@@ -136,6 +136,14 @@ class _PartnerScreenState extends State<PartnerScreen> {
 
   Future<void> _onDone() async {
     if (!mounted) return;
+    final controller = SessionScope.read(context);
+    if (controller.usesBackend && controller.hasRestorable) {
+      await CameoNav.openPayment(
+        context,
+        archiveId: controller.remoteCouple!.id,
+      );
+      if (!mounted) return;
+    }
     if (!_onboarding) {
       CameoNav.pop(context);
       return;

@@ -298,12 +298,12 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
     });
   }
 
-  void _confirmDelete() {
+  Future<void> _confirmDelete() async {
     final photo = _knownPhoto;
     setState(() => _sheetOpen = false);
     if (photo == null) return;
-    AlbumScope.read(context).deletePhotos([photo.id]);
-    CameoNav.pop(context);
+    final ok = await AlbumScope.read(context).removePhotos([photo.id]);
+    if (mounted && ok) CameoNav.pop(context);
   }
 
   void _close() => CameoNav.pop(context);
@@ -731,7 +731,7 @@ class PhotoViewerScreenState extends State<PhotoViewerScreen>
               child: ConfirmSheet(
                 visible: _sheetOpen,
                 title: fillTemplate(copy.deleteSheet.title, {'count': 1}),
-                body: copy.deleteSheet.body,
+                body: AlbumScope.read(context).usesBackend ? appContent.v6.backend.permanentDelete : copy.deleteSheet.body,
                 confirmLabel: copy.deleteSheet.confirm,
                 cancelLabel: copy.deleteSheet.cancel,
                 destructive: true,

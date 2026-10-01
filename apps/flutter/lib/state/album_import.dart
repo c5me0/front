@@ -16,7 +16,7 @@ Future<List<AlbumPhoto>> importPhotos(
   _busy = true;
   try {
     final photos = await picker.pickPhotos();
-    return album.addPhotos(photos);
+    return await album.savePhotos(photos);
   } finally {
     _busy = false;
   }

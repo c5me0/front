@@ -44,6 +44,7 @@ class CameoAppRoot extends StatefulWidget {
 class CameoAppRootState extends State<CameoAppRoot>
     implements FlowDemoHost, CameoLocationHost {
   late SessionStatus _status;
+  String? _partnerId;
 
   bool _applying = false;
 
@@ -53,6 +54,7 @@ class CameoAppRootState extends State<CameoAppRoot>
   void initState() {
     super.initState();
     _status = widget.session.session.status;
+    _partnerId = widget.session.session.partner?.id;
     widget.session.addListener(_onSession);
     if (widget.startFlowDemo) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -80,7 +82,15 @@ class CameoAppRootState extends State<CameoAppRoot>
 
   void _onSession() {
     final status = widget.session.session.status;
-    if (status == _status) return;
+    final partnerId = widget.session.session.partner?.id;
+    final lostPartner = _partnerId != null && _partnerId != partnerId;
+    _partnerId = partnerId;
+    if (status == _status &&
+        !(status == SessionStatus.member &&
+            lostPartner &&
+            widget.session.usesBackend)) {
+      return;
+    }
     final wasMember = _status == SessionStatus.member;
     _status = status;
     if (_applying) return;

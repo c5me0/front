@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import '../api/cameo_api.dart' show mediaUri;
 
 import 'device_services.dart';
 
@@ -62,6 +64,27 @@ class SystemShareService implements ShareService {
       final paths = [
         for (final i in images) isBundleAsset(i) ? written[next++] : i,
       ];
+      for (var i = 0; i < paths.length; i++) {
+        if (!paths[i].startsWith('https://') && !paths[i].startsWith('http://')) continue;
+        final client = http.Client();
+        try {
+          final request = http.Request('GET', mediaUri(paths[i]))..followRedirects = false;
+          final response = await client.send(request).timeout(const Duration(seconds: 30));
+          if (response.statusCode != 200) return ShareOutcome.unavailable;
+          final bytes = <int>[];
+          await for (final chunk in response.stream.timeout(const Duration(seconds: 30))) {
+            bytes.addAll(chunk);
+            if (bytes.length > 25 << 20) return ShareOutcome.unavailable;
+          }
+          final extension = switch (response.headers['content-type']?.split(';').first) {
+            'image/png' => 'png', 'image/webp' => 'webp', 'image/heic' => 'heic', _ => 'jpg',
+          };
+          final directory = await Directory.systemTemp.createTemp('cameo-share-');
+          final file = File('${directory.path}/photo.$extension');
+          await file.writeAsBytes(bytes);
+          paths[i] = file.path;
+        } finally { client.close(); }
+      }
       final result = await SharePlus.instance.share(
         ShareParams(
           files: [for (final p in paths) XFile(p)],
@@ -74,7 +97,7 @@ class SystemShareService implements ShareService {
         ShareResultStatus.unavailable => ShareOutcome.unavailable,
       };
     } catch (error) {
-      debugPrint('[cameo] share: 실패 ($error)');
+      debugPrint('[cameo] sharing unavailable');
       return ShareOutcome.unavailable;
     }
   }

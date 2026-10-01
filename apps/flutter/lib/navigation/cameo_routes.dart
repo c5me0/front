@@ -20,6 +20,7 @@ import '../screens/lab/glass_v6_harness.dart';
 import '../screens/lab/lab_screen.dart';
 import '../screens/partner/partner_screen.dart';
 import '../screens/payment/payment_screen.dart';
+import '../screens/payment/revenuecat_payment_screen.dart';
 import '../screens/permissions/permissions_screen.dart';
 import '../screens/phone/phone_screen.dart';
 import '../screens/photo_viewer/photo_viewer_screen.dart';
@@ -374,8 +375,10 @@ abstract final class CameoRoutes {
       presentation: CameoPresentation.push,
       statusBar: _dark,
       guard: SessionStatus.member,
-      builder: (_, location) =>
-          PaymentScreen(archiveId: location.param('recovery')),
+      builder: (context, location) =>
+          SessionScope.maybeRead(context)?.usesBackend == true
+          ? RevenueCatPaymentScreen(archiveId: location.param('recovery'))
+          : PaymentScreen(archiveId: location.param('recovery')),
     ),
     CameoRouteSpec(
       path: breakup,
@@ -444,13 +447,17 @@ abstract final class CameoRoutes {
       path: transcriptPath,
       presentation: CameoPresentation.push,
       statusBar: transcriptStatusBarFor,
-      builder: (_, l) => transcriptScreenFor(l),
+      builder: (context, l) => transcriptScreenFor(
+        l,
+        backend: SessionScope.maybeRead(context)?.usesBackend ?? false,
+      ),
     ),
     CameoRouteSpec(
       path: callPath,
       presentation: CameoPresentation.modal,
       statusBar: _light,
       builder: (_, l) => CallScreen(
+        callId: l.param('id'),
         state: callStateOf(l),
         demo: demoOf(l),
         sheet: photoSheetOf(l),

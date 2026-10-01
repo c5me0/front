@@ -1,4 +1,4 @@
-/// An empty endpoint keeps the standalone demo available. Configured endpoints
+/// Explicit demo builds remain available. Configured endpoints
 /// always use the backend; network failures never fall back to demo data.
 class ApiConfig {
   const ApiConfig._(this.baseUri);
@@ -22,7 +22,11 @@ class ApiConfig {
   }
 
   static ApiConfig? fromEnvironment() {
-    const value = String.fromEnvironment('CAMEO_API_BASE_URL');
+    if (const bool.fromEnvironment('CAMEO_DEMO_MODE')) return null;
+    const value = String.fromEnvironment(
+      'CAMEO_API_BASE_URL',
+      defaultValue: 'https://api.cameo.deltalab.dev',
+    );
     return value.isEmpty ? null : ApiConfig(value);
   }
 }

@@ -8,6 +8,7 @@ import '../../navigation/cameo_routes.dart';
 import '../../navigation/route_params.dart';
 import '../../navigation/status_bar.dart';
 import 'transcript_screen.dart';
+import 'live_transcript_screen.dart';
 
 enum TranscriptVersion {
   v6,
@@ -33,7 +34,10 @@ CameoStatusBarStyle transcriptStatusBarFor(CameoLocation location) =>
       TranscriptVersion.v3 => CameoStatusBarStyle.lightContent,
     };
 
-Widget transcriptScreenFor(CameoLocation location) {
+Widget transcriptScreenFor(CameoLocation location, {bool backend = false}) {
+  if (backend && !CameoRoutes.demoOf(location) && TranscriptVersion.of(location) != TranscriptVersion.v3) {
+    return LiveTranscriptScreen(callId: location.param('id'));
+  }
   final theme = CameoRoutes.transcriptThemeOf(location);
   final demo = CameoRoutes.demoOf(location);
   return switch (TranscriptVersion.of(location)) {

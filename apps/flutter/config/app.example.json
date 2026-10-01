@@ -1,0 +1,9 @@
+{
+  "CAMEO_API_BASE_URL": "https://api.cameo.deltalab.dev",
+  "CAMEO_RC_SDK_KEY": "",
+  "CAMEO_RC_OFFERING_ID": "",
+  "CAMEO_RC_MONTHLY_PRODUCT_ID": "monthly_pur",
+  "CAMEO_RC_RECOVERY_PRODUCT_ID": "cameo_recovery",
+  "CAMEO_RC_ENTITLEMENT_ID": "cameo_pro",
+  "CAMEO_RC_SANDBOX_ONLY": "true"
+}

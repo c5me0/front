@@ -1,6 +1,7 @@
 // Application composition root. Bind session, album, device services, theme, and
 // navigation; defer the initial route until stored session state is loaded.
 
+import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +14,11 @@ import 'state/session.dart';
 import 'api/api_config.dart';
 import 'api/cameo_api.dart';
 import 'api/credential_store.dart';
+import 'state/live_call.dart';
+import 'state/system_calls.dart';
+import 'state/revenuecat_billing.dart';
+import 'components/confirm_sheet.dart';
+import 'content/app.g.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +53,16 @@ class CameoApp extends StatefulWidget {
   State<CameoApp> createState() => _CameoAppState();
 }
 
-class _CameoAppState extends State<CameoApp> {
+class _CameoAppState extends State<CameoApp> with WidgetsBindingObserver {
+  Timer? _refreshTimer;
+  late final LiveCallController _calls = LiveCallController(
+    permissions: widget.permissions,
+  );
+  late final SystemCalls _systemCalls = SystemCalls(_onSystemCall);
+  late final RevenueCatBilling _billing = RevenueCatBilling(
+    RevenueCatConfig.fromEnvironment(),
+    account: _session,
+  );
   late final CameoLaunch _launch = CameoLaunch.parse(widget.initialRoute);
   late final SessionController _session = widget.session ?? _createSession();
 
@@ -73,14 +88,111 @@ class _CameoAppState extends State<CameoApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _session.bindAlbum(_album);
+    _session.addListener(_syncCalls);
+    _calls.addListener(_syncSystemCall);
+    _syncCalls();
     _session.load(dev: _launch.devSession, partnerNone: _launch.partnerNone);
     final albumReset = _launch.albumReset;
     if (albumReset != null) _album.reset(empty: albumReset);
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _refresh(),
+    );
+  }
+
+  void _syncCalls() {
+    _calls.configure(
+      _session.backend,
+      _session.userId,
+      _session.premiumRequired ? null : _session.session.partner?.id,
+      _album.remote,
+    );
+    unawaited(_billing.identify());
+    if (_session.isLoaded) {
+      unawaited(_systemCalls.configure(_session.backend, _session.userId));
+    }
+  }
+
+  void _syncSystemCall() => _systemCalls.sync(
+    _calls,
+    _session.session.partner?.name ?? appContent.v6.backend.partnerName,
+  );
+
+  Future<void> _onSystemCall(Map<String, dynamic> event) async {
+    if (!mounted || !_session.usesBackend) return;
+    final id = event['id'] as String?;
+    switch (event['type']) {
+      case 'answer':
+        if (id == null) return;
+        await _session.refreshBackend();
+        if (!mounted || _session.userId == null || _session.premiumRequired) {
+          await _systemCalls.reportEnded(id);
+          return;
+        }
+        unawaited(_calls.start(id: id));
+        _navigator.currentState?.pushNamed(
+          '/call?id=${Uri.encodeQueryComponent(id)}',
+        );
+      case 'end':
+        if (id == _calls.callId) {
+          await _calls.end();
+        } else if (id != null) {
+          try {
+            await _session.backend!.declineCall(id);
+          } catch (_) {}
+        }
+      case 'reset':
+        await _calls.end();
+      case 'mute':
+        _calls.setMuted(event['muted'] == true);
+      case 'incoming':
+        await _calls.pollIncoming();
+      case 'refresh':
+        await _refresh();
+      case 'open_record':
+        await _refresh();
+        if (mounted && id != null) {
+          _navigator.currentState?.pushNamed(
+            '/transcript?id=${Uri.encodeQueryComponent(id)}',
+          );
+        }
+    }
+  }
+
+  Future<void> _refresh() async {
+    if (!mounted || !_session.usesBackend) return;
+    await _session.refreshBackend();
+    if (mounted) await _album.remote.refresh();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _calls.setForeground(state == AppLifecycleState.resumed);
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_billing.refresh());
+      unawaited(_systemCalls.refreshRegistration());
+      unawaited(_refresh());
+      _refreshTimer ??= Timer.periodic(
+        const Duration(seconds: 30),
+        (_) => _refresh(),
+      );
+    } else {
+      _refreshTimer?.cancel();
+      _refreshTimer = null;
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _refreshTimer?.cancel();
+    _session.removeListener(_syncCalls);
+    _calls.removeListener(_syncSystemCall);
+    _systemCalls.dispose();
+    _billing.dispose();
+    _calls.dispose();
     if (widget.session == null) _session.dispose();
     if (widget.album == null) _album.dispose();
     super.dispose();
@@ -105,28 +217,82 @@ class _CameoAppState extends State<CameoApp> {
 
       builder: (context, navigator) => SessionScope(
         controller: _session,
-        child: AlbumScope(
-          store: _album,
-          child: DeviceServicesScope(
-            services: _services,
-            child: CameoReducedMotionScope(
-              child: CameoTheme(
-                mode: kCameoRootColorMode,
-                child: ColoredBox(
-                  color: palette.backgroundCanvasBase,
-                  child: ListenableBuilder(
-                    listenable: _session,
+        child: BillingScope(
+          billing: _billing,
+          child: LiveCallScope(
+            controller: _calls,
+            child: AlbumScope(
+              store: _album,
+              child: DeviceServicesScope(
+                services: _services,
+                child: CameoReducedMotionScope(
+                  child: CameoTheme(
+                    mode: kCameoRootColorMode,
+                    child: ColoredBox(
+                      color: palette.backgroundCanvasBase,
+                      child: ListenableBuilder(
+                        listenable: _session,
 
-                    builder: (context, _) => _session.isLoaded
-                        ? CameoAppRoot(
-                            session: _session,
-                            album: _album,
-                            navigatorKey: _navigator,
-                            startFlowDemo: _launch.flowDemo,
-                            permissions: widget.permissions,
-                            child: navigator!,
-                          )
-                        : const SizedBox.expand(),
+                        builder: (context, _) => _session.isLoaded
+                            ? CameoAppRoot(
+                                session: _session,
+                                album: _album,
+                                navigatorKey: _navigator,
+                                startFlowDemo: _launch.flowDemo,
+                                permissions: widget.permissions,
+                                child: ListenableBuilder(
+                                  listenable: _calls,
+                                  child: navigator!,
+                                  builder: (context, child) => Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        key: const ValueKey('app.navigator'),
+                                        child: child!,
+                                      ),
+                                      if (_calls.incoming != null &&
+                                          !_calls.hasCall)
+                                        Positioned.fill(
+                                          key: const ValueKey(
+                                            'app.incomingCall',
+                                          ),
+                                          child: ConfirmSheet(
+                                            visible: true,
+                                            title: appContent
+                                                .v6
+                                                .backend
+                                                .callIncoming,
+                                            body:
+                                                _session
+                                                    .session
+                                                    .partner
+                                                    ?.name ??
+                                                appContent
+                                                    .v6
+                                                    .backend
+                                                    .partnerName,
+                                            confirmLabel:
+                                                appContent.v6.backend.answer,
+                                            cancelLabel:
+                                                appContent.v6.backend.decline,
+                                            onConfirm: () {
+                                              final id = _calls.incoming?.id;
+                                              if (id == null) return;
+                                              unawaited(_calls.start(id: id));
+                                              _navigator.currentState?.pushNamed(
+                                                '/call?id=${Uri.encodeQueryComponent(id)}',
+                                              );
+                                            },
+                                            onCancel: () =>
+                                                unawaited(_calls.decline()),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.expand(),
+                      ),
+                    ),
                   ),
                 ),
               ),

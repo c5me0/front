@@ -32,6 +32,9 @@ class PlaybackController extends ChangeNotifier {
     required this.durationSec,
     double initialSec = 0,
     bool playing = false,
+    this.externallyDriven = false,
+    this.onPlayingChange,
+    this.onSeekSeconds,
   }) : _seconds = initialSec.clamp(0.0, durationSec).toDouble(),
        _playing = playing {
     _position = ValueNotifier<double>(_clockFraction);
@@ -61,6 +64,19 @@ class PlaybackController extends ChangeNotifier {
   );
 
   final double durationSec;
+  final bool externallyDriven;
+  final void Function(bool)? onPlayingChange;
+  final void Function(double)? onSeekSeconds;
+  bool _resumeAfterScrub = false;
+
+  void syncExternal(double seconds, bool playing) {
+    if (_disposed || !externallyDriven) return;
+    if (!_scrubbing) _setSeconds(seconds);
+    final changed = _playing != playing;
+    _playing = playing;
+    _publish();
+    if (changed) notifyListeners();
+  }
 
   late final Ticker _ticker;
   late final ValueNotifier<double> _position;
@@ -96,6 +112,10 @@ class PlaybackController extends ChangeNotifier {
   double get _clockFraction => durationSec > 0 ? _seconds / durationSec : 0;
 
   void play() {
+    if (externallyDriven) {
+      onPlayingChange?.call(true);
+      return;
+    }
     if (_playing) return;
     if (_seconds >= durationSec) {
       _seconds = 0;
@@ -110,6 +130,10 @@ class PlaybackController extends ChangeNotifier {
   }
 
   void pause() {
+    if (externallyDriven) {
+      onPlayingChange?.call(false);
+      return;
+    }
     if (!_playing) return;
     _playing = false;
     notifyListeners();
@@ -121,6 +145,7 @@ class PlaybackController extends ChangeNotifier {
     final target = _clamp01(fraction);
     final from = _position.value;
     _setSeconds(target * durationSec);
+    if (externallyDriven) onSeekSeconds?.call(_seconds);
     if (animated && !reduceMotion) {
       _seekOrigin = from;
       _seekOffset = from - target;
@@ -141,6 +166,10 @@ class PlaybackController extends ChangeNotifier {
   }
 
   void beginScrub() {
+    if (externallyDriven) {
+      _resumeAfterScrub = _playing;
+      onPlayingChange?.call(false);
+    }
     final from = _position.value;
     _stopSeek();
     _seekOrigin = from;
@@ -161,6 +190,10 @@ class PlaybackController extends ChangeNotifier {
   void endScrub() {
     if (!_scrubbing) return;
     _scrubbing = false;
+    if (externallyDriven) {
+      onSeekSeconds?.call(_seconds);
+      if (_resumeAfterScrub) onPlayingChange?.call(true);
+    }
     notifyListeners();
   }
 
@@ -191,7 +224,7 @@ class PlaybackController extends ChangeNotifier {
         Duration.microsecondsPerSecond;
     _lastElapsed = elapsed;
 
-    if (_playing && !_scrubbing && _clockArmed) {
+    if (!externallyDriven && _playing && !_scrubbing && _clockArmed) {
       final next = _seconds + dt;
       if (next >= durationSec) {
         _setSeconds(durationSec);

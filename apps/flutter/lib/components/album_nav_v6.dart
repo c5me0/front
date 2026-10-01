@@ -49,6 +49,8 @@ class AlbumNavV6 extends StatefulWidget {
     required this.backdrop,
     required this.actions,
     this.selectDisabled = false,
+    this.showDeleted = true,
+    this.onRefresh,
   });
 
   final AlbumMode mode;
@@ -61,6 +63,8 @@ class AlbumNavV6 extends StatefulWidget {
   final AlbumNavV6Actions actions;
 
   final bool selectDisabled;
+  final bool showDeleted;
+  final VoidCallback? onRefresh;
 
   static const Key headerKey = ValueKey('albumNavV6.header');
   static const Key headerPhotoKey = ValueKey('albumNavV6.header.photo');
@@ -145,11 +149,22 @@ class AlbumNavV6State extends State<AlbumNavV6> {
 
     final mainItems = [
       for (final key in lab.navActions)
-        switch (key) {
-          'plus' => item(key, copy.importLabel, a.onImport),
-          'heart' => item(key, copy.likedLabel, a.onLiked),
-          _ => item(key, copy.deletedLabel, a.onDeleted),
-        },
+        if (w.showDeleted ||
+            key == 'plus' ||
+            key == 'heart' ||
+            w.onRefresh != null)
+          switch (key) {
+            'plus' => item(key, copy.importLabel, a.onImport),
+            'heart' => item(key, copy.likedLabel, a.onLiked),
+            _ =>
+              w.showDeleted
+                  ? item(key, copy.deletedLabel, a.onDeleted)
+                  : item(
+                      'refresh',
+                      appContent.v6.backend.refresh,
+                      w.onRefresh!,
+                    ),
+          },
     ];
     final otherItems = otherChrome.right == AlbumNavRight.restore
         ? [

@@ -326,37 +326,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         trailing: const SettingsRowV6Trailing.chevron(),
                         onPress: () => CameoNav.openPayment(context),
                       ),
+                      if (controller.hasRestorable)
+                        SettingsRowV6(
+                          key: const ValueKey('settings.recovery'),
+                          label: appContent.v6.billing.recoveryTitle,
+                          trailing: const SettingsRowV6Trailing.chevron(),
+                          onPress: () => CameoNav.openPayment(
+                            context,
+                            archiveId: controller.remoteCouple!.id,
+                          ),
+                        ),
                     ],
                   ),
-                  SettingsSectionV6(
-                    key: SettingsScreen.developerKey,
-                    title: content.developerSection,
-                    children: [
-                      SettingsRowV6(
-                        key: SettingsScreen.labKey,
-                        label: content.lab,
-                        trailing: const SettingsRowV6Trailing.chevron(),
-                        onPress: () => CameoNav.openLab(context),
-                      ),
-                      SettingsRowV6(
-                        key: SettingsScreen.flowDemoKey,
-                        label: content.flowDemo,
-                        trailing: const SettingsRowV6Trailing.chevron(),
-                        onPress: () => FlowDemo.restart(context),
-                      ),
+                  if (!controller.usesBackend)
+                    SettingsSectionV6(
+                      key: SettingsScreen.developerKey,
+                      title: content.developerSection,
+                      children: [
+                        SettingsRowV6(
+                          key: SettingsScreen.labKey,
+                          label: content.lab,
+                          trailing: const SettingsRowV6Trailing.chevron(),
+                          onPress: () => CameoNav.openLab(context),
+                        ),
+                        SettingsRowV6(
+                          key: SettingsScreen.flowDemoKey,
+                          label: content.flowDemo,
+                          trailing: const SettingsRowV6Trailing.chevron(),
+                          onPress: () => FlowDemo.restart(context),
+                        ),
 
-                      SettingsRowV6(
-                        key: SettingsScreen.sheetVariantKey,
-                        label: v6.developerSheetMode,
-                        trailing: SettingsRowV6Trailing.value(
-                          photoSheetVariantLabel(sheetVariant),
+                        SettingsRowV6(
+                          key: SettingsScreen.sheetVariantKey,
+                          label: v6.developerSheetMode,
+                          trailing: SettingsRowV6Trailing.value(
+                            photoSheetVariantLabel(sheetVariant),
+                          ),
+                          onPress: () => controller.setPhotoSheetVariant(
+                            nextPhotoSheetVariant(sheetVariant),
+                          ),
                         ),
-                        onPress: () => controller.setPhotoSheetVariant(
-                          nextPhotoSheetVariant(sheetVariant),
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   SettingsSectionV6(
                     key: SettingsScreen.accountKey,
                     children: [
